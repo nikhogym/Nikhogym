@@ -110,7 +110,7 @@
                 <span class="cal-label">🔥 Calorias do Cardio</span>
                 <input type="number" id="calCardio" placeholder="0 kcal">
             </div>
-            <button class="btn btn-finish" onclick="finalizar()">Salvar Treino Total</button>
+            <button class="btn btn-finish" onclick="finalizar()">Finalizar e Sincronizar</button>
         </div>
 
         <h3 style="margin-left: 10px;">📜 Histórico</h3>
@@ -129,7 +129,7 @@
 
     <div id="grafico" class="content">
         <div class="card">
-            <div class="section-title">📊 Visualizar Evolução</div>
+            <div class="section-title">📊 Evolução</div>
             <select id="tipoGrafico" onchange="atualizarInterfaceGrafico()" style="margin-bottom: 10px;">
                 <option value="calorias">🔥 Calorias Totais</option>
                 <option value="carga">🏋️ Carga por Exercício</option>
@@ -147,7 +147,7 @@
         </div>
 
         <div class="card">
-            <div class="section-title">💾 Backup de Dados</div>
+            <div class="section-title">💾 Backup Local</div>
             <div style="display: flex; gap: 10px;">
                 <button class="btn-outline" onclick="exportarDados()">📤 Exportar</button>
                 <button class="btn-outline" onclick="document.getElementById('importFile').click()">📥 Importar</button>
@@ -158,6 +158,9 @@
 </div>
 
 <script>
+    // --- CONFIGURAÇÃO GOOGLE SHEETS ---
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/u/0/home/projects/19DEdBvFOY97iz9DXOlHYpblrsIk_lJLyA118zJzZru7iikuQH-cDra6V/edit";
+
     const bancoDicas = {
         "supino": { g: "Peitoral", d: "Mantenha o peito estufado e as escápulas presas no banco." },
         "agachamento": { g: "Pernas/Glúteo", d: "Mantenha o tronco ereto e desça jogando o quadril para trás." },
@@ -185,10 +188,7 @@
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         document.getElementById('btn-' + tabId).classList.add('active');
-        if(tabId === 'grafico') {
-            popularSelectExercicios();
-            atualizarInterfaceGrafico();
-        }
+        if(tabId === 'grafico') { popularSelectExercicios(); atualizarInterfaceGrafico(); }
         if(tabId === 'fichas') renderFichas();
         if(tabId === 'treino') renderAtalhosFicha();
     }
@@ -196,26 +196,14 @@
     function popularSelectExercicios() {
         const select = document.getElementById('selectExGrafico');
         const exerciciosUnicos = new Set();
-        hist.forEach(treino => {
-            treino.itens.forEach(item => exerciciosUnicos.add(item.ex));
-        });
-        
-        const listaSorteada = Array.from(exerciciosUnicos).sort();
-        select.innerHTML = listaSorteada.map(ex => `<option value="${ex}">${ex}</option>`).join('');
+        hist.forEach(treino => treino.itens.forEach(item => exerciciosUnicos.add(item.ex)));
+        select.innerHTML = Array.from(exerciciosUnicos).sort().map(ex => `<option value="${ex}">${ex}</option>`).join('');
     }
 
     function atualizarInterfaceGrafico() {
         const tipo = document.getElementById('tipoGrafico').value;
-        const containerFiltro = document.getElementById('containerFiltroEx');
-        const labelTotal = document.getElementById('totalCalsLabel');
-        
-        if (tipo === 'carga') {
-            containerFiltro.style.display = 'block';
-            labelTotal.style.display = 'none';
-        } else {
-            containerFiltro.style.display = 'none';
-            labelTotal.style.display = 'block';
-        }
+        document.getElementById('containerFiltroEx').style.display = tipo === 'carga' ? 'block' : 'none';
+        document.getElementById('totalCalsLabel').style.display = tipo === 'carga' ? 'none' : 'block';
         renderGrafico();
     }
 
@@ -226,16 +214,13 @@
             encontrado = treino.itens.find(i => i.ex.toLowerCase() === nomeEx.toLowerCase());
             if (encontrado && encontrado.p) break;
         }
-        if (encontrado && encontrado.p) {
-            document.getElementById('referenciaPeso').innerHTML = `<span class="last-weight-info">💡 Última vez: ${encontrado.p}kg (${encontrado.s}x${encontrado.r})</span>`;
-        } else { document.getElementById('referenciaPeso').innerHTML = ""; }
+        document.getElementById('referenciaPeso').innerHTML = encontrado ? `<span class="last-weight-info">💡 Última vez: ${encontrado.p}kg (${encontrado.s}x${encontrado.r})</span>` : "";
     }
 
     function carregarFichaNoTreino(idFicha) {
         const ficha = fichas.find(f => f.id === idFicha);
         if(ficha) {
-            const linhas = ficha.txt.split('\n');
-            linhas.forEach(linha => {
+            ficha.txt.split('\n').forEach(linha => {
                 const nomeEx = linha.trim().replace(/^\d+\.\s*/, '');
                 if(nomeEx) {
                     let info = bancoDicas["padrao"];
@@ -248,15 +233,12 @@
                     atual.push({ ex: nomeEx, s: '', r: '', p: pesoRef, grupo: info.g });
                 }
             });
-            localStorage.setItem('treino_v13', JSON.stringify(atual));
-            render();
+            localStorage.setItem('treino_v13', JSON.stringify(atual)); render();
         }
     }
 
     function renderAtalhosFicha() {
-        document.getElementById('botoesAtalhoFicha').innerHTML = fichas.map(f => 
-            `<button class="btn-load" onclick="carregarFichaNoTreino(${f.id})">${f.tit}</button>`
-        ).join('');
+        document.getElementById('botoesAtalhoFicha').innerHTML = fichas.map(f => `<button class="btn-load" onclick="carregarFichaNoTreino(${f.id})">${f.tit}</button>`).join('');
     }
 
     function adicionar() {
@@ -266,8 +248,7 @@
             let info = bancoDicas["padrao"];
             for (let chave in bancoDicas) { if (ex.toLowerCase().includes(chave)) { info = bancoDicas[chave]; break; } }
             atual.push({ ex, s, r, p, grupo: info.g });
-            localStorage.setItem('treino_v13', JSON.stringify(atual));
-            render();
+            localStorage.setItem('treino_v13', JSON.stringify(atual)); render();
             ["ex","sets","reps","peso"].forEach(id => document.getElementById(id).value = '');
             document.getElementById('referenciaPeso').innerHTML = "";
         }
@@ -303,16 +284,42 @@
     function fecharDica() { document.getElementById('modalDica').style.display = 'none'; }
     function removerEx(idx) { atual.splice(idx,1); localStorage.setItem('treino_v13', JSON.stringify(atual)); render(); }
 
-    function finalizar() {
+    // --- FINALIZAR COM SINCRONIZAÇÃO NUVEM ---
+    async function finalizar() {
         const cM = parseFloat(document.getElementById('calMusculo').value) || 0;
         const cC = parseFloat(document.getElementById('calCardio').value) || 0;
+        
         if (atual.length === 0 && (cM + cC) === 0) return;
-        hist.unshift({ id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calTotal: cM + cC, calM: cM, calC: cC, itens: [...atual] });
-        atual = []; localStorage.setItem('treino_v13', JSON.stringify(atual));
+
+        const novoTreino = { 
+            id: Date.now(), 
+            data: new Date().toLocaleDateString('pt-BR'), 
+            calTotal: cM + cC, 
+            calM: cM, 
+            calC: cC, 
+            itens: [...atual] 
+        };
+
+        // Salva Local
+        hist.unshift(novoTreino);
         localStorage.setItem('hist_v13', JSON.stringify(hist));
+
+        // Sincroniza Google Sheets
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(novoTreino)
+            });
+            alert("Sincronizado com a Nuvem Google!");
+        } catch (e) {
+            alert("Salvo apenas no celular (sem conexão).");
+        }
+
+        atual = []; 
+        localStorage.setItem('treino_v13', JSON.stringify(atual));
         ["calMusculo", "calCardio", "cardioTempo"].forEach(id => document.getElementById(id).value = '');
         render(); renderHist();
-        alert("Treino Salvo!");
     }
 
     function renderHist() {
@@ -330,8 +337,7 @@
         const tit = document.getElementById('tituloFicha').value;
         const txt = document.getElementById('textoFicha').value;
         if(tit && txt) {
-            fichas.push({ id: Date.now(), tit, txt });
-            localStorage.setItem('fichas_v13', JSON.stringify(fichas));
+            fichas.push({ id: Date.now(), tit, txt }); localStorage.setItem('fichas_v13', JSON.stringify(fichas));
             document.getElementById('tituloFicha').value = ''; document.getElementById('textoFicha').value = '';
             renderFichas(); renderAtalhosFicha();
         }
@@ -351,14 +357,10 @@
     function apagarFicha(id) { if(confirm("Apagar ficha?")) { fichas = fichas.filter(f => f.id !== id); localStorage.setItem('fichas_v13', JSON.stringify(fichas)); renderFichas(); renderAtalhosFicha(); } }
 
     function exportarDados() {
-        const dados = { hist, fichas };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dados));
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ hist, fichas }));
         const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "backup_treino_nikho.json");
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
+        downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", "backup_nikho.json");
+        document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove();
     }
 
     function importarDados(input) {
@@ -368,8 +370,8 @@
                 const dados = JSON.parse(reader.result);
                 if (dados.hist) { hist = dados.hist; localStorage.setItem('hist_v13', JSON.stringify(hist)); }
                 if (dados.fichas) { fichas = dados.fichas; localStorage.setItem('fichas_v13', JSON.stringify(fichas)); }
-                alert("Dados importados!"); location.reload();
-            } catch(e) { alert("Erro ao ler o arquivo."); }
+                alert("Importado!"); location.reload();
+            } catch(e) { alert("Erro ao ler arquivo."); }
         };
         reader.readAsText(input.files[0]);
     }
@@ -377,29 +379,20 @@
     function renderGrafico() {
         const ctx = document.getElementById('meuGrafico').getContext('2d');
         const tipo = document.getElementById('tipoGrafico').value;
-        let labels = [];
-        let dataPoints = [];
-        let datasetLabel = "";
+        let labels = [], dataPoints = [], datasetLabel = "";
 
         if (tipo === 'calorias') {
             const dados = [...hist].slice(0, 10).reverse();
-            labels = dados.map(h => h.data.substring(0,5));
-            dataPoints = dados.map(h => h.calTotal);
-            datasetLabel = "Calorias";
-            const total = hist.reduce((s, h) => s + h.calTotal, 0);
-            document.getElementById('totalCalsLabel').innerText = `Total Geral: ${total.toFixed(0)} kcal`;
+            labels = dados.map(h => h.data.substring(0,5)); dataPoints = dados.map(h => h.calTotal); datasetLabel = "Calorias";
+            document.getElementById('totalCalsLabel').innerText = `Total Geral: ${hist.reduce((s, h) => s + h.calTotal, 0).toFixed(0)} kcal`;
         } else {
             const exSelecionado = document.getElementById('selectExGrafico').value;
             const dadosEx = [];
             [...hist].reverse().forEach(treino => {
                 const item = treino.itens.find(i => i.ex === exSelecionado);
-                if (item && item.p) {
-                    dadosEx.push({ data: treino.data.substring(0,5), peso: parseFloat(item.p) });
-                }
+                if (item && item.p) dadosEx.push({ data: treino.data.substring(0,5), peso: parseFloat(item.p) });
             });
-            labels = dadosEx.map(d => d.data);
-            dataPoints = dadosEx.map(d => d.peso);
-            datasetLabel = `Carga em ${exSelecionado} (kg)`;
+            labels = dadosEx.map(d => d.data); dataPoints = dadosEx.map(d => d.peso); datasetLabel = `Carga em ${exSelecionado} (kg)`;
         }
 
         if(chartInstance) chartInstance.destroy();
@@ -407,26 +400,9 @@
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: datasetLabel,
-                    data: dataPoints,
-                    borderColor: '#0A84FF',
-                    backgroundColor: 'rgba(10, 132, 255, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 5
-                }]
+                datasets: [{ label: datasetLabel, data: dataPoints, borderColor: '#0A84FF', backgroundColor: 'rgba(10, 132, 255, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 5 }]
             },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                plugins: { legend: { display: tipo === 'carga' } }, 
-                scales: { 
-                    y: { beginAtZero: false, grid: { color: '#333' }, ticks: { color: '#8E8E93' } }, 
-                    x: { grid: { display: false }, ticks: { color: '#8E8E93' } } 
-                } 
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: tipo === 'carga' } }, scales: { y: { beginAtZero: false, grid: { color: '#333' }, ticks: { color: '#8E8E93' } }, x: { grid: { display: false }, ticks: { color: '#8E8E93' } } } }
         });
     }
 
