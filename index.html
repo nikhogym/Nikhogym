@@ -71,7 +71,7 @@
         <div class="card">
             <div class="section-title">🔥 Finalizar</div>
             <input type="number" id="cM" placeholder="Calorias Musculação">
-            <input type="number" id="cC" placeholder="Calorias Cardio (Auto)" readonly>
+            <input type="number" id="cC" placeholder="Calorias Cardio (Carregando...)" readonly>
             <button class="btn btn-finish" onclick="enviarParaPlanilha()">✅ Salvar Treino</button>
         </div>
     </div>
@@ -107,29 +107,48 @@
         if(aba === 'evolucao') { popularSelectExercicios(); renderizarGraficoCalorias(); }
     }
 
-    // --- LOGICA STRAVA ---
+    // --- LOGICA STRAVA CORRIGIDA ---
     function autorizar() {
         const url = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&approval_prompt=force&scope=activity:read_all`;
         window.location.href = url;
     }
 
     async function listarAtividades() {
-        const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await r.json();
-        const lista = document.getElementById('listaAtividadesStrava');
-        lista.innerHTML = data.map(act => `
-            <div class="strava-list-item" onclick="selecionarAtividade(${act.calories || 0}, '${act.name}')">
-                🏃 ${act.name} <br>
-                <small>${new Date(act.start_date).toLocaleDateString()} | ${Math.round(act.calories || 0)} kcal</small>
-            </div>
-        `).join('');
+        try {
+            const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await r.json();
+            const lista = document.getElementById('listaAtividadesStrava');
+            // Nota: Na listagem, calorias costumam vir como undefined/0. 
+            // Mostramos um ícone de carregamento ou apenas o nome.
+            lista.innerHTML = data.map(act => `
+                <div class="strava-list-item" onclick="buscarDetalhesAtividade(${act.id}, '${act.name}')">
+                    🏃 ${act.name} <br>
+                    <small>${new Date(act.start_date).toLocaleDateString()} | Toque para puxar calorias</small>
+                </div>
+            `).join('');
+        } catch (e) { alert("Erro ao listar atividades."); }
     }
 
-    function selecionarAtividade(cal, nome) {
-        document.getElementById('cC').value = Math.round(cal);
-        document.getElementById('listaAtividadesStrava').innerHTML = `<div style="color:var(--success); font-size:12px; padding:10px;">Selecionado: ${nome} ✅</div>`;
+    // NOVA FUNÇÃO: Busca as calorias reais de uma atividade específica
+    async function buscarDetalhesAtividade(id, nome) {
+        document.getElementById('cC').placeholder = "Buscando calorias...";
+        try {
+            const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await r.json();
+            const caloriasReais = data.calories || 0;
+            
+            document.getElementById('cC').value = Math.round(caloriasReais);
+            document.getElementById('listaAtividadesStrava').innerHTML = `
+                <div style="color:var(--success); font-size:12px; padding:10px; background: rgba(48, 209, 88, 0.1); border-radius:12px;">
+                    Selecionado: ${nome} (${Math.round(caloriasReais)} kcal) ✅
+                </div>`;
+        } catch (e) { 
+            alert("Erro ao buscar detalhes. Tente novamente."); 
+        }
     }
 
     // --- LOGICA TREINO ---
