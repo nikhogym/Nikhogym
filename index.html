@@ -11,7 +11,7 @@
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 10px; padding-top: 80px; }
         
         .tabs { display: flex; gap: 8px; position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 15px 10px; z-index: 1000; border-bottom: 1px solid #3A3A3C; }
-        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 12px; background: var(--input-bg); color: #8E8E93; font-weight: bold; font-size: 13px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 12px; background: var(--input-bg); color: #8E8E93; font-weight: bold; font-size: 11px; }
         .tab-btn.active { background: var(--primary); color: white; }
 
         .container { max-width: 450px; margin: auto; }
@@ -21,12 +21,15 @@
         .card { background: var(--card); padding: 20px; border-radius: 22px; margin-bottom: 15px; border: 1px solid #2C2C2E; }
         .section-title { font-size: 16px; margin-bottom: 15px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
         
-        input, select { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 14px; width: 100%; margin-bottom: 10px; font-size: 15px; outline: none; }
+        input, select, textarea { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 14px; width: 100%; margin-bottom: 10px; font-size: 15px; outline: none; }
 
         .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
+        .btn:active { opacity: 0.7; transform: scale(0.98); }
         .btn-strava { background: var(--primary); color: white; }
         .btn-finish { background: var(--success); color: white; }
         
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
+
         .ref-badge { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 10px; display: block; }
         
         .strava-list-item { background: #2C2C2E; padding: 12px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; border: 1px solid #3A3A3C; font-size: 13px; }
@@ -47,6 +50,7 @@
 
 <div class="tabs">
     <button id="tab-t" class="tab-btn active" onclick="switchTab('treinar')">💪 Treinar</button>
+    <button id="tab-f" class="tab-btn" onclick="switchTab('fichas')">📋 Fichas</button>
     <button id="tab-e" class="tab-btn" onclick="switchTab('evolucao')">📈 Evolução</button>
 </div>
 
@@ -77,6 +81,10 @@
 
         <div class="card">
             <div class="section-title">🏋️ Musculação</div>
+            <div style="margin-bottom: 10px;">
+                <span style="font-size: 11px; color: #8E8E93;">Atalhos de Ficha:</span><br>
+                <div id="atalhosFicha" style="margin-top:5px;"></div>
+            </div>
             <div id="referenciaPeso" class="ref-badge"></div>
             <input type="text" id="exNome" placeholder="Ex: Supino Reto" oninput="buscarReferencia(this.value)">
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;">
@@ -100,6 +108,16 @@
         <div id="historicoInferior"></div>
     </div>
 
+    <div id="fichas" class="content">
+        <div class="card">
+            <div class="section-title">📝 Criar Nova Ficha</div>
+            <input type="text" id="titFicha" placeholder="Nome (Ex: Treino A - Peito)">
+            <textarea id="txtFicha" rows="5" placeholder="Exercícios (Um por linha)"></textarea>
+            <button class="btn btn-strava" onclick="salvarFicha()">Salvar Ficha</button>
+        </div>
+        <div id="listaFichas"></div>
+    </div>
+
     <div id="evolucao" class="content">
         <div class="card">
             <div class="section-title">📊 Evolução de Carga</div>
@@ -110,11 +128,19 @@
             <div class="section-title">🔥 Calorias Semanais</div>
             <div style="height: 250px;"><canvas id="chartCalorias"></canvas></div>
         </div>
+        <div class="card">
+            <div class="section-title">💾 Backup Local (JSON)</div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-outline" style="flex:1" onclick="exportarDados()">📤 Exportar</button>
+                <button class="btn-outline" style="flex:1" onclick="document.getElementById('importFile').click()">📥 Importar</button>
+            </div>
+            <input type="file" id="importFile" style="display:none" onchange="importarDados(this)">
+            <small style="color:#8E8E93; font-size: 10px; display:block; margin-top:5px;">DICA: Salve o arquivo no Notion como backup.</small>
+        </div>
     </div>
 </div>
 
 <script>
-    // Configurações Strava do usuário
     const CLIENT_ID = '201889'; 
     const CLIENT_SECRET = 'f9b59003e315ec7961d6c89e94d76941bd39c72b';
     const GOOGLE_URL = 'https://script.google.com/macros/s/AKfycbyjhUFfkvnlz-AnpSmgA6ZXeASbeBm_7nHl6cFDuKTuIWVx_Iv1Aq8pb_M8RcxMa0ly/exec';
@@ -122,14 +148,16 @@
 
     let sessao = [];
     let hist = JSON.parse(localStorage.getItem('hist_nikho')) || [];
+    let fichas = JSON.parse(localStorage.getItem('fichas_nikho')) || [];
     let token = localStorage.getItem('strava_access_token');
 
     function switchTab(aba) {
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(aba).classList.add('active');
-        document.getElementById(aba === 'treinar' ? 'tab-t' : 'tab-e').classList.add('active');
+        document.getElementById('tab-' + aba.charAt(0)).classList.add('active');
         if(aba === 'evolucao') { popularSelectExercicios(); renderizarGraficoCalorias(); }
+        if(aba === 'treinar') { renderAtalhosFichas(); }
     }
 
     // --- STRAVA ---
@@ -158,8 +186,54 @@
         const cals = Math.round(data.calories || 0);
         document.getElementById('cC').value = cals;
         document.getElementById('cardioCalManual').value = cals;
-        document.getElementById('cardioTipoFinal').value = tipo; // Armazena o tipo de cardio
-        document.getElementById('listaAtividadesStrava').innerHTML = `<div style="color:var(--success); font-size:12px; padding:10px;">${nome} (${tipo}) selecionado! ✅</div>`;
+        document.getElementById('cardioTipoFinal').value = tipo;
+        document.getElementById('listaAtividadesStrava').innerHTML = `<div style="color:var(--success); font-size:12px; padding:10px;">${nome} selecionado! ✅</div>`;
+    }
+
+    // --- FICHAS ---
+    function salvarFicha() {
+        const t = document.getElementById('titFicha').value;
+        const txt = document.getElementById('txtFicha').value;
+        if(t && txt) {
+            fichas.push({ id: Date.now(), t, txt });
+            localStorage.setItem('fichas_nikho', JSON.stringify(fichas));
+            document.getElementById('titFicha').value = ''; 
+            document.getElementById('txtFicha').value = '';
+            renderFichas();
+            alert("Ficha salva!");
+        }
+    }
+
+    function renderFichas() {
+        document.getElementById('listaFichas').innerHTML = fichas.map(f => `
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <strong>${f.t}</strong>
+                    <span onclick="apagarFicha(${f.id})" style="color:var(--danger); cursor:pointer">🗑️</span>
+                </div>
+                <div style="font-size:12px; color:#8E8E93; margin-top:10px; white-space:pre-wrap">${f.txt}</div>
+            </div>`).join('');
+    }
+
+    function renderAtalhosFichas() {
+        document.getElementById('atalhosFicha').innerHTML = fichas.map(f => `
+            <button class="btn-outline" onclick="carregarFicha(${f.id})">${f.t}</button>`).join('');
+    }
+
+    function carregarFicha(id) {
+        const f = fichas.find(x => x.id === id);
+        f.txt.split('\n').forEach(ex => {
+            if(ex.trim()) sessao.push({ nome: ex.trim(), s: '', r: '', p: '' });
+        });
+        renderSessao();
+    }
+
+    function apagarFicha(id) {
+        if(confirm("Apagar esta ficha permanentemente?")) {
+            fichas = fichas.filter(x => x.id !== id);
+            localStorage.setItem('fichas_nikho', JSON.stringify(fichas));
+            renderFichas(); renderAtalhosFichas();
+        }
     }
 
     // --- TREINO ---
@@ -175,7 +249,7 @@
     function addEx() {
         const nome = document.getElementById('exNome').value;
         const s = document.getElementById('exS').value, r = document.getElementById('exR').value, p = document.getElementById('exP').value;
-        if (nome && s) {
+        if (nome) {
             sessao.push({ nome, s, r, p });
             renderSessao();
             ["exNome", "exS", "exR", "exP"].forEach(id => document.getElementById(id).value = "");
@@ -186,23 +260,25 @@
     function renderSessao() {
         document.getElementById('lista').innerHTML = sessao.map((i, idx) => `
             <li class="item-treino">
-                <span>${i.nome} (${i.s}x${i.r})</span>
-                <strong>${i.p}kg <span onclick="sessao.splice(${idx},1); renderSessao();" style="color:red; margin-left:10px; cursor:pointer">✕</span></strong>
+                <div style="flex:1"><b>${i.nome}</b></div>
+                <div style="display:flex; gap:5px">
+                    <input type="number" value="${i.s}" placeholder="S" style="width:45px; margin:0" onchange="sessao[${idx}].s=this.value">
+                    <input type="number" value="${i.r}" placeholder="R" style="width:45px; margin:0" onchange="sessao[${idx}].r=this.value">
+                    <input type="number" value="${i.p}" placeholder="Kg" style="width:55px; margin:0" onchange="sessao[${idx}].p=this.value">
+                </div>
+                <span onclick="sessao.splice(${idx},1); renderSessao();" style="color:var(--danger); margin-left:10px; cursor:pointer">✕</span>
             </li>`).join('');
     }
 
     async function enviarParaPlanilha() {
         const cM = parseFloat(document.getElementById('cM').value) || 0;
         const cC = parseFloat(document.getElementById('cC').value) || 0;
-        const tipoCardio = document.getElementById('cardioTipoFinal').value === "Nenhum" ? document.getElementById('cardioTipo').value : document.getElementById('cardioTipoFinal').value;
+        const tC = document.getElementById('cardioTipoFinal').value === "Nenhum" ? document.getElementById('cardioTipo').value : document.getElementById('cardioTipoFinal').value;
 
         const payload = {
             id: Date.now(),
             data: new Date().toLocaleDateString('pt-BR'),
-            calM: cM, // Calorias Musculação
-            calC: cC, // Calorias Cardio
-            calTotal: cM + cC,
-            tipoCardio: tipoCardio, // Tipo do exercício de cardio
+            calM: cM, calC: cC, calTotal: cM + cC, tipoCardio: tC,
             exercicios: [...sessao],
             volTotal: sessao.reduce((acc, i) => acc + (i.s * i.r * i.p), 0)
         };
@@ -232,11 +308,34 @@
     }
 
     function apagarTreino(id) {
-        if(confirm("Deseja apagar este treino do histórico local?")) {
+        if(confirm("Apagar este treino do histórico local?")) {
             hist = hist.filter(h => h.id !== id);
             localStorage.setItem('hist_nikho', JSON.stringify(hist));
             renderHistInferior();
         }
+    }
+
+    // --- BACKUP ---
+    function exportarDados() {
+        const data = JSON.stringify({ hist, fichas });
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'backup_nikho_treino.json'; a.click();
+    }
+
+    function importarDados(input) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const data = JSON.parse(reader.result);
+            if(data.hist) hist = data.hist;
+            if(data.fichas) fichas = data.fichas;
+            localStorage.setItem('hist_nikho', JSON.stringify(hist));
+            localStorage.setItem('fichas_nikho', JSON.stringify(fichas));
+            alert("Backup importado com sucesso!");
+            location.reload();
+        };
+        reader.readAsText(input.files[0]);
     }
 
     // --- GRÁFICOS ---
@@ -281,6 +380,7 @@
     if (token) {
         document.getElementById('btnAuth').style.display = 'none';
         document.getElementById('stravaAcoes').style.display = 'block';
+        listarAtividades();
     }
     const code = new URLSearchParams(window.location.search).get('code');
     if (code) {
@@ -291,11 +391,12 @@
         }).then(r => r.json()).then(d => { 
             if(d.access_token) { 
                 localStorage.setItem('strava_access_token', d.access_token); 
-                window.location.href = REDIRECT_URI; 
+                window.history.replaceState({}, document.title, REDIRECT_URI);
+                location.reload();
             }
         });
     }
-    renderHistInferior();
+    renderHistInferior(); renderFichas(); renderAtalhosFichas();
 </script>
 </body>
 </html>
