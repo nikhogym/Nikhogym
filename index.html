@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nikho Gym Connect - Pro</title>
+    <title>Nikho Gym Connect</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #FC4C02; --success: #30D158; --danger: #FF453A; --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --input-bg: #2C2C2E; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 10px; padding-top: 80px; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; padding-top: 80px; }
         
         .tabs { display: flex; gap: 8px; position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 15px 10px; z-index: 1000; border-bottom: 1px solid #3A3A3C; }
         .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 12px; background: var(--input-bg); color: #8E8E93; font-weight: bold; font-size: 11px; }
@@ -19,24 +19,39 @@
         .content.active { display: block; }
 
         .card { background: var(--card); padding: 20px; border-radius: 22px; margin-bottom: 15px; border: 1px solid #2C2C2E; }
-        .section-title { font-size: 16px; margin-bottom: 12px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .section-title { font-size: 16px; margin-bottom: 15px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
         
-        input, select, textarea { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 12px; width: 100%; margin-bottom: 10px; font-size: 14px; outline: none; }
+        input, select, textarea { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 14px; width: 100%; margin-bottom: 10px; font-size: 15px; outline: none; }
+
         .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
+        .btn:active { opacity: 0.7; transform: scale(0.98); }
         .btn-strava { background: var(--primary); color: white; }
         .btn-finish { background: var(--success); color: white; }
         
-        .ex-item { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 5px solid var(--primary); }
-        .muscle-tag { font-size: 10px; background: rgba(252, 76, 2, 0.2); color: var(--primary); padding: 2px 8px; border-radius: 5px; text-transform: uppercase; font-weight: bold; }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
+
+        .ref-badge { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 10px; display: block; }
         
-        /* Estilo para Séries Individuais */
-        .set-row { display: grid; grid-template-columns: 30px 1fr 1fr 40px; gap: 8px; align-items: center; margin-top: 8px; }
-        .set-num { font-size: 12px; color: #8E8E93; font-weight: bold; }
-        .btn-add-set { background: #3A3A3C; color: var(--primary); padding: 8px; border-radius: 10px; font-size: 12px; margin-top: 10px; border: none; width: 100%; font-weight: bold; }
+        .strava-list-item { background: #2C2C2E; padding: 12px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; border: 1px solid #3A3A3C; font-size: 13px; }
+
+        ul { list-style: none; padding: 0; }
         
+        /* Estilo para a nova lista de exercícios e séries */
+        .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+        .ex-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .muscle-tag { font-size: 10px; background: rgba(252, 76, 2, 0.2); color: var(--primary); padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
+        
+        .serie-row { display: grid; grid-template-columns: 25px 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 5px; }
+        .serie-row input { margin-bottom: 0; padding: 8px; font-size: 13px; text-align: center; }
+        .btn-add-serie { background: #3A3A3C; color: #FFFFFF; padding: 8px; border-radius: 8px; font-size: 12px; border: none; width: 100%; margin-top: 5px; cursor: pointer; font-weight: bold; }
+
+        .historico-item { background: var(--card); padding: 15px; border-radius: 18px; margin-bottom: 10px; border: 1px solid #3A3A3C; position: relative; }
         .hist-meta { font-size: 12px; color: #8E8E93; margin-bottom: 8px; }
         .hist-cals { display: flex; gap: 10px; margin-bottom: 8px; font-size: 11px; font-weight: bold; }
-        .btn-del { color: var(--danger); font-size: 14px; cursor: pointer; }
+        .hist-detalhes { font-size: 13px; color: #FFFFFF; padding-right: 30px; border-top: 1px solid #2C2C2E; padding-top: 8px; line-height: 1.4; }
+        .btn-del-hist { position: absolute; right: 15px; top: 15px; color: var(--danger); font-weight: bold; cursor: pointer; padding: 5px; }
+        
+        .cal-tag { padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,0.05); }
     </style>
 </head>
 <body>
@@ -51,20 +66,37 @@
     <div id="treinar" class="content active">
         <div class="card">
             <div class="section-title">🏃 Cardio</div>
-            <button class="btn btn-strava" id="btnAuth" onclick="autorizar()">🔗 Sincronizar Strava</button>
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <select id="cardioTipo" style="flex: 2; margin-bottom:0;">
+                    <option value="Esteira">Esteira</option>
+                    <option value="Bicicleta">Bicicleta</option>
+                    <option value="Corda">Corda</option>
+                    <option value="Caminhada">Caminhada</option>
+                    <option value="Corrida">Corrida</option>
+                </select>
+                <input type="number" id="cardioTempoManual" placeholder="Min" style="flex: 1; margin-bottom:0;">
+            </div>
+            <input type="number" id="cardioCalManual" placeholder="Calorias Manuais" oninput="document.getElementById('cC').value = this.value">
+            
+            <hr style="border: 0; border-top: 1px solid #3A3A3C; margin: 15px 0;">
+            
+            <button class="btn btn-strava" id="btnAuth" onclick="autorizar()">🔗 Conectar Strava</button>
             <div id="stravaAcoes" style="display:none;">
-                <button class="btn btn-strava" onclick="listarAtividades()">📥 Importar do Strava</button>
+                <button class="btn btn-strava" onclick="listarAtividades()">📥 Escolher do Strava</button>
                 <div id="listaAtividadesStrava"></div>
             </div>
-            <input type="number" id="cC" placeholder="Calorias Cardio" readonly>
         </div>
 
         <div class="card">
             <div class="section-title">🏋️ Musculação</div>
-            <div id="atalhosFicha" style="margin-bottom: 10px;"></div>
-            <input type="text" id="exNome" placeholder="Nome do Exercício" list="listaExSugestao">
-            <datalist id="listaExSugestao"></datalist>
-            <button class="btn" style="background:#3A3A3C; color:white;" onclick="iniciarExercicio()">+ Iniciar Exercício</button>
+            <div style="margin-bottom: 10px;">
+                <span style="font-size: 11px; color: #8E8E93;">Atalhos de Ficha:</span><br>
+                <div id="atalhosFicha" style="margin-top:5px;"></div>
+            </div>
+            <div id="referenciaPeso" class="ref-badge"></div>
+            <input type="text" id="exNome" placeholder="Ex: Supino Reto" oninput="buscarReferencia(this.value)">
+            
+            <button class="btn" style="background:#3A3A3C; color:white;" onclick="addEx()">➕ Iniciar Exercício</button>
             
             <div id="listaTreinoAtivo"></div>
         </div>
@@ -72,17 +104,20 @@
         <div class="card">
             <div class="section-title">🔥 Finalizar</div>
             <input type="number" id="cM" placeholder="Calorias Musculação">
-            <button class="btn btn-finish" onclick="enviarParaPlanilha()">✅ Salvar Treino Completo</button>
+            <input type="number" id="cC" placeholder="Calorias Cardio Total" readonly>
+            <input type="hidden" id="cardioTipoFinal" value="Nenhum">
+            <button class="btn btn-finish" onclick="enviarParaPlanilha()">✅ Salvar Treino</button>
         </div>
 
+        <h3 style="margin-left: 10px; font-size: 18px;">📜 Histórico Recente</h3>
         <div id="historicoInferior"></div>
     </div>
 
     <div id="fichas" class="content">
         <div class="card">
-            <div class="section-title">📝 Nova Ficha</div>
-            <input type="text" id="titFicha" placeholder="Ex: Treino A - Costas">
-            <textarea id="txtFicha" rows="4" placeholder="Um exercício por linha"></textarea>
+            <div class="section-title">📝 Criar Nova Ficha</div>
+            <input type="text" id="titFicha" placeholder="Nome (Ex: Treino A - Peito)">
+            <textarea id="txtFicha" rows="5" placeholder="Exercícios (Um por linha)"></textarea>
             <button class="btn btn-strava" onclick="salvarFicha()">Salvar Ficha</button>
         </div>
         <div id="listaFichas"></div>
@@ -90,130 +125,116 @@
 
     <div id="evolucao" class="content">
         <div class="card">
-            <div class="section-title">💾 Backup</div>
-            <button class="btn" style="background:#3A3A3C; color:white;" onclick="exportarDados()">📤 Exportar JSON</button>
+            <div class="section-title">📊 Evolução de Carga</div>
+            <select id="selectExGrafico" onchange="renderizarGraficoEvolucao()"></select>
+            <div style="height: 250px;"><canvas id="chartCarga"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="section-title">🔥 Calorias Semanais</div>
+            <div style="height: 250px;"><canvas id="chartCalorias"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="section-title">💾 Backup Local (JSON)</div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-outline" style="flex:1" onclick="exportarDados()">📤 Exportar</button>
+                <button class="btn-outline" style="flex:1" onclick="document.getElementById('importFile').click()">📥 Importar</button>
+            </div>
+            <input type="file" id="importFile" style="display:none" onchange="importarDados(this)">
         </div>
     </div>
 </div>
 
 <script>
-    // Dicionário de Grupos Musculares
-    const gruposMusculares = {
-        'supino': 'Peitoral', 'crucifixo': 'Peitoral', 'chest': 'Peitoral',
-        'puxada': 'Costas', 'remada': 'Costas', 'pulldown': 'Costas', 'terra': 'Costas/Posterior',
-        'agachamento': 'Pernas', 'leg press': 'Pernas', 'extensora': 'Pernas', 'flexora': 'Pernas',
-        'rosca': 'Bíceps', 'biceps': 'Bíceps', 'martelo': 'Bíceps',
-        'triceps': 'Tríceps', 'pulley': 'Tríceps', 'testa': 'Tríceps',
-        'elevacao lateral': 'Ombros', 'desenvolvimento': 'Ombros', 'shoulder': 'Ombros'
-    };
-
     const CLIENT_ID = '201889'; 
     const CLIENT_SECRET = 'f9b59003e315ec7961d6c89e94d76941bd39c72b';
     const GOOGLE_URL = 'https://script.google.com/macros/s/AKfycbyjhUFfkvnlz-AnpSmgA6ZXeASbeBm_7nHl6cFDuKTuIWVx_Iv1Aq8pb_M8RcxMa0ly/exec';
+    const REDIRECT_URI = window.location.href.split('?')[0];
 
-    let sessaoAtiva = [];
+    // Dicionário de Grupos Musculares
+    const muscleGroups = {
+        'supino': 'Peito', 'crucifixo': 'Peito', 'voador': 'Peito', 'chest': 'Peito',
+        'puxada': 'Costas', 'remada': 'Costas', 'pulldown': 'Costas', 'chin up': 'Costas',
+        'agachamento': 'Pernas', 'leg press': 'Pernas', 'extensora': 'Pernas', 'flexora': 'Pernas', 'afundo': 'Pernas',
+        'desenvolvimento': 'Ombro', 'elevacao lateral': 'Ombro', 'shoulder': 'Ombro',
+        'rosca': 'Biceps', 'biceps': 'Biceps', 'martelo': 'Biceps',
+        'triceps': 'Triceps', 'pulley': 'Triceps', 'mergulho': 'Triceps'
+    };
+
+    let sessao = [];
     let hist = JSON.parse(localStorage.getItem('hist_nikho')) || [];
     let fichas = JSON.parse(localStorage.getItem('fichas_nikho')) || [];
     let token = localStorage.getItem('strava_access_token');
-
-    function identificarGrupo(nome) {
-        nome = nome.toLowerCase();
-        for (let chave in gruposMusculares) {
-            if (nome.includes(chave)) return gruposMusculares[chave];
-        }
-        return 'Outros';
-    }
 
     function switchTab(aba) {
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(aba).classList.add('active');
         document.getElementById('tab-' + aba.charAt(0)).classList.add('active');
-        if(aba === 'treinar') renderAtalhosFichas();
+        if(aba === 'evolucao') { popularSelectExercicios(); renderizarGraficoCalorias(); }
+        if(aba === 'treinar') { renderAtalhosFichas(); }
     }
 
-    function iniciarExercicio(nomeManual = null) {
-        const nome = nomeManual || document.getElementById('exNome').value;
-        if (!nome) return;
-        
-        const novoEx = {
-            id: Date.now(),
-            nome: nome,
-            grupo: identificarGrupo(nome),
-            series: [{ r: '', p: '' }] // Inicia com uma série vazia
-        };
-        
-        sessaoAtiva.push(novoEx);
-        renderSessao();
-        document.getElementById('exNome').value = '';
-    }
-
-    function addSerie(exId) {
-        const ex = sessaoAtiva.find(e => e.id === exId);
-        const ultimaSerie = ex.series[ex.series.length - 1];
-        // Sugere o peso e rep da última série para agilizar
-        ex.series.push({ r: ultimaSerie.r, p: ultimaSerie.p });
-        renderSessao();
-    }
-
-    function removerSerie(exId, index) {
-        const ex = sessaoAtiva.find(e => e.id === exId);
-        if (ex.series.length > 1) {
-            ex.series.splice(index, 1);
-            renderSessao();
+    function getMuscleGroup(name) {
+        const lowerName = name.toLowerCase();
+        for (let key in muscleGroups) {
+            if (lowerName.includes(key)) return muscleGroups[key];
         }
+        return 'Geral';
     }
 
-    function renderSessao() {
-        const container = document.getElementById('listaTreinoAtivo');
-        container.innerHTML = sessaoAtiva.map(ex => `
-            <div class="ex-item">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <strong>${ex.nome}</strong>
-                    <span class="muscle-tag">${ex.grupo}</span>
-                </div>
-                ${ex.series.map((s, idx) => `
-                    <div class="set-row">
-                        <span class="set-num">${idx + 1}º</span>
-                        <input type="number" value="${s.r}" placeholder="Rep" onchange="sessaoAtiva.find(e => e.id === ${ex.id}).series[${idx}].r = this.value">
-                        <input type="number" value="${s.p}" placeholder="Kg" onchange="sessaoAtiva.find(e => e.id === ${ex.id}).series[${idx}].p = this.value">
-                        <span class="btn-del" onclick="removerSerie(${ex.id}, ${idx})">✕</span>
-                    </div>
-                `).join('')}
-                <button class="btn-add-set" onclick="addSerie(${ex.id})">+ Adicionar Série (Progressão)</button>
-            </div>
-        `).join('');
+    // --- STRAVA ---
+    function autorizar() {
+        const url = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&approval_prompt=force&scope=activity:read_all`;
+        window.location.href = url;
     }
 
-    // --- STRAVA E PLANILHA ---
-    async function enviarParaPlanilha() {
-        const payload = {
-            data: new Date().toLocaleDateString('pt-BR'),
-            calM: document.getElementById('cM').value,
-            calC: document.getElementById('cC').value,
-            calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value),
-            exercicios: sessaoAtiva
-        };
-        hist.push(payload);
-        localStorage.setItem('hist_nikho', JSON.stringify(hist));
-        await fetch(GOOGLE_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-        alert("Treino salvo!"); location.reload();
+    async function listarAtividades() {
+        const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await r.json();
+        document.getElementById('listaAtividadesStrava').innerHTML = data.map(act => `
+            <div class="strava-list-item" onclick="buscarDetalhesAtividade(${act.id}, '${act.name}', '${act.type}')">
+                🏃 ${act.name} (${act.type}) <br>
+                <small>${new Date(act.start_date).toLocaleDateString()} | Puxar calorias</small>
+            </div>`).join('');
     }
 
-    // Funções de Ficha e Strava permanecem similares às anteriores, adaptadas para o novo modelo de séries
+    async function buscarDetalhesAtividade(id, nome, tipo) {
+        const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await r.json();
+        const cals = Math.round(data.calories || 0);
+        document.getElementById('cC').value = cals;
+        document.getElementById('cardioCalManual').value = cals;
+        document.getElementById('cardioTipoFinal').value = tipo;
+        document.getElementById('listaAtividadesStrava').innerHTML = `<div style="color:var(--success); font-size:12px; padding:10px;">${nome} selecionado! ✅</div>`;
+    }
+
+    // --- FICHAS ---
     function salvarFicha() {
         const t = document.getElementById('titFicha').value;
         const txt = document.getElementById('txtFicha').value;
         if(t && txt) {
             fichas.push({ id: Date.now(), t, txt });
             localStorage.setItem('fichas_nikho', JSON.stringify(fichas));
-            location.reload();
+            document.getElementById('titFicha').value = ''; 
+            document.getElementById('txtFicha').value = '';
+            renderFichas();
+            alert("Ficha salva!");
         }
     }
 
-    function carregarFicha(id) {
-        const f = fichas.find(x => x.id === id);
-        f.txt.split('\n').forEach(ex => { if(ex.trim()) iniciarExercicio(ex.trim()); });
+    function renderFichas() {
+        document.getElementById('listaFichas').innerHTML = fichas.map(f => `
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <strong>${f.t}</strong>
+                    <span onclick="apagarFicha(${f.id})" style="color:var(--danger); cursor:pointer">🗑️</span>
+                </div>
+                <div style="font-size:12px; color:#8E8E93; margin-top:10px; white-space:pre-wrap">${f.txt}</div>
+            </div>`).join('');
     }
 
     function renderAtalhosFichas() {
@@ -221,17 +242,236 @@
             <button class="btn-outline" onclick="carregarFicha(${f.id})">${f.t}</button>`).join('');
     }
 
-    function renderHistInferior() {
-        document.getElementById('historicoInferior').innerHTML = hist.slice().reverse().slice(0, 5).map(h => `
-            <div class="historico-item">
-                <div class="hist-meta">📅 ${h.data} | 🔥 ${h.calTotal} kcal</div>
-                <div class="hist-detalhes">${h.exercicios ? h.exercicios.map(e => e.nome).join(', ') : 'Cardio'}</div>
+    function carregarFicha(id) {
+        const f = fichas.find(x => x.id === id);
+        f.txt.split('\n').forEach(ex => {
+            if(ex.trim()) addExManual(ex.trim());
+        });
+    }
+
+    function apagarFicha(id) {
+        if(confirm("Apagar ficha?")) {
+            fichas = fichas.filter(x => x.id !== id);
+            localStorage.setItem('fichas_nikho', JSON.stringify(fichas));
+            renderFichas(); renderAtalhosFichas();
+        }
+    }
+
+    // --- TREINO ---
+    function buscarReferencia(nome) {
+        if (nome.length < 2) return;
+        const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase() === nome.toLowerCase()));
+        if (ultimo) {
+            const ex = ultimo.exercicios.find(e => e.nome.toLowerCase() === nome.toLowerCase());
+            const lastSet = ex.series[ex.series.length - 1];
+            document.getElementById('referenciaPeso').innerText = `💡 Último peso: ${lastSet.p}kg (${ex.series.length} séries)`;
+        } else { document.getElementById('referenciaPeso').innerText = ""; }
+    }
+
+    function addEx() {
+        const nome = document.getElementById('exNome').value;
+        if (nome) {
+            addExManual(nome);
+            document.getElementById('exNome').value = "";
+            document.getElementById('referenciaPeso').innerText = "";
+        }
+    }
+
+    function addExManual(nome) {
+        const novoEx = {
+            id: Date.now() + Math.random(),
+            nome: nome,
+            grupo: getMuscleGroup(nome),
+            series: [{ r: '', p: '' }]
+        };
+        sessao.push(novoEx);
+        renderSessao();
+    }
+
+    function addSerie(exId) {
+        const ex = sessao.find(e => e.id === exId);
+        const last = ex.series[ex.series.length - 1];
+        ex.series.push({ r: last.r, p: last.p });
+        renderSessao();
+    }
+
+    function removeEx(exId) {
+        sessao = sessao.filter(e => e.id !== exId);
+        renderSessao();
+    }
+
+    function removeSerie(exId, index) {
+        const ex = sessao.find(e => e.id === exId);
+        if (ex.series.length > 1) {
+            ex.series.splice(index, 1);
+            renderSessao();
+        }
+    }
+
+    function renderSessao() {
+        document.getElementById('listaTreinoAtivo').innerHTML = sessao.map((ex) => `
+            <div class="ex-item-card">
+                <div class="ex-header">
+                    <div>
+                        <strong>${ex.nome}</strong><br>
+                        <span class="muscle-tag">${ex.grupo}</span>
+                    </div>
+                    <span onclick="removeEx(${ex.id})" style="color:var(--danger); cursor:pointer">✕</span>
+                </div>
+                ${ex.series.map((s, idx) => `
+                    <div class="serie-row">
+                        <span style="font-size:11px; color:#8E8E93">${idx+1}º</span>
+                        <input type="number" placeholder="Rep" value="${s.r}" onchange="updateSerieData(${ex.id}, ${idx}, 'r', this.value)">
+                        <input type="number" placeholder="Kg" value="${s.p}" onchange="updateSerieData(${ex.id}, ${idx}, 'p', this.value)">
+                        <span onclick="removeSerie(${ex.id}, ${idx})" style="color:var(--danger); text-align:right; cursor:pointer">✕</span>
+                    </div>
+                `).join('')}
+                <button class="btn-add-serie" onclick="addSerie(${ex.id})">+ Adicionar Série</button>
             </div>`).join('');
     }
 
-    // Inicialização
-    if (token) { document.getElementById('btnAuth').style.display = 'none'; document.getElementById('stravaAcoes').style.display = 'block'; }
-    renderHistInferior(); renderAtalhosFichas();
+    function updateSerieData(exId, sIdx, field, val) {
+        const ex = sessao.find(e => e.id === exId);
+        ex.series[sIdx][field] = val;
+    }
+
+    async function enviarParaPlanilha() {
+        const cM = parseFloat(document.getElementById('cM').value) || 0;
+        const cC = parseFloat(document.getElementById('cC').value) || 0;
+        const tC = document.getElementById('cardioTipoFinal').value === "Nenhum" ? document.getElementById('cardioTipo').value : document.getElementById('cardioTipoFinal').value;
+
+        const payload = {
+            id: Date.now(),
+            data: new Date().toLocaleDateString('pt-BR'),
+            calM: cM, calC: cC, calTotal: cM + cC, tipoCardio: tC,
+            exercicios: [...sessao]
+        };
+        
+        hist.push(payload);
+        localStorage.setItem('hist_nikho', JSON.stringify(hist));
+        try {
+            await fetch(GOOGLE_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            alert("Treino salvo!");
+            location.reload();
+        } catch (e) { alert("Erro ao salvar."); }
+    }
+
+    function renderHistInferior() {
+        const container = document.getElementById('historicoInferior');
+        container.innerHTML = hist.slice().reverse().slice(0, 8).map(h => `
+            <div class="historico-item">
+                <span class="btn-del-hist" onclick="apagarTreino(${h.id})">🗑️</span>
+                <div class="hist-meta">📅 ${h.data}</div>
+                <div class="hist-cals">
+                    <span class="cal-tag" style="color:var(--primary)">💪 Musc: ${h.calM || 0}</span>
+                    <span class="cal-tag" style="color:#5AC8FA">🏃 ${h.tipoCardio || 'Cardio'}: ${h.calC || 0}</span>
+                    <span class="cal-tag" style="color:var(--success)">🔥 Total: ${h.calTotal}</span>
+                </div>
+                <div class="hist-detalhes">
+                    ${h.exercicios ? h.exercicios.map(e => `
+                        <div style="margin-bottom:4px;">
+                            <strong>${e.nome} (${getMuscleGroup(e.nome)})</strong><br>
+                            <span style="color:#8E8E93; font-size:11px;">
+                                ${e.series.map((s, i) => `${i+1}º: ${s.r}x${s.p}kg`).join(' | ')}
+                            </span>
+                        </div>
+                    `).join('') : 'Foco em Cardio'}
+                </div>
+            </div>`).join('');
+    }
+
+    function apagarTreino(id) {
+        if(confirm("Apagar este treino?")) {
+            hist = hist.filter(h => h.id !== id);
+            localStorage.setItem('hist_nikho', JSON.stringify(hist));
+            renderHistInferior();
+        }
+    }
+
+    // --- BACKUP ---
+    function exportarDados() {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify({ hist, fichas })], { type: 'application/json' }));
+        a.download = 'backup_nikho_treino.json'; a.click();
+    }
+
+    function importarDados(input) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const data = JSON.parse(reader.result);
+            if(data.hist) hist = data.hist;
+            if(data.fichas) fichas = data.fichas;
+            localStorage.setItem('hist_nikho', JSON.stringify(hist));
+            localStorage.setItem('fichas_nikho', JSON.stringify(fichas));
+            location.reload();
+        };
+        reader.readAsText(input.files[0]);
+    }
+
+    // --- GRÁFICOS ---
+    function popularSelectExercicios() {
+        const select = document.getElementById('selectExGrafico');
+        const nomes = [...new Set(hist.flatMap(t => t.exercicios ? t.exercicios.map(e => e.nome) : []))];
+        select.innerHTML = nomes.map(n => `<option value="${n}">${n}</option>`).join('');
+        renderizarGraficoEvolucao();
+    }
+
+    let chartCarga, chartCal;
+    function renderizarGraficoEvolucao() {
+        const ex = document.getElementById('selectExGrafico').value;
+        if(!ex) return;
+        const dados = hist.filter(t => t.exercicios && t.exercicios.some(e => e.nome === ex))
+                          .map(t => {
+                              const exercicio = t.exercicios.find(e => e.nome === ex);
+                              // Usa a maior carga da sessão para o gráfico
+                              const maxPeso = Math.max(...exercicio.series.map(s => parseFloat(s.p) || 0));
+                              return { data: t.data, peso: maxPeso };
+                          });
+        if(chartCarga) chartCarga.destroy();
+        chartCarga = new Chart(document.getElementById('chartCarga'), {
+            type: 'line',
+            data: { labels: dados.map(d => d.data), datasets: [{ label: 'Carga Máxima (kg)', data: dados.map(d => d.peso), borderColor: '#FC4C02', tension: 0.3 }] },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function renderizarGraficoCalorias() {
+        const dados = hist.slice(-7);
+        if(chartCal) chartCal.destroy();
+        chartCal = new Chart(document.getElementById('chartCalorias'), {
+            type: 'bar',
+            data: { 
+                labels: dados.map(d => d.data), 
+                datasets: [
+                    { label: 'Musc', data: dados.map(d => d.calM || 0), backgroundColor: '#FC4C02' },
+                    { label: 'Cardio', data: dados.map(d => d.calC || 0), backgroundColor: '#5AC8FA' }
+                ] 
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+        });
+    }
+
+    // --- AUTH INIT ---
+    if (token) {
+        document.getElementById('btnAuth').style.display = 'none';
+        document.getElementById('stravaAcoes').style.display = 'block';
+        listarAtividades();
+    }
+    const code = new URLSearchParams(window.location.search).get('code');
+    if (code) {
+        fetch('https://www.strava.com/oauth/token', {
+            method: 'POST',
+            body: JSON.stringify({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code: code, grant_type: 'authorization_code' }),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(r => r.json()).then(d => { 
+            if(d.access_token) { 
+                localStorage.setItem('strava_access_token', d.access_token); 
+                window.history.replaceState({}, document.title, REDIRECT_URI);
+                location.reload();
+            }
+        });
+    }
+    renderHistInferior(); renderFichas(); renderAtalhosFichas();
 </script>
 </body>
 </html>
