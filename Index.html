@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nikho Gym Connect</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #FC4C02; --success: #30D158; --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --input-bg: #2C2C2E; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; padding-top: 80px; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 10px; padding-top: 80px; }
         
         .tabs { display: flex; gap: 8px; position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 15px 10px; z-index: 1000; border-bottom: 1px solid #3A3A3C; }
         .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 12px; background: var(--input-bg); color: #8E8E93; font-weight: bold; font-size: 13px; }
@@ -17,11 +16,9 @@
         .card { background: var(--card); padding: 20px; border-radius: 22px; margin-bottom: 15px; border: 1px solid #2C2C2E; }
         .section-title { font-size: 16px; margin-bottom: 15px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
         
-        input, select { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 14px; width: 100%; margin-bottom: 10px; font-size: 15px; outline: none; }
-        input:focus { border-color: var(--primary); }
+        input { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 14px; width: 100%; margin-bottom: 10px; font-size: 15px; outline: none; }
 
         .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
-        .btn:active { opacity: 0.7; transform: scale(0.98); }
         .btn-strava { background: var(--primary); color: white; }
         .btn-finish { background: var(--success); color: white; }
         
@@ -35,7 +32,7 @@
 
 <div class="tabs">
     <button class="tab-btn active">💪 Treinar</button>
-    <button class="tab-btn" onclick="alert('Histórico disponível na sua Planilha Google')">📊 Planilha</button>
+    <button class="tab-btn">📊 Planilha</button>
 </div>
 
 <div class="container" style="max-width: 450px; margin: auto;">
@@ -49,46 +46,47 @@
 
     <div class="card">
         <div class="section-title">🏋️ Registro de Força</div>
-        <input type="text" id="exNome" placeholder="Ex: Supino Reto" list="sugestoes">
-        <datalist id="sugestoes"></datalist>
-
+        <input type="text" id="exNome" placeholder="Ex: Supino Reto">
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;">
             <input type="number" id="exS" placeholder="Sér.">
             <input type="number" id="exR" placeholder="Rep.">
             <input type="number" id="exP" placeholder="Kg">
         </div>
-        
         <button class="btn" style="background:#3A3A3C; color:white;" onclick="addEx()">➕ Adicionar Exercício</button>
-        
         <div id="boxVolume" class="vol-badge" style="display:none;">Volume da Sessão: 0 kg</div>
         <ul id="lista"></ul>
     </div>
 
     <div class="card">
         <div class="section-title">🔥 Resumo de Calorias</div>
-        <input type="number" id="cM" placeholder="Calorias Musculação (Estimadas)">
-        <input type="number" id="cC" placeholder="Calorias Cardio (Strava)" readonly style="opacity: 0.6;">
-        <button class="btn btn-finish" onclick="enviarParaPlanilha()">✅ Salvar Treino Completo</button>
+        <input type="number" id="cM" placeholder="Calorias Musculação">
+        <input type="number" id="cC" placeholder="Calorias Cardio (Strava)" readonly>
+        <button class="btn btn-finish" onclick="enviarParaPlanilha()">✅ Salvar Treino</button>
     </div>
 
 </div>
 
 <script>
-    // --- CREDENCIAIS ATUALIZADAS ---
     const CLIENT_ID = '201889';
     const CLIENT_SECRET = 'f9b59003e315ec7961d6c89e94d76941bd39c72b';
     const GOOGLE_URL = 'https://script.google.com/macros/s/AKfycbyjhUFfkvnlz-AnpSmgA6ZXeASbeBm_7nHl6cFDuKTuIWVx_Iv1Aq8pb_M8RcxMa0ly/exec';
-    const REDIRECT_URI = window.location.href.split('?')[0];
+    
+    // REDIRECT_URI precisa ser exatamente igual ao que está no Strava (ou subdomínio dele)
+    const REDIRECT_URI = "https://nikhogym.github.io/Nikhogym/";
 
     let sessao = [];
     let token = localStorage.getItem('strava_access_token');
 
-    // --- LÓGICA OAUTH2 STRAVA ---
     function autorizar() {
-        const url = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&approval_prompt=force&scope=activity:read_all`;
-        window.location.href = url;
+        // Escopo necessário para ler as atividades
+        const scope = "activity:read_all";
+        const authUrl = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&approval_prompt=force&scope=${scope}`;
+        
+        console.log("Redirecionando para:", authUrl);
+        window.location.href = authUrl;
     }
 
+    // Captura o código que o Strava envia de volta na URL
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
 
@@ -97,15 +95,25 @@
     }
 
     async function finalizarLogin(c) {
-        const r = await fetch('https://www.strava.com/oauth/token', {
-            method: 'POST',
-            body: JSON.stringify({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code: c, grant_type: 'authorization_code' }),
-            headers: { 'Content-Type': 'application/json' }
-        });
-        const d = await r.json();
-        if (d.access_token) {
-            localStorage.setItem('strava_access_token', d.access_token);
-            window.location.href = REDIRECT_URI;
+        try {
+            const r = await fetch('https://www.strava.com/oauth/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    client_id: CLIENT_ID, 
+                    client_secret: CLIENT_SECRET, 
+                    code: c, 
+                    grant_type: 'authorization_code' 
+                })
+            });
+            const d = await r.json();
+            if (d.access_token) {
+                localStorage.setItem('strava_access_token', d.access_token);
+                // Limpa a URL do navegador para remover o ?code=...
+                window.location.href = REDIRECT_URI;
+            }
+        } catch (e) {
+            console.error("Erro ao trocar token:", e);
         }
     }
 
@@ -121,27 +129,29 @@
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await r.json();
-            if (data.length > 0) {
+            if (data && data.length > 0) {
                 const activity = data[0];
-                // Nota: Strava API às vezes exige cálculo manual ou permissão estendida para calorias. 
-                // Usaremos uma estimativa baseada no tempo se calories vier nulo.
-                const cals = activity.calories || (activity.moving_time / 60) * 8; 
-                document.getElementById('cC').value = Math.round(cals);
-                alert(`Importado: ${activity.name} (${Math.round(activity.distance/1000)}km)`);
+                // Estimativa de calorias se não vier do GPS (muito comum em treinos indoor)
+                const cals = activity.calories || Math.round((activity.moving_time / 60) * 7); 
+                document.getElementById('cC').value = cals;
+                alert(`Importado: ${activity.name}`);
+            } else {
+                alert("Nenhuma atividade recente encontrada no Strava.");
             }
-        } catch (e) { alert("Erro ao importar. Tente autorizar novamente."); }
+        } catch (e) { 
+            alert("Sessão expirada. Autorize novamente."); 
+            localStorage.removeItem('strava_access_token');
+            location.reload();
+        }
     }
 
-    // --- LÓGICA DE TREINO ---
     function addEx() {
         const nome = document.getElementById('exNome').value;
         const s = parseInt(document.getElementById('exS').value) || 0;
         const r = parseInt(document.getElementById('exR').value) || 0;
         const p = parseFloat(document.getElementById('exP').value) || 0;
-
         if (nome && s > 0) {
-            const vol = s * r * p;
-            sessao.push({ nome, s, r, p, vol });
+            sessao.push({ nome, s, r, p, vol: s * r * p });
             atualizarLista();
             ["exNome", "exS", "exR", "exP"].forEach(id => document.getElementById(id).value = "");
         }
@@ -150,38 +160,23 @@
     function atualizarLista() {
         const lista = document.getElementById('lista');
         const totalVol = sessao.reduce((acc, i) => acc + i.vol, 0);
-        
         document.getElementById('boxVolume').style.display = 'block';
         document.getElementById('boxVolume').innerText = `Volume da Sessão: ${totalVol.toFixed(1)} kg`;
-        
-        lista.innerHTML = sessao.map(i => `
-            <li>
-                <span>${i.nome} (${i.s}x${i.r})</span>
-                <strong>${i.vol}kg</strong>
-            </li>
-        `).join('');
+        lista.innerHTML = sessao.map(i => `<li><span>${i.nome}</span><strong>${i.vol}kg</strong></li>`).join('');
     }
 
     async function enviarParaPlanilha() {
-        const calsM = parseFloat(document.getElementById('cM').value) || 0;
-        const calsC = parseFloat(document.getElementById('cC').value) || 0;
-
         const payload = {
             data: new Date().toLocaleDateString('pt-BR'),
-            calM: calsM,
-            calC: calsC,
-            calTotal: calsM + calsC,
+            calTotal: (parseFloat(document.getElementById('cM').value) || 0) + (parseFloat(document.getElementById('cC').value) || 0),
             exercicios: sessao,
             volumeTotal: sessao.reduce((acc, i) => acc + i.vol, 0)
         };
-
         try {
             await fetch(GOOGLE_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            alert("Treino enviado para a planilha! 🔥");
-            sessao = [];
-            atualizarLista();
+            alert("Enviado!");
             location.reload();
-        } catch (e) { alert("Erro ao sincronizar."); }
+        } catch (e) { alert("Erro ao salvar."); }
     }
 </script>
 
