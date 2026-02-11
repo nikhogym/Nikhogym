@@ -6,7 +6,7 @@
     <title>Nikho Gym Connect</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #FC4C02; --success: #30D158; --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --input-bg: #2C2C2E; }
+        :root { --primary: #FC4C02; --success: #30D158; --danger: #FF453A; --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --input-bg: #2C2C2E; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 10px; padding-top: 80px; }
         
@@ -30,10 +30,14 @@
         .ref-badge { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 10px; display: block; }
         
         .strava-list-item { background: #2C2C2E; padding: 12px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; border: 1px solid #3A3A3C; font-size: 13px; }
-        .strava-list-item:active { background: var(--primary); }
 
         ul { list-style: none; padding: 0; }
-        li { background: var(--input-bg); padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 14px; border-left: 4px solid var(--primary); display: flex; justify-content: space-between; }
+        .item-treino { background: var(--input-bg); padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 14px; border-left: 4px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
+        
+        .historico-item { background: var(--card); padding: 15px; border-radius: 18px; margin-bottom: 10px; border: 1px solid #3A3A3C; position: relative; }
+        .hist-meta { font-size: 12px; color: #8E8E93; margin-bottom: 5px; }
+        .hist-detalhes { font-size: 13px; color: #FFFFFF; padding-right: 30px; }
+        .btn-del-hist { position: absolute; right: 15px; top: 15px; color: var(--danger); font-weight: bold; cursor: pointer; padding: 5px; }
     </style>
 </head>
 <body>
@@ -46,13 +50,25 @@
 <div class="container">
     <div id="treinar" class="content active">
         <div class="card">
-            <div class="section-title">🧡 Cardio (Strava)</div>
+            <div class="section-title">🏃 Cardio</div>
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <select id="cardioTipo" style="flex: 2; margin-bottom:0;">
+                    <option value="Esteira">Esteira</option>
+                    <option value="Bicicleta">Bicicleta</option>
+                    <option value="Corda">Corda</option>
+                    <option value="Caminhada">Caminhada</option>
+                </select>
+                <input type="number" id="cardioTempoManual" placeholder="Min" style="flex: 1; margin-bottom:0;">
+            </div>
+            <input type="number" id="cardioCalManual" placeholder="Calorias Manuais" oninput="document.getElementById('cC').value = this.value">
+            
+            <hr style="border: 0; border-top: 1px solid #3A3A3C; margin: 15px 0;">
+            
             <button class="btn btn-strava" id="btnAuth" onclick="autorizar()">🔗 Conectar Strava</button>
             <div id="stravaAcoes" style="display:none;">
-                <button class="btn btn-strava" onclick="listarAtividades()">📥 Escolher Cardio</button>
+                <button class="btn btn-strava" onclick="listarAtividades()">📥 Escolher do Strava</button>
                 <div id="listaAtividadesStrava"></div>
             </div>
-            <div id="statusStrava" style="font-size:11px; text-align:center; color:#8E8E93;"></div>
         </div>
 
         <div class="card">
@@ -71,9 +87,12 @@
         <div class="card">
             <div class="section-title">🔥 Finalizar</div>
             <input type="number" id="cM" placeholder="Calorias Musculação">
-            <input type="number" id="cC" placeholder="Calorias Cardio (Carregando...)" readonly>
+            <input type="number" id="cC" placeholder="Calorias Cardio Total" readonly>
             <button class="btn btn-finish" onclick="enviarParaPlanilha()">✅ Salvar Treino</button>
         </div>
+
+        <h3 style="margin-left: 10px; font-size: 18px;">📜 Histórico Recente</h3>
+        <div id="historicoInferior"></div>
     </div>
 
     <div id="evolucao" class="content">
@@ -107,60 +126,41 @@
         if(aba === 'evolucao') { popularSelectExercicios(); renderizarGraficoCalorias(); }
     }
 
-    // --- LOGICA STRAVA CORRIGIDA ---
     function autorizar() {
         const url = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&approval_prompt=force&scope=activity:read_all`;
         window.location.href = url;
     }
 
     async function listarAtividades() {
-        try {
-            const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await r.json();
-            const lista = document.getElementById('listaAtividadesStrava');
-            // Nota: Na listagem, calorias costumam vir como undefined/0. 
-            // Mostramos um ícone de carregamento ou apenas o nome.
-            lista.innerHTML = data.map(act => `
-                <div class="strava-list-item" onclick="buscarDetalhesAtividade(${act.id}, '${act.name}')">
-                    🏃 ${act.name} <br>
-                    <small>${new Date(act.start_date).toLocaleDateString()} | Toque para puxar calorias</small>
-                </div>
-            `).join('');
-        } catch (e) { alert("Erro ao listar atividades."); }
+        const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await r.json();
+        document.getElementById('listaAtividadesStrava').innerHTML = data.map(act => `
+            <div class="strava-list-item" onclick="buscarDetalhesAtividade(${act.id}, '${act.name}')">
+                🏃 ${act.name} <br>
+                <small>${new Date(act.start_date).toLocaleDateString()} | Puxar calorias</small>
+            </div>`).join('');
     }
 
-    // NOVA FUNÇÃO: Busca as calorias reais de uma atividade específica
     async function buscarDetalhesAtividade(id, nome) {
-        document.getElementById('cC').placeholder = "Buscando calorias...";
-        try {
-            const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await r.json();
-            const caloriasReais = data.calories || 0;
-            
-            document.getElementById('cC').value = Math.round(caloriasReais);
-            document.getElementById('listaAtividadesStrava').innerHTML = `
-                <div style="color:var(--success); font-size:12px; padding:10px; background: rgba(48, 209, 88, 0.1); border-radius:12px;">
-                    Selecionado: ${nome} (${Math.round(caloriasReais)} kcal) ✅
-                </div>`;
-        } catch (e) { 
-            alert("Erro ao buscar detalhes. Tente novamente."); 
-        }
+        const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await r.json();
+        const cals = Math.round(data.calories || 0);
+        document.getElementById('cC').value = cals;
+        document.getElementById('cardioCalManual').value = cals;
+        document.getElementById('listaAtividadesStrava').innerHTML = `<div style="color:var(--success); font-size:12px; padding:10px;">${nome} selecionado! ✅</div>`;
     }
 
-    // --- LOGICA TREINO ---
     function buscarReferencia(nome) {
         if (nome.length < 2) return;
-        const ultimo = hist.slice().reverse().find(t => t.exercicios.some(e => e.nome.toLowerCase() === nome.toLowerCase()));
+        const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase() === nome.toLowerCase()));
         if (ultimo) {
             const ex = ultimo.exercicios.find(e => e.nome.toLowerCase() === nome.toLowerCase());
             document.getElementById('referenciaPeso').innerText = `💡 Último peso: ${ex.p}kg (${ex.s}x${ex.r})`;
-        } else {
-            document.getElementById('referenciaPeso').innerText = "";
-        }
+        } else { document.getElementById('referenciaPeso').innerText = ""; }
     }
 
     function addEx() {
@@ -168,21 +168,26 @@
         const s = document.getElementById('exS').value, r = document.getElementById('exR').value, p = document.getElementById('exP').value;
         if (nome && s) {
             sessao.push({ nome, s, r, p });
-            atualizarLista();
+            renderSessao();
             ["exNome", "exS", "exR", "exP"].forEach(id => document.getElementById(id).value = "");
             document.getElementById('referenciaPeso').innerText = "";
         }
     }
 
-    function atualizarLista() {
-        document.getElementById('lista').innerHTML = sessao.map(i => `<li><span>${i.nome}</span><strong>${i.p}kg</strong></li>`).join('');
+    function renderSessao() {
+        document.getElementById('lista').innerHTML = sessao.map((i, idx) => `
+            <li class="item-treino">
+                <span>${i.nome} (${i.s}x${i.r})</span>
+                <strong>${i.p}kg <span onclick="sessao.splice(${idx},1); renderSessao();" style="color:red; margin-left:10px; cursor:pointer">✕</span></strong>
+            </li>`).join('');
     }
 
     async function enviarParaPlanilha() {
         const payload = {
+            id: Date.now(),
             data: new Date().toLocaleDateString('pt-BR'),
             calTotal: (parseFloat(document.getElementById('cM').value) || 0) + (parseFloat(document.getElementById('cC').value) || 0),
-            exercicios: sessao,
+            exercicios: [...sessao],
             volTotal: sessao.reduce((acc, i) => acc + (i.s * i.r * i.p), 0)
         };
         hist.push(payload);
@@ -194,32 +199,47 @@
         } catch (e) { alert("Erro ao salvar."); }
     }
 
-    // --- GRÁFICOS ---
-    let chartCarga, chartCal;
+    function renderHistInferior() {
+        const container = document.getElementById('historicoInferior');
+        container.innerHTML = hist.slice().reverse().slice(0, 5).map(h => `
+            <div class="historico-item">
+                <span class="btn-del-hist" onclick="apagarTreino(${h.id})">🗑️</span>
+                <div class="hist-meta">📅 ${h.data} | 🔥 ${h.calTotal} kcal</div>
+                <div class="hist-detalhes">${h.exercicios ? h.exercicios.map(e => e.nome).join(', ') : 'Cardio'}</div>
+            </div>`).join('');
+    }
+
+    function apagarTreino(id) {
+        if(confirm("Deseja apagar este treino do histórico local?")) {
+            hist = hist.filter(h => h.id !== id);
+            localStorage.setItem('hist_nikho', JSON.stringify(hist));
+            renderHistInferior();
+        }
+    }
 
     function popularSelectExercicios() {
         const select = document.getElementById('selectExGrafico');
-        const nomes = [...new Set(hist.flatMap(t => t.exercicios.map(e => e.nome)))];
+        const nomes = [...new Set(hist.flatMap(t => t.exercicios ? t.exercicios.map(e => e.nome) : []))];
         select.innerHTML = nomes.map(n => `<option value="${n}">${n}</option>`).join('');
         renderizarGraficoEvolucao();
     }
 
+    let chartCarga, chartCal;
     function renderizarGraficoEvolucao() {
         const ex = document.getElementById('selectExGrafico').value;
-        const dados = hist.filter(t => t.exercicios.some(e => e.nome === ex))
+        const dados = hist.filter(t => t.exercicios && t.exercicios.some(e => e.nome === ex))
                           .map(t => ({ data: t.data, peso: t.exercicios.find(e => e.nome === ex).p }));
-        
-        if (chartCarga) chartCarga.destroy();
+        if(chartCarga) chartCarga.destroy();
         chartCarga = new Chart(document.getElementById('chartCarga'), {
             type: 'line',
-            data: { labels: dados.map(d => d.data), datasets: [{ label: 'Carga (kg)', data: dados.map(d => d.peso), borderColor: '#FC4C02', tension: 0.3 }] },
+            data: { labels: dados.map(d => d.data), datasets: [{ label: 'kg', data: dados.map(d => d.peso), borderColor: '#FC4C02', tension: 0.3 }] },
             options: { responsive: true, maintainAspectRatio: false }
         });
     }
 
     function renderizarGraficoCalorias() {
         const dados = hist.slice(-7);
-        if (chartCal) chartCal.destroy();
+        if(chartCal) chartCal.destroy();
         chartCal = new Chart(document.getElementById('chartCalorias'), {
             type: 'bar',
             data: { labels: dados.map(d => d.data), datasets: [{ label: 'kcal', data: dados.map(d => d.calTotal), backgroundColor: '#30D158' }] },
@@ -227,11 +247,9 @@
         });
     }
 
-    // Auth Init
     if (token) {
         document.getElementById('btnAuth').style.display = 'none';
         document.getElementById('stravaAcoes').style.display = 'block';
-        document.getElementById('statusStrava').innerText = "Conectado ✅";
     }
     const code = new URLSearchParams(window.location.search).get('code');
     if (code) {
@@ -241,6 +259,7 @@
             headers: { 'Content-Type': 'application/json' }
         }).then(r => r.json()).then(d => { if(d.access_token) { localStorage.setItem('strava_access_token', d.access_token); window.location.href = REDIRECT_URI; }});
     }
+    renderHistInferior();
 </script>
 </body>
 </html>
