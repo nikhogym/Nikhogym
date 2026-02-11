@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nikho Gym Connect</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #FC4C02; --success: #30D158; --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --input-bg: #2C2C2E; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -13,17 +14,24 @@
         .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 12px; background: var(--input-bg); color: #8E8E93; font-weight: bold; font-size: 13px; }
         .tab-btn.active { background: var(--primary); color: white; }
 
+        .container { max-width: 450px; margin: auto; }
+        .content { display: none; }
+        .content.active { display: block; }
+
         .card { background: var(--card); padding: 20px; border-radius: 22px; margin-bottom: 15px; border: 1px solid #2C2C2E; }
         .section-title { font-size: 16px; margin-bottom: 15px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
         
-        input { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 14px; width: 100%; margin-bottom: 10px; font-size: 15px; outline: none; }
+        input, select { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 14px; width: 100%; margin-bottom: 10px; font-size: 15px; outline: none; }
 
         .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
         .btn-strava { background: var(--primary); color: white; }
         .btn-finish { background: var(--success); color: white; }
         
-        .vol-badge { background: rgba(48, 209, 88, 0.1); color: var(--success); padding: 10px; border-radius: 12px; font-size: 13px; font-weight: bold; text-align: center; margin-bottom: 15px; border: 1px solid var(--success); }
+        .ref-badge { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 10px; display: block; }
         
+        .strava-list-item { background: #2C2C2E; padding: 12px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; border: 1px solid #3A3A3C; font-size: 13px; }
+        .strava-list-item:active { background: var(--primary); }
+
         ul { list-style: none; padding: 0; }
         li { background: var(--input-bg); padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 14px; border-left: 4px solid var(--primary); display: flex; justify-content: space-between; }
     </style>
@@ -31,138 +39,124 @@
 <body>
 
 <div class="tabs">
-    <button class="tab-btn active">💪 Treinar</button>
-    <button class="tab-btn">📊 Planilha</button>
+    <button id="tab-t" class="tab-btn active" onclick="switchTab('treinar')">💪 Treinar</button>
+    <button id="tab-e" class="tab-btn" onclick="switchTab('evolucao')">📈 Evolução</button>
 </div>
 
-<div class="container" style="max-width: 450px; margin: auto;">
-    
-    <div class="card">
-        <div class="section-title">🧡 Conectar Bip 5 via Strava</div>
-        <button class="btn btn-strava" id="btnAuth" onclick="autorizar()">🔗 Autorizar Acesso</button>
-        <button class="btn btn-strava" id="btnImport" style="display:none;" onclick="importarCardio()">📥 Importar Último Cardio</button>
-        <div id="statusStrava" style="font-size:12px; text-align:center; color:#8E8E93;">Aguardando conexão...</div>
-    </div>
-
-    <div class="card">
-        <div class="section-title">🏋️ Registro de Força</div>
-        <input type="text" id="exNome" placeholder="Ex: Supino Reto">
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;">
-            <input type="number" id="exS" placeholder="Sér.">
-            <input type="number" id="exR" placeholder="Rep.">
-            <input type="number" id="exP" placeholder="Kg">
+<div class="container">
+    <div id="treinar" class="content active">
+        <div class="card">
+            <div class="section-title">🧡 Cardio (Strava)</div>
+            <button class="btn btn-strava" id="btnAuth" onclick="autorizar()">🔗 Conectar Strava</button>
+            <div id="stravaAcoes" style="display:none;">
+                <button class="btn btn-strava" onclick="listarAtividades()">📥 Escolher Cardio</button>
+                <div id="listaAtividadesStrava"></div>
+            </div>
+            <div id="statusStrava" style="font-size:11px; text-align:center; color:#8E8E93;"></div>
         </div>
-        <button class="btn" style="background:#3A3A3C; color:white;" onclick="addEx()">➕ Adicionar Exercício</button>
-        <div id="boxVolume" class="vol-badge" style="display:none;">Volume da Sessão: 0 kg</div>
-        <ul id="lista"></ul>
+
+        <div class="card">
+            <div class="section-title">🏋️ Musculação</div>
+            <div id="referenciaPeso" class="ref-badge"></div>
+            <input type="text" id="exNome" placeholder="Ex: Supino Reto" oninput="buscarReferencia(this.value)">
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;">
+                <input type="number" id="exS" placeholder="Sér.">
+                <input type="number" id="exR" placeholder="Rep.">
+                <input type="number" id="exP" placeholder="Kg">
+            </div>
+            <button class="btn" style="background:#3A3A3C; color:white;" onclick="addEx()">➕ Adicionar</button>
+            <ul id="lista"></ul>
+        </div>
+
+        <div class="card">
+            <div class="section-title">🔥 Finalizar</div>
+            <input type="number" id="cM" placeholder="Calorias Musculação">
+            <input type="number" id="cC" placeholder="Calorias Cardio (Auto)" readonly>
+            <button class="btn btn-finish" onclick="enviarParaPlanilha()">✅ Salvar Treino</button>
+        </div>
     </div>
 
-    <div class="card">
-        <div class="section-title">🔥 Resumo de Calorias</div>
-        <input type="number" id="cM" placeholder="Calorias Musculação">
-        <input type="number" id="cC" placeholder="Calorias Cardio (Strava)" readonly>
-        <button class="btn btn-finish" onclick="enviarParaPlanilha()">✅ Salvar Treino</button>
+    <div id="evolucao" class="content">
+        <div class="card">
+            <div class="section-title">📊 Evolução de Carga</div>
+            <select id="selectExGrafico" onchange="renderizarGraficoEvolucao()"></select>
+            <div style="height: 250px;"><canvas id="chartCarga"></canvas></div>
+        </div>
+        <div class="card">
+            <div class="section-title">🔥 Calorias Semanais</div>
+            <div style="height: 250px;"><canvas id="chartCalorias"></canvas></div>
+        </div>
     </div>
-
 </div>
 
 <script>
     const CLIENT_ID = '201889';
     const CLIENT_SECRET = 'f9b59003e315ec7961d6c89e94d76941bd39c72b';
     const GOOGLE_URL = 'https://script.google.com/macros/s/AKfycbyjhUFfkvnlz-AnpSmgA6ZXeASbeBm_7nHl6cFDuKTuIWVx_Iv1Aq8pb_M8RcxMa0ly/exec';
-    
-    // REDIRECT_URI precisa ser exatamente igual ao que está no Strava (ou subdomínio dele)
-    const REDIRECT_URI = "https://nikhogym.github.io/Nikhogym/";
+    const REDIRECT_URI = window.location.href.split('?')[0];
 
     let sessao = [];
+    let hist = JSON.parse(localStorage.getItem('hist_nikho')) || [];
     let token = localStorage.getItem('strava_access_token');
 
+    function switchTab(aba) {
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(aba).classList.add('active');
+        document.getElementById(aba === 'treinar' ? 'tab-t' : 'tab-e').classList.add('active');
+        if(aba === 'evolucao') { popularSelectExercicios(); renderizarGraficoCalorias(); }
+    }
+
+    // --- LOGICA STRAVA ---
     function autorizar() {
-        // Escopo necessário para ler as atividades
-        const scope = "activity:read_all";
-        const authUrl = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&approval_prompt=force&scope=${scope}`;
-        
-        console.log("Redirecionando para:", authUrl);
-        window.location.href = authUrl;
+        const url = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&approval_prompt=force&scope=activity:read_all`;
+        window.location.href = url;
     }
 
-    // Captura o código que o Strava envia de volta na URL
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-
-    if (code) {
-        finalizarLogin(code);
+    async function listarAtividades() {
+        const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await r.json();
+        const lista = document.getElementById('listaAtividadesStrava');
+        lista.innerHTML = data.map(act => `
+            <div class="strava-list-item" onclick="selecionarAtividade(${act.calories || 0}, '${act.name}')">
+                🏃 ${act.name} <br>
+                <small>${new Date(act.start_date).toLocaleDateString()} | ${Math.round(act.calories || 0)} kcal</small>
+            </div>
+        `).join('');
     }
 
-    async function finalizarLogin(c) {
-        try {
-            const r = await fetch('https://www.strava.com/oauth/token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    client_id: CLIENT_ID, 
-                    client_secret: CLIENT_SECRET, 
-                    code: c, 
-                    grant_type: 'authorization_code' 
-                })
-            });
-            const d = await r.json();
-            if (d.access_token) {
-                localStorage.setItem('strava_access_token', d.access_token);
-                // Limpa a URL do navegador para remover o ?code=...
-                window.location.href = REDIRECT_URI;
-            }
-        } catch (e) {
-            console.error("Erro ao trocar token:", e);
-        }
+    function selecionarAtividade(cal, nome) {
+        document.getElementById('cC').value = Math.round(cal);
+        document.getElementById('listaAtividadesStrava').innerHTML = `<div style="color:var(--success); font-size:12px; padding:10px;">Selecionado: ${nome} ✅</div>`;
     }
 
-    if (token) {
-        document.getElementById('btnAuth').style.display = 'none';
-        document.getElementById('btnImport').style.display = 'block';
-        document.getElementById('statusStrava').innerText = "Conectado ao Strava ✅";
-    }
-
-    async function importarCardio() {
-        try {
-            const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=1', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await r.json();
-            if (data && data.length > 0) {
-                const activity = data[0];
-                // Estimativa de calorias se não vier do GPS (muito comum em treinos indoor)
-                const cals = activity.calories || Math.round((activity.moving_time / 60) * 7); 
-                document.getElementById('cC').value = cals;
-                alert(`Importado: ${activity.name}`);
-            } else {
-                alert("Nenhuma atividade recente encontrada no Strava.");
-            }
-        } catch (e) { 
-            alert("Sessão expirada. Autorize novamente."); 
-            localStorage.removeItem('strava_access_token');
-            location.reload();
+    // --- LOGICA TREINO ---
+    function buscarReferencia(nome) {
+        if (nome.length < 2) return;
+        const ultimo = hist.slice().reverse().find(t => t.exercicios.some(e => e.nome.toLowerCase() === nome.toLowerCase()));
+        if (ultimo) {
+            const ex = ultimo.exercicios.find(e => e.nome.toLowerCase() === nome.toLowerCase());
+            document.getElementById('referenciaPeso').innerText = `💡 Último peso: ${ex.p}kg (${ex.s}x${ex.r})`;
+        } else {
+            document.getElementById('referenciaPeso').innerText = "";
         }
     }
 
     function addEx() {
         const nome = document.getElementById('exNome').value;
-        const s = parseInt(document.getElementById('exS').value) || 0;
-        const r = parseInt(document.getElementById('exR').value) || 0;
-        const p = parseFloat(document.getElementById('exP').value) || 0;
-        if (nome && s > 0) {
-            sessao.push({ nome, s, r, p, vol: s * r * p });
+        const s = document.getElementById('exS').value, r = document.getElementById('exR').value, p = document.getElementById('exP').value;
+        if (nome && s) {
+            sessao.push({ nome, s, r, p });
             atualizarLista();
             ["exNome", "exS", "exR", "exP"].forEach(id => document.getElementById(id).value = "");
+            document.getElementById('referenciaPeso').innerText = "";
         }
     }
 
     function atualizarLista() {
-        const lista = document.getElementById('lista');
-        const totalVol = sessao.reduce((acc, i) => acc + i.vol, 0);
-        document.getElementById('boxVolume').style.display = 'block';
-        document.getElementById('boxVolume').innerText = `Volume da Sessão: ${totalVol.toFixed(1)} kg`;
-        lista.innerHTML = sessao.map(i => `<li><span>${i.nome}</span><strong>${i.vol}kg</strong></li>`).join('');
+        document.getElementById('lista').innerHTML = sessao.map(i => `<li><span>${i.nome}</span><strong>${i.p}kg</strong></li>`).join('');
     }
 
     async function enviarParaPlanilha() {
@@ -170,15 +164,64 @@
             data: new Date().toLocaleDateString('pt-BR'),
             calTotal: (parseFloat(document.getElementById('cM').value) || 0) + (parseFloat(document.getElementById('cC').value) || 0),
             exercicios: sessao,
-            volumeTotal: sessao.reduce((acc, i) => acc + i.vol, 0)
+            volTotal: sessao.reduce((acc, i) => acc + (i.s * i.r * i.p), 0)
         };
+        hist.push(payload);
+        localStorage.setItem('hist_nikho', JSON.stringify(hist));
         try {
             await fetch(GOOGLE_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            alert("Enviado!");
+            alert("Treino salvo!");
             location.reload();
         } catch (e) { alert("Erro ao salvar."); }
     }
-</script>
 
+    // --- GRÁFICOS ---
+    let chartCarga, chartCal;
+
+    function popularSelectExercicios() {
+        const select = document.getElementById('selectExGrafico');
+        const nomes = [...new Set(hist.flatMap(t => t.exercicios.map(e => e.nome)))];
+        select.innerHTML = nomes.map(n => `<option value="${n}">${n}</option>`).join('');
+        renderizarGraficoEvolucao();
+    }
+
+    function renderizarGraficoEvolucao() {
+        const ex = document.getElementById('selectExGrafico').value;
+        const dados = hist.filter(t => t.exercicios.some(e => e.nome === ex))
+                          .map(t => ({ data: t.data, peso: t.exercicios.find(e => e.nome === ex).p }));
+        
+        if (chartCarga) chartCarga.destroy();
+        chartCarga = new Chart(document.getElementById('chartCarga'), {
+            type: 'line',
+            data: { labels: dados.map(d => d.data), datasets: [{ label: 'Carga (kg)', data: dados.map(d => d.peso), borderColor: '#FC4C02', tension: 0.3 }] },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function renderizarGraficoCalorias() {
+        const dados = hist.slice(-7);
+        if (chartCal) chartCal.destroy();
+        chartCal = new Chart(document.getElementById('chartCalorias'), {
+            type: 'bar',
+            data: { labels: dados.map(d => d.data), datasets: [{ label: 'kcal', data: dados.map(d => d.calTotal), backgroundColor: '#30D158' }] },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    // Auth Init
+    if (token) {
+        document.getElementById('btnAuth').style.display = 'none';
+        document.getElementById('stravaAcoes').style.display = 'block';
+        document.getElementById('statusStrava').innerText = "Conectado ✅";
+    }
+    const code = new URLSearchParams(window.location.search).get('code');
+    if (code) {
+        fetch('https://www.strava.com/oauth/token', {
+            method: 'POST',
+            body: JSON.stringify({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code: code, grant_type: 'authorization_code' }),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(r => r.json()).then(d => { if(d.access_token) { localStorage.setItem('strava_access_token', d.access_token); window.location.href = REDIRECT_URI; }});
+    }
+</script>
 </body>
 </html>
