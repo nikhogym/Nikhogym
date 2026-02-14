@@ -21,42 +21,25 @@
         .card { background: var(--card); padding: 20px; border-radius: 22px; margin-bottom: 15px; border: 1px solid #2C2C2E; }
         .section-title { font-size: 16px; margin-bottom: 15px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
         
-        input, select, textarea { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 14px; width: 100%; margin-bottom: 10px; font-size: 15px; outline: none; }
-
+        input, select, textarea { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 12px; width: 100%; margin-bottom: 10px; font-size: 14px; outline: none; }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
-        .btn:active { opacity: 0.7; transform: scale(0.98); }
         .btn-strava { background: var(--primary); color: white; }
         .btn-finish { background: var(--success); color: white; }
-        
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
 
-        .ref-badge { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 10px; display: block; }
-        
-        .strava-list-item { background: #2C2C2E; padding: 12px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; border: 1px solid #3A3A3C; font-size: 13px; }
-
-        ul { list-style: none; padding: 0; }
-        
-        .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
-        .ex-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .muscle-tag { font-size: 10px; background: rgba(252, 76, 2, 0.2); color: var(--primary); padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
-        
+        .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
         .serie-row { display: grid; grid-template-columns: 25px 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 5px; }
-        .serie-row input { margin-bottom: 0; padding: 8px; font-size: 13px; text-align: center; }
-        .btn-add-serie { background: #3A3A3C; color: #FFFFFF; padding: 8px; border-radius: 8px; font-size: 12px; border: none; width: 100%; margin-top: 5px; cursor: pointer; font-weight: bold; }
 
-        .historico-item { background: var(--card); padding: 15px; border-radius: 18px; margin-bottom: 10px; border: 1px solid #3A3A3C; position: relative; display: flex; gap: 15px; align-items: center; }
-        .hist-content { flex: 1; }
-        .hist-meta { font-size: 12px; color: #8E8E93; margin-bottom: 8px; }
-        .hist-cals { display: flex; gap: 10px; margin-bottom: 8px; font-size: 11px; font-weight: bold; }
-        .hist-detalhes { font-size: 13px; color: #FFFFFF; padding-right: 30px; border-top: 1px solid #2C2C2E; padding-top: 8px; line-height: 1.4; }
-        .btn-del-hist { position: absolute; right: 10px; top: 10px; color: var(--danger); font-weight: bold; cursor: pointer; padding: 5px; }
-        .btn-edit-hist { position: absolute; right: 40px; top: 10px; color: var(--success); font-weight: bold; cursor: pointer; padding: 5px; font-size: 14px; }
+        /* Estilos Histórico Expansível */
+        .historico-item { background: var(--card); padding: 15px; border-radius: 18px; margin-bottom: 10px; border: 1px solid #3A3A3C; cursor: pointer; transition: 0.3s; }
+        .hist-header { display: flex; justify-content: space-between; align-items: center; }
+        .hist-details-pane { display: none; margin-top: 15px; border-top: 1px solid #2C2C2E; padding-top: 15px; cursor: default; }
+        .historico-item.expanded .hist-details-pane { display: block; }
+        .edit-mode input { border: 1px solid var(--primary); margin-bottom: 5px; padding: 5px 10px; height: 35px; }
         
-        .cal-tag { padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,0.05); }
-
-        /* Anel no histórico */
-        .ring-hist-container { position: relative; width: 50px; height: 50px; flex-shrink: 0; }
-        .ring-hist-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 9px; font-weight: bold; }
+        .ring-small { position: relative; width: 45px; height: 45px; }
+        .ring-text-small { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 9px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -69,63 +52,39 @@
 
 <div class="container">
     <div id="treinar" class="content active">
-        
         <div class="card" style="text-align: center;">
             <div class="section-title">🎯 Meta Diária</div>
-            <div style="position: relative; height: 150px; width: 150px; margin: auto;">
+            <div style="position: relative; height: 140px; width: 140px; margin: auto;">
                 <canvas id="ringChart"></canvas>
                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%;">
                     <span id="txtPorcentagem" style="font-size: 20px; font-weight: bold; display: block;">0%</span>
                     <span id="txtCaloriasRing" style="font-size: 9px; color: #8E8E93;">0 / 2000 kcal</span>
                 </div>
             </div>
-            <div style="margin-top: 15px;">
-                <input type="number" id="metaDiaria" placeholder="Definir Meta (ex: 2000)" value="2000" oninput="updateRingChart()" style="margin-bottom: 0; font-size: 13px; padding: 10px; text-align: center;">
-            </div>
+            <input type="number" id="metaDiaria" value="2000" oninput="updateRingChart()" style="margin-top: 15px; text-align: center;">
         </div>
 
         <div class="card">
             <div class="section-title">🏃 Cardio</div>
-            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                <select id="cardioTipo" style="flex: 2; margin-bottom:0;">
-                    <option value="Esteira">Esteira</option>
-                    <option value="Bicicleta">Bicicleta</option>
-                    <option value="Corda">Corda</option>
-                    <option value="Caminhada">Caminhada</option>
-                    <option value="Corrida">Corrida</option>
-                </select>
-                <input type="number" id="cardioTempoManual" placeholder="Min" style="flex: 1; margin-bottom:0;">
-            </div>
-            <input type="number" id="cardioCalManual" placeholder="Calorias Manuais" oninput="document.getElementById('cC').value = this.value; updateRingChart();">
-            
-            <hr style="border: 0; border-top: 1px solid #3A3A3C; margin: 15px 0;">
-            
             <button class="btn btn-strava" id="btnAuth" onclick="autorizar()">🔗 Conectar Strava</button>
             <div id="stravaAcoes" style="display:none;">
                 <button class="btn btn-strava" onclick="listarAtividades()">📥 Escolher do Strava</button>
                 <div id="listaAtividadesStrava"></div>
             </div>
+            <input type="number" id="cC" placeholder="Calorias Cardio Total" readonly oninput="updateRingChart()">
         </div>
 
         <div class="card">
             <div class="section-title">🏋️ Musculação</div>
-            <div style="margin-bottom: 10px;">
-                <span style="font-size: 11px; color: #8E8E93;">Atalhos de Ficha:</span><br>
-                <div id="atalhosFicha" style="margin-top:5px;"></div>
-            </div>
-            <div id="referenciaPeso" class="ref-badge"></div>
-            <input type="text" id="exNome" placeholder="Ex: Supino Reto" oninput="buscarReferencia(this.value)">
-            
+            <div id="atalhosFicha" style="margin-bottom: 10px;"></div>
+            <input type="text" id="exNome" placeholder="Ex: Supino Reto">
             <button class="btn" style="background:#3A3A3C; color:white;" onclick="addEx()">➕ Iniciar Exercício</button>
-            
             <div id="listaTreinoAtivo"></div>
         </div>
 
         <div class="card">
             <div class="section-title">🔥 Finalizar</div>
             <input type="number" id="cM" placeholder="Calorias Musculação" oninput="updateRingChart()">
-            <input type="number" id="cC" placeholder="Calorias Cardio Total" readonly oninput="updateRingChart()">
-            <input type="hidden" id="cardioTipoFinal" value="Nenhum">
             <button class="btn btn-finish" onclick="enviarParaPlanilha()">✅ Salvar Treino</button>
         </div>
 
@@ -135,9 +94,9 @@
 
     <div id="fichas" class="content">
         <div class="card">
-            <div class="section-title">📝 Criar Nova Ficha</div>
-            <input type="text" id="titFicha" placeholder="Nome (Ex: Treino A - Peito)">
-            <textarea id="txtFicha" rows="5" placeholder="Exercícios (Um por linha)"></textarea>
+            <div class="section-title">📝 Fichas de Treino</div>
+            <input type="text" id="titFicha" placeholder="Nome da Ficha">
+            <textarea id="txtFicha" rows="5" placeholder="Exercícios (um por linha)"></textarea>
             <button class="btn btn-strava" onclick="salvarFicha()">Salvar Ficha</button>
         </div>
         <div id="listaFichas"></div>
@@ -145,20 +104,11 @@
 
     <div id="evolucao" class="content">
         <div class="card">
-            <div class="section-title">📊 Evolução de Carga</div>
+            <div class="section-title">📊 Gráficos & Backup</div>
             <select id="selectExGrafico" onchange="renderizarGraficoEvolucao()"></select>
-            <div style="height: 250px;"><canvas id="chartCarga"></canvas></div>
-        </div>
-        <div class="card">
-            <div class="section-title">🔥 Calorias Semanais</div>
-            <div style="height: 250px;"><canvas id="chartCalorias"></canvas></div>
-        </div>
-        <div class="card">
-            <div class="section-title">💾 Backup Local (JSON)</div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-outline" style="flex:1" onclick="exportarDados()">📤 Exportar</button>
-                <button class="btn-outline" style="flex:1" onclick="document.getElementById('importFile').click()">📥 Importar</button>
-            </div>
+            <div style="height: 200px;"><canvas id="chartCarga"></canvas></div>
+            <button class="btn-outline" onclick="exportarDados()">📤 Exportar</button>
+            <button class="btn-outline" onclick="document.getElementById('importFile').click()">📥 Importar</button>
             <input type="file" id="importFile" style="display:none" onchange="importarDados(this)">
         </div>
     </div>
@@ -170,257 +120,162 @@
     const GOOGLE_URL = 'https://script.google.com/macros/s/AKfycbyjhUFfkvnlz-AnpSmgA6ZXeASbeBm_7nHl6cFDuKTuIWVx_Iv1Aq8pb_M8RcxMa0ly/exec';
     const REDIRECT_URI = window.location.href.split('?')[0];
 
-    const muscleGroups = {
-        'supino': 'Peito', 'crucifixo': 'Peito', 'voador': 'Peito', 'chest': 'Peito',
-        'puxada': 'Costas', 'remada': 'Costas', 'pulldown': 'Costas', 'chin up': 'Costas',
-        'agachamento': 'Pernas', 'leg press': 'Pernas', 'extensora': 'Pernas', 'flexora': 'Pernas', 'afundo': 'Pernas',
-        'desenvolvimento': 'Ombro', 'elevacao lateral': 'Ombro', 'shoulder': 'Ombro',
-        'rosca': 'Biceps', 'biceps': 'Biceps', 'martelo': 'Biceps',
-        'triceps': 'Triceps', 'pulley': 'Triceps', 'mergulho': 'Triceps'
-    };
+    const muscleGroups = { 'supino': 'Peito', 'puxada': 'Costas', 'agachamento': 'Pernas', 'rosca': 'Biceps', 'triceps': 'Triceps' };
 
-    let sessao = [];
+    let sessao = [], myRingChart;
     let hist = JSON.parse(localStorage.getItem('hist_nikho')) || [];
     let fichas = JSON.parse(localStorage.getItem('fichas_nikho')) || [];
     let token = localStorage.getItem('strava_access_token');
-    let myRingChart;
 
     function switchTab(aba) {
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(aba).classList.add('active');
         document.getElementById('tab-' + aba.charAt(0)).classList.add('active');
-        if(aba === 'evolucao') { popularSelectExercicios(); renderizarGraficoCalorias(); }
-        if(aba === 'treinar') { renderAtalhosFichas(); updateRingChart(); renderHistInferior(); }
+        if(aba === 'treinar') { renderAtalhosFichas(); renderHistInferior(); updateRingChart(); }
+        if(aba === 'fichas') renderFichas();
     }
 
-    function getMuscleGroup(name) {
-        const lowerName = name.toLowerCase();
-        for (let key in muscleGroups) {
-            if (lowerName.includes(key)) return muscleGroups[key];
-        }
-        return 'Geral';
-    }
-
-    // --- LÓGICA ANEL DE METAS ---
+    // --- ANEL DE META ---
     function updateRingChart() {
         const meta = parseFloat(document.getElementById('metaDiaria').value) || 1;
-        const musc = parseFloat(document.getElementById('cM').value) || 0;
-        const cardio = parseFloat(document.getElementById('cC').value) || 0;
-        const totalAtual = musc + cardio;
-        
-        const porcentagem = Math.min(Math.round((totalAtual / meta) * 100), 100);
-        document.getElementById('txtPorcentagem').innerText = porcentagem + "%";
-        document.getElementById('txtCaloriasRing').innerText = totalAtual + " / " + meta + " kcal";
+        const total = (parseFloat(document.getElementById('cM').value) || 0) + (parseFloat(document.getElementById('cC').value) || 0);
+        const perc = Math.min(Math.round((total / meta) * 100), 100);
+        document.getElementById('txtPorcentagem').innerText = perc + "%";
+        document.getElementById('txtCaloriasRing').innerText = total + " / " + meta + " kcal";
+        const data = { datasets: [{ data: [total, Math.max(0, meta - total)], backgroundColor: ['#FC4C02', '#2C2C2E'], borderWidth: 0, cutout: '85%', borderRadius: 15 }] };
+        if (myRingChart) { myRingChart.data = data; myRingChart.update(); } 
+        else { myRingChart = new Chart(document.getElementById('ringChart').getContext('2d'), { type: 'doughnut', data: data, options: { plugins: { legend: false, tooltip: false }, maintainAspectRatio: false } }); }
+    }
 
-        const chartData = {
-            datasets: [{
-                data: [totalAtual, Math.max(0, meta - totalAtual)],
-                backgroundColor: ['#FC4C02', '#2C2C2E'],
-                borderWidth: 0,
-                cutout: '85%',
-                borderRadius: 15
-            }]
-        };
+    // --- HISTÓRICO EXPANSÍVEL E EDIÇÃO UNIFICADA ---
+    function renderHistInferior() {
+        const container = document.getElementById('historicoInferior');
+        container.innerHTML = hist.slice().reverse().slice(0, 10).map(h => {
+            const meta = h.metaSalva || 2000;
+            const perc = Math.min(Math.round((h.calTotal / meta) * 100), 100);
+            return `
+            <div class="historico-item" id="hist-${h.id}" onclick="toggleExpand('${h.id}')">
+                <div class="hist-header">
+                    <div class="ring-small">
+                        <canvas id="ringSmall-${h.id}" width="45" height="45"></canvas>
+                        <div class="ring-small-text ring-text-small">${perc}%</div>
+                    </div>
+                    <div style="flex:1; margin-left:15px;">
+                        <div class="hist-meta">📅 ${h.data}</div>
+                        <div style="font-size:14px; font-weight:bold;">🔥 ${h.calTotal} kcal</div>
+                    </div>
+                    <span>▼</span>
+                </div>
+                <div class="hist-details-pane" onclick="event.stopPropagation()">
+                    <div class="edit-mode" id="edit-pane-${h.id}">
+                        <label style="font-size:10px; color:#8E8E93">Meta do Dia</label>
+                        <input type="number" value="${meta}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                            <div><label style="font-size:10px;">💪 Musc.</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
+                            <div><label style="font-size:10px;">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
+                        </div>
+                        <div style="margin-top:10px;">
+                            <strong>Exercícios:</strong><br>
+                            ${h.exercicios ? h.exercicios.map((e, ei) => `
+                                <div style="margin-bottom:10px; background:#2C2C2E; padding:10px; border-radius:10px;">
+                                    <input type="text" value="${e.nome}" style="font-weight:bold;" onchange="updateExName('${h.id}', ${ei}, this.value)">
+                                    ${e.series.map((s, si) => `
+                                        <div style="display:flex; gap:5px; margin-top:5px;">
+                                            <input type="number" value="${s.r}" placeholder="R" onchange="updateSerie('${h.id}', ${ei}, ${si}, 'r', this.value)">
+                                            <input type="number" value="${s.p}" placeholder="Kg" onchange="updateSerie('${h.id}', ${ei}, ${si}, 'p', this.value)">
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `).join('') : 'Sem exercícios'}
+                        </div>
+                        <button class="btn-outline" style="color:var(--danger); width:100%; margin-top:15px;" onclick="apagarTreino('${h.id}')">🗑️ Excluir permanentemente</button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
 
-        if (myRingChart) {
-            myRingChart.data = chartData;
-            myRingChart.update();
-        } else {
-            const ctx = document.getElementById('ringChart').getContext('2d');
-            myRingChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: chartData,
-                options: {
-                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                    maintainAspectRatio: false
-                }
-            });
+        hist.slice().reverse().slice(0, 10).forEach(h => renderSmallRing(h));
+    }
+
+    function renderSmallRing(h) {
+        const meta = h.metaSalva || 2000;
+        const ctx = document.getElementById(`ringSmall-${h.id}`).getContext('2d');
+        new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [h.calTotal, Math.max(0, meta - h.calTotal)], backgroundColor: ['#FC4C02', '#3A3A3C'], borderWidth: 0, cutout: '80%' }] }, options: { plugins: { legend: false, tooltip: false }, maintainAspectRatio: false } });
+    }
+
+    function toggleExpand(id) { document.getElementById(`hist-${id}`).classList.toggle('expanded'); }
+
+    // --- FUNÇÕES DE ATUALIZAÇÃO DO HISTÓRICO ---
+    function updateHistValue(id, field, val) {
+        const idx = hist.findIndex(x => x.id == id);
+        hist[idx][field] = Number(val);
+        hist[idx].calTotal = Number(hist[idx].calM || 0) + Number(hist[idx].calC || 0);
+        saveAndRefresh();
+    }
+
+    function updateExName(hId, exIdx, val) {
+        const idx = hist.findIndex(x => x.id == hId);
+        hist[idx].exercicios[exIdx].nome = val;
+        saveAndRefresh();
+    }
+
+    function updateSerie(hId, exIdx, sIdx, field, val) {
+        const idx = hist.findIndex(x => x.id == hId);
+        hist[idx].exercicios[exIdx].series[sIdx][field] = val;
+        saveAndRefresh();
+    }
+
+    function saveAndRefresh() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); renderHistInferior(); }
+    function apagarTreino(id) { if(confirm("Apagar permanentemente?")) { hist = hist.filter(h => h.id != id); saveAndRefresh(); } }
+
+    // --- FICHAS EDITÁVEIS ---
+    function renderFichas() {
+        document.getElementById('listaFichas').innerHTML = fichas.map((f, i) => `
+            <div class="card">
+                <input type="text" value="${f.t}" style="font-weight:bold; margin-bottom:5px;" onchange="fichas[${i}].t=this.value; saveFichas();">
+                <textarea rows="4" onchange="fichas[${i}].txt=this.value; saveFichas();">${f.txt}</textarea>
+                <button class="btn-outline" style="color:var(--danger)" onclick="apagarFicha(${f.id})">🗑️</button>
+            </div>`).join('');
+    }
+    function saveFichas() { localStorage.setItem('fichas_nikho', JSON.stringify(fichas)); renderAtalhosFichas(); }
+
+    // --- TREINO & SÉRIES ---
+    function addEx() {
+        const nome = document.getElementById('exNome').value;
+        if (nome) {
+            sessao.push({ id: Date.now() + Math.random(), nome, grupo: muscleGroups[Object.keys(muscleGroups).find(k => nome.toLowerCase().includes(k))] || 'Geral', series: [{ r: '', p: '' }] });
+            renderSessao(); document.getElementById('exNome').value = "";
         }
     }
-
-    // --- STRAVA ---
-    function autorizar() {
-        const url = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&approval_prompt=force&scope=activity:read_all`;
-        window.location.href = url;
-    }
-
-    async function listarAtividades() {
-        const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await r.json();
-        document.getElementById('listaAtividadesStrava').innerHTML = data.map(act => `
-            <div class="strava-list-item" onclick="buscarDetalhesAtividade(${act.id}, '${act.name}', '${act.type}')">
-                🏃 ${act.name} (${act.type}) <br>
-                <small>${new Date(act.start_date).toLocaleDateString()} | Puxar calorias</small>
+    function renderSessao() {
+        document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `
+            <div class="ex-item-card">
+                <div class="ex-header"><strong>${ex.nome}</strong><span onclick="sessao=sessao.filter(e=>e.id!=${ex.id});renderSessao();">✕</span></div>
+                ${ex.series.map((s, i) => `<div class="serie-row"><span>${i+1}º</span>
+                <input type="number" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].r=this.value">
+                <input type="number" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].p=this.value">
+                <span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(${i},1);renderSessao();">✕</span></div>`).join('')}
+                <button class="btn-add-serie" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:'',p:''});renderSessao();">+ Série</button>
             </div>`).join('');
     }
 
-    async function buscarDetalhesAtividade(id, nome, tipo) {
-        const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await r.json();
-        const cals = Math.round(data.calories || 0);
-        document.getElementById('cC').value = cals;
-        document.getElementById('cardioCalManual').value = cals;
-        document.getElementById('cardioTipoFinal').value = tipo;
-        document.getElementById('listaAtividadesStrava').innerHTML = `<div style="color:var(--success); font-size:12px; padding:10px;">${nome} selecionado! ✅</div>`;
-        updateRingChart();
-    }
-
-    // --- FICHAS ---
-    function salvarFicha() {
-        const t = document.getElementById('titFicha').value, txt = document.getElementById('txtFicha').value;
-        if(t && txt) {
-            fichas.push({ id: Date.now(), t, txt });
-            localStorage.setItem('fichas_nikho', JSON.stringify(fichas));
-            document.getElementById('titFicha').value = ''; document.getElementById('txtFicha').value = '';
-            renderFichas(); alert("Ficha salva!");
-        }
-    }
-
-    function renderFichas() {
-        document.getElementById('listaFichas').innerHTML = fichas.map(f => `
-            <div class="card"><div style="display:flex; justify-content:space-between; align-items:center">
-            <strong>${f.t}</strong><span onclick="apagarFicha(${f.id})" style="color:var(--danger); cursor:pointer">🗑️</span></div>
-            <div style="font-size:12px; color:#8E8E93; margin-top:10px; white-space:pre-wrap">${f.txt}</div></div>`).join('');
-    }
-
-    function renderAtalhosFichas() {
-        document.getElementById('atalhosFicha').innerHTML = fichas.map(f => `
-            <button class="btn-outline" onclick="carregarFicha(${f.id})">${f.t}</button>`).join('');
-    }
-
-    function carregarFicha(id) {
-        const f = fichas.find(x => x.id === id);
-        f.txt.split('\n').forEach(ex => { if(ex.trim()) addExManual(ex.trim()); });
-    }
-
-    function apagarFicha(id) {
-        if(confirm("Apagar ficha?")) {
-            fichas = fichas.filter(x => x.id !== id);
-            localStorage.setItem('fichas_nikho', JSON.stringify(fichas));
-            renderFichas(); renderAtalhosFichas();
-        }
-    }
-
-    // --- TREINO ---
-    function buscarReferencia(nome) {
-        if (nome.length < 2) return;
-        const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase() === nome.toLowerCase()));
-        if (ultimo) {
-            const ex = ultimo.exercicios.find(e => e.nome.toLowerCase() === nome.toLowerCase());
-            const lastSet = ex.series[ex.series.length - 1];
-            document.getElementById('referenciaPeso').innerText = `💡 Último peso: ${lastSet.p}kg (${ex.series.length} séries)`;
-        } else { document.getElementById('referenciaPeso').innerText = ""; }
-    }
-
-    function addEx() {
-        const nome = document.getElementById('exNome').value;
-        if (nome) { addExManual(nome); document.getElementById('exNome').value = ""; document.getElementById('referenciaPeso').innerText = ""; }
-    }
-
-    function addExManual(nome) {
-        sessao.push({ id: Date.now() + Math.random(), nome: nome, grupo: getMuscleGroup(nome), series: [{ r: '', p: '' }] });
-        renderSessao();
-    }
-
-    function addSerie(exId) {
-        const ex = sessao.find(e => e.id === exId);
-        const last = ex.series[ex.series.length - 1];
-        ex.series.push({ r: last.r, p: last.p });
-        renderSessao();
-    }
-
-    function renderSessao() {
-        document.getElementById('listaTreinoAtivo').innerHTML = sessao.map((ex) => `
-            <div class="ex-item-card"><div class="ex-header"><div><strong>${ex.nome}</strong><br><span class="muscle-tag">${ex.grupo}</span></div>
-            <span onclick="sessao = sessao.filter(e => e.id !== ${ex.id}); renderSessao();" style="color:var(--danger); cursor:pointer">✕</span></div>
-            ${ex.series.map((s, idx) => `<div class="serie-row"><span style="font-size:11px; color:#8E8E93">${idx+1}º</span>
-            <input type="number" placeholder="Rep" value="${s.r}" onchange="sessao.find(e => e.id === ${ex.id}).series[${idx}].r = this.value">
-            <input type="number" placeholder="Kg" value="${s.p}" onchange="sessao.find(e => e.id === ${ex.id}).series[${idx}].p = this.value">
-            <span onclick="if(sessao.find(e => e.id === ${ex.id}).series.length > 1) { sessao.find(e => e.id === ${ex.id}).series.splice(${idx}, 1); renderSessao(); }" style="color:var(--danger); cursor:pointer">✕</span></div>`).join('')}
-            <button class="btn-add-serie" onclick="addSerie(${ex.id})">+ Adicionar Série</button></div>`).join('');
-    }
-
     async function enviarParaPlanilha() {
-        const cM = parseFloat(document.getElementById('cM').value) || 0, cC = parseFloat(document.getElementById('cC').value) || 0;
-        const payload = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calM: cM, calC: cC, calTotal: cM + cC, exercicios: [...sessao] };
-        hist.push(payload); localStorage.setItem('hist_nikho', JSON.stringify(hist));
+        const payload = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calM: Number(document.getElementById('cM').value), calC: Number(document.getElementById('cC').value), calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value), metaSalva: Number(document.getElementById('metaDiaria').value), exercicios: [...sessao] };
+        hist.push(payload); saveAndRefresh();
         await fetch(GOOGLE_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
         location.reload();
     }
 
-    // --- HISTÓRICO COM ANEL E EDIÇÃO ---
-    function renderHistInferior() {
-        const meta = parseFloat(document.getElementById('metaDiaria').value) || 2000;
-        document.getElementById('historicoInferior').innerHTML = hist.slice().reverse().slice(0, 8).map((h, i) => {
-            const perc = Math.min(Math.round((h.calTotal / meta) * 100), 100);
-            return `
-            <div class="historico-item">
-                <div class="ring-hist-container">
-                    <canvas id="ringHist-${h.id}" width="50" height="50"></canvas>
-                    <div class="ring-hist-text">${perc}%</div>
-                </div>
-                <div class="hist-content">
-                    <span class="btn-del-hist" onclick="apagarTreino(${h.id})">🗑️</span>
-                    <span class="btn-edit-hist" onclick="editarTreino(${h.id})">✏️</span>
-                    <div class="hist-meta">📅 ${h.data}</div>
-                    <div class="hist-cals">
-                        <span class="cal-tag" style="color:var(--primary)">💪 ${h.calM || 0}</span>
-                        <span class="cal-tag" style="color:#5AC8FA">🏃 ${h.calC || 0}</span>
-                    </div>
-                    <div class="hist-detalhes">${h.exercicios ? h.exercicios.map(e => `<strong>${e.nome}</strong>: ${e.series.map(s => `${s.r}x${s.p}`).join(', ')}`).join('<br>') : 'Cardio'}</div>
-                </div>
-            </div>`;
-        }).join('');
-        
-        // Renderiza os mini anéis após o HTML ser inserido
-        hist.slice().reverse().slice(0, 8).forEach(h => {
-            const ctx = document.getElementById(`ringHist-${h.id}`).getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: { datasets: [{ data: [h.calTotal, Math.max(0, meta - h.calTotal)], backgroundColor: ['#FC4C02', '#3A3A3C'], borderWidth: 0, cutout: '80%' }] },
-                options: { plugins: { legend: false, tooltip: false }, maintainAspectRatio: false }
-            });
-        });
-    }
+    // --- AUXILIARES ---
+    function salvarFicha() { fichas.push({ id: Date.now(), t: document.getElementById('titFicha').value, txt: document.getElementById('txtFicha').value }); saveFichas(); renderFichas(); }
+    function apagarFicha(id) { fichas = fichas.filter(f => f.id != id); saveFichas(); renderFichas(); }
+    function renderAtalhosFichas() { document.getElementById('atalhosFicha').innerHTML = fichas.map(f => `<button class="btn-outline" onclick="f.txt.split('\\n').forEach(ex => { if(ex.trim()){ document.getElementById('exNome').value=ex; addEx(); } });">${f.t}</button>`).join(''); }
+    function exportarDados() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ hist, fichas })], { type: 'application/json' })); a.download = 'backup.json'; a.click(); }
+    function importarDados(i) { const r = new FileReader(); r.onload = () => { const d = JSON.parse(r.result); localStorage.setItem('hist_nikho', JSON.stringify(d.hist)); localStorage.setItem('fichas_nikho', JSON.stringify(d.fichas)); location.reload(); }; r.readAsText(i.files[0]); }
+    function autorizar() { window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&approval_prompt=force&scope=activity:read_all`; }
 
-    function editarTreino(id) {
-        const item = hist.find(h => h.id === id);
-        if(!item) return;
-        const nCalM = prompt("Editar Calorias Musculação:", item.calM);
-        const nCalC = prompt("Editar Calorias Cardio:", item.calC);
-        if(nCalM !== null && nCalC !== null) {
-            item.calM = parseFloat(nCalM) || 0;
-            item.calC = parseFloat(nCalC) || 0;
-            item.calTotal = item.calM + item.calC;
-            localStorage.setItem('hist_nikho', JSON.stringify(hist));
-            renderHistInferior();
-            updateRingChart();
-        }
-    }
-
-    function apagarTreino(id) { if(confirm("Apagar treino?")) { hist = hist.filter(h => h.id !== id); localStorage.setItem('hist_nikho', JSON.stringify(hist)); renderHistInferior(); } }
-
-    // --- BACKUP E GRÁFICOS ---
-    function exportarDados() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ hist, fichas })], { type: 'application/json' })); a.download = 'backup_nikho.json'; a.click(); }
-    function importarDados(input) { const reader = new FileReader(); reader.onload = () => { const data = JSON.parse(reader.result); localStorage.setItem('hist_nikho', JSON.stringify(data.hist)); localStorage.setItem('fichas_nikho', JSON.stringify(data.fichas)); location.reload(); }; reader.readAsText(input.files[0]); }
-    function popularSelectExercicios() { const nomes = [...new Set(hist.flatMap(t => t.exercicios ? t.exercicios.map(e => e.nome) : []))]; document.getElementById('selectExGrafico').innerHTML = nomes.map(n => `<option value="${n}">${n}</option>`).join(''); renderizarGraficoEvolucao(); }
-    function renderizarGraficoEvolucao() { const ex = document.getElementById('selectExGrafico').value; if(!ex) return; const dados = hist.filter(t => t.exercicios && t.exercicios.some(e => e.nome === ex)).map(t => ({ data: t.data, peso: Math.max(...t.exercicios.find(e => e.nome === ex).series.map(s => parseFloat(s.p) || 0)) })); new Chart(document.getElementById('chartCarga'), { type: 'line', data: { labels: dados.map(d => d.data), datasets: [{ label: 'kg', data: dados.map(d => d.peso), borderColor: '#FC4C02' }] } }); }
-    function renderizarGraficoCalorias() { const dados = hist.slice(-7); new Chart(document.getElementById('chartCalorias'), { type: 'bar', data: { labels: dados.map(d => d.data), datasets: [{ label: 'Musc', data: dados.map(d => d.calM || 0), backgroundColor: '#FC4C02' }, { label: 'Cardio', data: dados.map(d => d.calC || 0), backgroundColor: '#5AC8FA' }] }, options: { scales: { x: { stacked: true }, y: { stacked: true } } } }); }
-
-    // AUTH STRAVA
-    if (token) { document.getElementById('btnAuth').style.display = 'none'; document.getElementById('stravaAcoes').style.display = 'block'; listarAtividades(); }
-    const code = new URLSearchParams(window.location.search).get('code');
-    if (code) {
-        fetch('https://www.strava.com/oauth/token', { method: 'POST', body: JSON.stringify({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code: code, grant_type: 'authorization_code' }), headers: { 'Content-Type': 'application/json' } })
-        .then(r => r.json()).then(d => { if(d.access_token) { localStorage.setItem('strava_access_token', d.access_token); window.location.href = REDIRECT_URI; }});
-    }
-
-    window.addEventListener('DOMContentLoaded', () => { renderHistInferior(); renderFichas(); renderAtalhosFichas(); updateRingChart(); });
+    window.addEventListener('DOMContentLoaded', () => { renderHistInferior(); renderAtalhosFichas(); updateRingChart(); if(token){document.getElementById('btnAuth').style.display='none'; document.getElementById('stravaAcoes').style.display='block';} });
 </script>
 </body>
 </html>
