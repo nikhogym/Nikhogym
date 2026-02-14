@@ -24,6 +24,11 @@
         input, select, textarea { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 12px; width: 100%; margin-bottom: 10px; font-size: 14px; outline: none; }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-finish { background: var(--success); color: white; }
+        
+        /* Botão Strava Estilo Outline solicitado */
+        .btn-strava-outline { background: transparent; border: 2px solid var(--strava); color: var(--strava); }
+        .btn-strava-outline:active { background: rgba(252, 76, 2, 0.1); }
+
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
 
         .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
@@ -69,12 +74,12 @@
 
         <div class="card">
             <div class="section-title" style="color: var(--cardio);">🏃 Cardio</div>
-            <button id="btnAuth" class="btn" style="background: var(--strava); color:white;" onclick="autorizar()">
+            <button id="btnAuth" class="btn btn-strava-outline" onclick="autorizar()">
                 <svg class="strava-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
                 Conectar Strava
             </button>
             <div id="stravaAcoes" style="display:none;">
-                <button class="btn" style="background: var(--strava); color:white;" onclick="listarAtividades()">
+                <button class="btn btn-strava-outline" onclick="listarAtividades()">
                     <svg class="strava-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
                     Escolher do Strava
                 </button>
