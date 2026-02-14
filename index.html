@@ -76,10 +76,10 @@
                 <canvas id="ringChart"></canvas>
                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%;">
                     <span id="txtPorcentagem" style="font-size: 20px; font-weight: bold; display: block;">0%</span>
-                    <span id="txtCaloriasRing" style="font-size: 9px; color: #8E8E93;">0 / 2000 kcal</span>
+                    <span id="txtCaloriasRing" style="font-size: 9px; color: #8E8E93;">0 / 700 kcal</span>
                 </div>
             </div>
-            <input type="number" id="metaDiaria" value="2000" oninput="updateRingChart()" style="margin-top: 15px; text-align: center;">
+            <input type="number" id="metaDiaria" value="700" oninput="updateRingChart()" style="margin-top: 15px; text-align: center;">
         </div>
 
         <div class="card">
@@ -92,9 +92,9 @@
             </button>
 
             <div id="stravaAcoes" style="display:none; margin-top:10px;">
-                <button class="btn btn-strava-outline" onclick="puxarAtividadesStrava()">
+                <button class="btn btn-strava-outline" onclick="ConectarStrava()">
                     <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                    Puxar Treinos Strava tm
+                    Conectar Strava
                 </button>
                 <div id="listaAtividadesStrava" style="max-height: 150px; overflow-y: auto;"></div>
             </div>
