@@ -20,7 +20,7 @@
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; padding-top: 80px; }
         
         .tabs { display: flex; gap: 5px; position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 15px 10px; z-index: 1000; border-bottom: 1px solid #3A3A3C; }
-        .tab-btn { flex: 1; padding: 10px 5px; border: none; border-radius: 12px; background: var(--input-bg); color: #8E8E93; font-weight: bold; font-size: 10px; white-space: nowrap; }
+        .tab-btn { flex: 1; padding: 10px 5px; border: none; border-radius: 12px; background: var(--input-bg); color: #8E8E93; font-weight: bold; font-size: 10px; }
         .tab-btn.active { background: var(--primary); color: white; }
 
         .container { max-width: 450px; margin: auto; }
@@ -35,11 +35,12 @@
         .btn-finish { background: var(--success); color: white; }
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
 
-        .btn-strava-outline { background: transparent; border: 2px solid var(--strava); color: var(--strava); }
+        .ref-badge { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 10px; display: block; }
         
         .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
         .serie-row { display: grid; grid-template-columns: 25px 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 5px; }
 
+        /* Histórico Expansível */
         .historico-item { background: var(--card); padding: 15px; border-radius: 18px; margin-bottom: 10px; border: 1px solid #3A3A3C; cursor: pointer; }
         .hist-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         .hist-details-pane { display: none; margin-top: 15px; border-top: 1px solid #2C2C2E; padding-top: 15px; }
@@ -51,16 +52,11 @@
         .cal-summary { display: flex; gap: 8px; margin-top: 5px; font-size: 11px; }
         .tag-musc { color: var(--primary); font-weight: bold; }
         .tag-cardio { color: var(--cardio); font-weight: bold; }
-        .tag-total { color: var(--success); font-weight: bold; }
-        
-        .strava-icon { width: 18px; height: 18px; fill: currentColor; }
 
-        /* CALENDÁRIO */
+        /* Calendário */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        .cal-day-label { font-size: 10px; color: #8E8E93; padding-bottom: 10px; font-weight: bold; }
-        .cal-day { aspect-ratio: 1/1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; background: #1C1C1E; border-radius: 10px; font-size: 12px; border: 1px solid transparent; }
-        .cal-day.has-data { border-color: #3A3A3C; }
-        .cal-ring-mini { position: absolute; width: 85%; height: 85%; pointer-events: none; }
+        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; position: relative; background: #1C1C1E; border-radius: 10px; font-size: 12px; }
+        .cal-ring-mini { position: absolute; width: 90%; height: 90%; }
     </style>
 </head>
 <body>
@@ -68,8 +64,8 @@
 <div class="tabs">
     <button id="tab-t" class="tab-btn active" onclick="switchTab('treinar')">💪 Treinar</button>
     <button id="tab-f" class="tab-btn" onclick="switchTab('fichas')">📋 Fichas</button>
-    <button id="tab-c" class="tab-btn" onclick="switchTab('calendario')">📅 Calendário</button>
-    <button id="tab-e" class="tab-btn" onclick="switchTab('evolucao')">📈 Evolução</button>
+    <button id="tab-c" class="tab-btn" onclick="switchTab('calendario')">📅 Calen.</button>
+    <button id="tab-e" class="tab-btn" onclick="switchTab('evolucao')">📈 Evol.</button>
 </div>
 
 <div class="container">
@@ -88,21 +84,16 @@
 
         <div class="card">
             <div class="section-title" style="color: var(--cardio);">🏃 Cardio</div>
-            <button id="btnAuth" class="btn btn-strava-outline" onclick="autorizar()">
-                <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                Conectar Strava
-            </button>
-            <div id="stravaAcoes" style="display:none; margin-bottom: 10px;">
-                <button class="btn btn-strava-outline" onclick="listarAtividades()">Escolher do Strava</button>
-                <div id="listaAtividadesStrava"></div>
-            </div>
-            <input type="number" id="cC" placeholder="Calorias Cardio Total" readonly oninput="updateRingChart()">
+            <input type="number" id="cC" placeholder="Calorias Cardio" readonly oninput="updateRingChart()">
+            <button class="btn btn-strava-outline" onclick="listarAtividades()">Escolher do Strava</button>
+            <div id="listaAtividadesStrava"></div>
         </div>
 
         <div class="card">
             <div class="section-title">🏋️ Musculação</div>
             <div id="atalhosFicha" style="margin-bottom: 10px;"></div>
-            <input type="text" id="exNome" placeholder="Ex: Supino Reto">
+            <div id="referenciaPeso" class="ref-badge"></div>
+            <input type="text" id="exNome" placeholder="Nome do exercício" oninput="buscarReferencia(this.value)">
             <button class="btn" style="background:#3A3A3C; color:white;" onclick="addEx()">➕ Iniciar Exercício</button>
             <div id="listaTreinoAtivo"></div>
         </div>
@@ -119,9 +110,9 @@
 
     <div id="fichas" class="content">
         <div class="card">
-            <div class="section-title">📝 Fichas de Treino</div>
+            <div class="section-title">📝 Fichas</div>
             <input type="text" id="titFicha" placeholder="Nome da Ficha">
-            <textarea id="txtFicha" rows="5" placeholder="Exercícios (um por linha)"></textarea>
+            <textarea id="txtFicha" rows="4" placeholder="Exercícios (um por linha)"></textarea>
             <button class="btn btn-finish" onclick="salvarFicha()">Salvar Ficha</button>
         </div>
         <div id="listaFichas"></div>
@@ -129,64 +120,59 @@
 
     <div id="calendario" class="content">
         <div class="card">
-            <div class="section-title" style="justify-content: space-between;">
-                <span id="mesAnoAtual">Fevereiro 2026</span>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-outline" onclick="mudarMes(-1)" style="padding:5px 10px;"><</button>
-                    <button class="btn-outline" onclick="mudarMes(1)" style="padding:5px 10px;">></button>
-                </div>
-            </div>
-            <div class="cal-grid" id="calHeader">
-                <div class="cal-day-label">DOM</div><div class="cal-day-label">SEG</div><div class="cal-day-label">TER</div>
-                <div class="cal-day-label">QUA</div><div class="cal-day-label">QUI</div><div class="cal-day-label">SEX</div><div class="cal-day-label">SÁB</div>
-            </div>
+            <div class="section-title" id="mesAnoAtual"></div>
             <div class="cal-grid" id="calBody"></div>
         </div>
     </div>
 
     <div id="evolucao" class="content">
         <div class="card">
-            <div class="section-title">📊 Evolução de Carga</div>
+            <div class="section-title">📊 Carga Máxima</div>
             <select id="selectExGrafico" onchange="renderizarGraficoEvolucao()"></select>
             <div style="height: 200px;"><canvas id="chartCarga"></canvas></div>
         </div>
         <div class="card">
-            <div class="section-title" style="color: var(--success);">🔥 Evolução de Calorias</div>
+            <div class="section-title">🔥 Calorias Totais</div>
             <div style="height: 200px;"><canvas id="chartCalEvolucao"></canvas></div>
         </div>
-        <div class="card">
-            <div class="section-title">💾 Dados & Backup</div>
-            <button class="btn-outline" onclick="exportarDados()">📤 Exportar JSON</button>
-            <button class="btn-outline" onclick="document.getElementById('importFile').click()">📥 Importar</button>
-            <input type="file" id="importFile" style="display:none" onchange="importarDados(this)">
-        </div>
+        <button class="btn-outline" onclick="exportarDados()">📤 Exportar Backup</button>
     </div>
 </div>
 
 <script>
-    const CLIENT_ID = '201889', CLIENT_SECRET = 'f9b59003e315ec7961d6c89e94d76941bd39c72b';
-    const GOOGLE_URL = 'https://script.google.com/macros/s/AKfycbyjhUFfkvnlz-AnpSmgA6ZXeASbeBm_7nHl6cFDuKTuIWVx_Iv1Aq8pb_M8RcxMa0ly/exec';
-    const REDIRECT_URI = window.location.href.split('?')[0];
-
     let sessao = [], myRingChart, chartCargaInstance, chartCalEvInstance;
     let hist = JSON.parse(localStorage.getItem('hist_nikho')) || [];
     let fichas = JSON.parse(localStorage.getItem('fichas_nikho')) || [];
     let token = localStorage.getItem('strava_access_token');
-    let currentCalDate = new Date();
 
     function switchTab(aba) {
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(aba).classList.add('active');
         document.getElementById('tab-' + aba.charAt(0)).classList.add('active');
-        
         if(aba === 'treinar') { renderAtalhosFichas(); renderHistInferior(); updateRingChart(); }
-        if(aba === 'fichas') renderFichas();
         if(aba === 'calendario') renderCalendario();
         if(aba === 'evolucao') { popularSelectExercicios(); renderizarGraficoCaloriasEvolucao(); }
     }
 
-    // --- ANEL PRINCIPAL ---
+    // --- CORREÇÃO: RECONHECIMENTO DE PESO ---
+    function buscarReferencia(nome) {
+        if (nome.length < 2) return;
+        // Procura no histórico do mais recente para o mais antigo
+        const ultimoTreinoComEx = hist.slice().reverse().find(t => 
+            t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim() === nome.toLowerCase().trim())
+        );
+
+        if (ultimoTreinoComEx) {
+            const exData = ultimoTreinoComEx.exercicios.find(e => e.nome.toLowerCase().trim() === nome.toLowerCase().trim());
+            const maiorPeso = Math.max(...exData.series.map(s => parseFloat(s.p) || 0));
+            document.getElementById('referenciaPeso').innerText = `💡 Último peso: ${maiorPeso}kg (${exData.series.length} séries)`;
+        } else {
+            document.getElementById('referenciaPeso').innerText = "";
+        }
+    }
+
+    // --- ANEL E GRÁFICOS ---
     function updateRingChart() {
         const meta = parseFloat(document.getElementById('metaDiaria').value) || 1;
         const musc = parseFloat(document.getElementById('cM').value) || 0;
@@ -204,65 +190,109 @@
             }]
         };
         if (myRingChart) { myRingChart.data = data; myRingChart.update(); } 
-        else { myRingChart = new Chart(document.getElementById('ringChart').getContext('2d'), { type: 'doughnut', data: data, options: { plugins: { legend: false, tooltip: false }, maintainAspectRatio: false } }); }
+        else { myRingChart = new Chart(document.getElementById('ringChart').getContext('2d'), { type: 'doughnut', data: data, options: { plugins: { legend: false }, maintainAspectRatio: false } }); }
     }
 
-    // --- CALENDÁRIO ---
-    function mudarMes(n) { currentCalDate.setMonth(currentCalDate.getMonth() + n); renderCalendario(); }
+    // --- HISTÓRICO EXPANSÍVEL E EDITÁVEL ---
+    function renderHistInferior() {
+        const container = document.getElementById('historicoInferior');
+        container.innerHTML = hist.slice().reverse().slice(0, 10).map(h => {
+            const m = h.metaSalva || 2000;
+            const perc = Math.min(Math.round((h.calTotal / m) * 100), 100);
+            return `
+            <div class="historico-item" id="hist-${h.id}" onclick="toggleExpand('${h.id}')">
+                <div class="hist-header">
+                    <div class="ring-container">
+                        <canvas id="ringSmall-${h.id}" width="60" height="60"></canvas>
+                        <div class="ring-text-small">${perc}%</div>
+                    </div>
+                    <div style="flex:1;">
+                        <div class="hist-meta">📅 ${h.data}</div>
+                        <div class="cal-summary">
+                            <span class="tag-musc">💪 ${h.calM || 0}</span> + <span class="tag-cardio">🏃 ${h.calC || 0}</span>
+                        </div>
+                    </div>
+                    <span>▼</span>
+                </div>
+                <div class="hist-details-pane" onclick="event.stopPropagation()">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div><label style="font-size:10px;">💪 Musc.</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
+                        <div><label style="font-size:10px;">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
+                    </div>
+                    <label style="font-size:10px;">🎯 Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
+                    <div style="margin-top:10px;">
+                        <strong>Exercícios:</strong>
+                        ${h.exercicios ? h.exercicios.map((e, ei) => `
+                            <div style="background:#2C2C2E; padding:8px; border-radius:10px; margin-top:5px;">
+                                <input type="text" value="${e.nome}" onchange="updateExName('${h.id}', ${ei}, this.value)" style="margin-bottom:5px;">
+                                ${e.series.map((s, si) => `
+                                    <div style="display:flex; gap:5px;">
+                                        <input type="number" value="${s.r}" onchange="updateSerie('${h.id}', ${ei}, ${si}, 'r', this.value)">
+                                        <input type="number" value="${s.p}" onchange="updateSerie('${h.id}', ${ei}, ${si}, 'p', this.value)">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('') : ''}
+                    </div>
+                    <button class="btn-outline" style="color:var(--danger); width:100%; margin-top:10px;" onclick="apagarTreino('${h.id}')">Excluir</button>
+                </div>
+            </div>`;
+        }).join('');
+        hist.slice().reverse().slice(0, 10).forEach(h => renderSmallRing(h));
+    }
+
+    function renderSmallRing(h) {
+        const m = h.metaSalva || 2000;
+        const ctx = document.getElementById(`ringSmall-${h.id}`).getContext('2d');
+        new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [h.calM||0, h.calC||0, Math.max(0, m - h.calTotal)], backgroundColor: ['#0A84FF', '#FC4C02', '#3A3A3C'], borderWidth: 0, cutout: '80%' }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } });
+    }
+
+    // --- FUNÇÕES DE EDIÇÃO ---
+    function toggleExpand(id) { document.getElementById(`hist-${id}`).classList.toggle('expanded'); }
+    function updateHistValue(id, field, val) { const idx = hist.findIndex(x => x.id == id); hist[idx][field] = Number(val); hist[idx].calTotal = Number(hist[idx].calM || 0) + Number(hist[idx].calC || 0); saveRef(); }
+    function updateExName(hId, exIdx, val) { const idx = hist.findIndex(x => x.id == hId); hist[idx].exercicios[exIdx].nome = val; saveRef(); }
+    function updateSerie(hId, exIdx, sIdx, f, v) { const idx = hist.findIndex(x => x.id == hId); hist[idx].exercicios[exIdx].series[sIdx][f] = v; saveRef(); }
+    function saveRef() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); renderHistInferior(); }
+    function apagarTreino(id) { if(confirm("Apagar?")) { hist = hist.filter(h => h.id != id); saveRef(); } }
+
+    // --- TREINO E FICHAS ---
+    function addEx() {
+        const n = document.getElementById('exNome').value;
+        if(n) { sessao.push({ id: Date.now()+Math.random(), nome: n, series: [{ r: '', p: '' }] }); renderSessao(); document.getElementById('exNome').value = ""; document.getElementById('referenciaPeso').innerText = ""; }
+    }
+    function renderSessao() {
+        document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `
+            <div class="ex-item-card">
+                <div class="ex-header"><strong>${ex.nome}</strong><span onclick="sessao=sessao.filter(e=>e.id!=${ex.id});renderSessao();">✕</span></div>
+                ${ex.series.map((s, i) => `<div class="serie-row"><span>${i+1}º</span>
+                <input type="number" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[i].r=this.value">
+                <input type="number" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[i].p=this.value">
+                <span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(i,1);renderSessao();">✕</span></div>`).join('')}
+                <button class="btn" style="background:#3A3A3C; color:white; padding:5px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:'',p:''});renderSessao();">+ Série</button>
+            </div>`).join('');
+    }
+
+    async function enviarParaPlanilha() {
+        const p = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calM: Number(document.getElementById('cM').value), calC: Number(document.getElementById('cC').value), calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value), metaSalva: Number(document.getElementById('metaDiaria').value), exercicios: [...sessao] };
+        hist.push(p); saveRef();
+        location.reload();
+    }
+
     function renderCalendario() {
         const body = document.getElementById('calBody');
-        const mesAno = document.getElementById('mesAnoAtual');
+        const now = new Date();
+        document.getElementById('mesAnoAtual').innerText = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
         body.innerHTML = '';
-        
-        const year = currentCalDate.getFullYear();
-        const month = currentCalDate.getMonth();
-        mesAno.innerText = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(currentCalDate);
-
-        const firstDay = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-        // Dias vazios
-        for (let i = 0; i < firstDay; i++) { body.innerHTML += '<div></div>'; }
-
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
         for (let d = 1; d <= daysInMonth; d++) {
-            const dateStr = `${d.toString().padStart(2, '0')}/${(month + 1).toString().padStart(2, '0')}/${year}`;
-            const treinoDia = hist.find(h => h.data === dateStr);
-            let calHtml = '';
-            
-            if (treinoDia) {
-                const m = treinoDia.metaSalva || 2000;
-                const perc = Math.min(Math.round((treinoDia.calTotal / m) * 100), 100);
-                calHtml = `<div class="cal-day has-data">
-                    ${d}
-                    <canvas class="cal-ring-mini" id="ringCal-${d}"></canvas>
-                </div>`;
-                body.innerHTML += calHtml;
-                
-                // Timeout para garantir que o canvas exista no DOM
-                setTimeout(() => {
-                    const ctx = document.getElementById(`ringCal-${d}`).getContext('2d');
-                    new Chart(ctx, {
-                        type: 'doughnut',
-                        data: { datasets: [{ data: [treinoDia.calM, treinoDia.calC, Math.max(0, m - treinoDia.calTotal)], backgroundColor: ['#0A84FF', '#FC4C02', '#3A3A3C'], borderWidth: 0, cutout: '80%' }] },
-                        options: { plugins: { legend: false, tooltip: false }, maintainAspectRatio: false }
-                    });
-                }, 10);
-            } else {
-                body.innerHTML += `<div class="cal-day">${d}</div>`;
-            }
+            const dateStr = `${d.toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+            const t = hist.find(h => h.data === dateStr);
+            body.innerHTML += `<div class="cal-day" style="${t ? 'border:1px solid #3A3A3C' : ''}">${d}${t ? `<canvas class="cal-ring-mini" id="cRing-${d}"></canvas>` : ''}</div>`;
+            if(t) setTimeout(() => {
+                const ctx = document.getElementById(`cRing-${d}`).getContext('2d');
+                new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [t.calM, t.calC, Math.max(0, (t.metaSalva||2000)-t.calTotal)], backgroundColor: ['#0A84FF', '#FC4C02', '#3A3A3C'], borderWidth: 0 }] }, options: { plugins: { legend: false } } });
+            }, 10);
         }
-    }
-
-    // --- GRÁFICOS EVOLUÇÃO ---
-    function renderizarGraficoCaloriasEvolucao() {
-        if (chartCalEvInstance) chartCalEvInstance.destroy();
-        const ctx = document.getElementById('chartCalEvolucao').getContext('2d');
-        const dados = hist.slice(-15);
-        chartCalEvInstance = new Chart(ctx, {
-            type: 'line',
-            data: { labels: dados.map(d => d.data.split('/')[0]), datasets: [{ label: 'Cal Total', data: dados.map(d => d.calTotal), borderColor: '#30D158', backgroundColor: 'rgba(48, 209, 88, 0.1)', fill: true, tension: 0.3 }] },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
     }
 
     function popularSelectExercicios() {
@@ -274,83 +304,18 @@
         const ex = document.getElementById('selectExGrafico').value; if(!ex) return;
         const dados = hist.filter(t => t.exercicios && t.exercicios.some(e => e.nome === ex)).map(t => ({ data: t.data, peso: Math.max(...t.exercicios.find(e => e.nome === ex).series.map(s => parseFloat(s.p) || 0)) }));
         if (chartCargaInstance) chartCargaInstance.destroy();
-        chartCargaInstance = new Chart(document.getElementById('chartCarga').getContext('2d'), { type: 'line', data: { labels: dados.map(d => d.data.split('/')[0]), datasets: [{ label: 'kg', data: dados.map(d => d.peso), borderColor: '#0A84FF', tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } });
+        chartCargaInstance = new Chart(document.getElementById('chartCarga').getContext('2d'), { type: 'line', data: { labels: dados.map(d => d.data), datasets: [{ label: 'kg', data: dados.map(d => d.peso), borderColor: '#0A84FF' }] }, options: { responsive: true, maintainAspectRatio: false } });
     }
-
-    // --- FUNÇÕES DE TREINO ---
-    function addEx() {
-        const n = document.getElementById('exNome').value;
-        if(n) { sessao.push({ id: Date.now()+Math.random(), nome: n, series: [{ r: '', p: '' }] }); renderSessao(); document.getElementById('exNome').value = ""; }
+    function renderizarGraficoCaloriasEvolucao() {
+        if (chartCalEvInstance) chartCalEvInstance.destroy();
+        const dados = hist.slice(-15);
+        chartCalEvInstance = new Chart(document.getElementById('chartCalEvolucao').getContext('2d'), { type: 'line', data: { labels: dados.map(d => d.data), datasets: [{ label: 'Cal', data: dados.map(d => d.calTotal), borderColor: '#30D158' }] }, options: { responsive: true, maintainAspectRatio: false } });
     }
-    function renderSessao() {
-        document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `
-            <div class="ex-item-card">
-                <div class="ex-header"><strong>${ex.nome}</strong><span onclick="sessao=sessao.filter(e=>e.id!=${ex.id});renderSessao();">✕</span></div>
-                ${ex.series.map((s, i) => `<div class="serie-row"><span>${i+1}º</span>
-                <input type="number" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].r=this.value">
-                <input type="number" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].p=this.value">
-                <span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(${i},1);renderSessao();">✕</span></div>`).join('')}
-                <button class="btn" style="background:#3A3A3C; color:white; padding:8px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:sessao.find(e=>e.id==${ex.id}).series[sessao.find(e=>e.id==${ex.id}).series.length-1].r, p:sessao.find(e=>e.id==${ex.id}).series[sessao.find(e=>e.id==${ex.id}).series.length-1].p});renderSessao();">+ Série</button>
-            </div>`).join('');
-    }
-
-    async function enviarParaPlanilha() {
-        const p = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calM: Number(document.getElementById('cM').value), calC: Number(document.getElementById('cC').value), calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value), metaSalva: Number(document.getElementById('metaDiaria').value), exercicios: [...sessao] };
-        hist.push(p); saveRef();
-        await fetch(GOOGLE_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(p) });
-        location.reload();
-    }
-
-    function renderHistInferior() {
-        const container = document.getElementById('historicoInferior');
-        container.innerHTML = hist.slice().reverse().slice(0, 5).map(h => {
-            const m = h.metaSalva || 2000;
-            const perc = Math.min(Math.round((h.calTotal / m) * 100), 100);
-            return `<div class="historico-item" id="hist-${h.id}" onclick="toggleExpand('${h.id}')">
-                <div class="hist-header">
-                    <div class="ring-container"><canvas id="ringSmall-${h.id}" width="60" height="60"></canvas><div class="ring-text-small">${perc}%</div></div>
-                    <div style="flex:1;"><div class="hist-meta">📅 ${h.data}</div><div class="cal-summary"><span class="tag-musc">💪 ${h.calM || 0}</span> + <span class="tag-cardio">🏃 ${h.calC || 0}</span> = <span class="tag-total">${h.calTotal} kcal</span></div></div>
-                    <span>▼</span>
-                </div>
-                <div class="hist-details-pane" onclick="event.stopPropagation()">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <div><label style="font-size:10px;">💪 Musc.</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
-                        <div><label style="font-size:10px;">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
-                    </div>
-                    <label style="font-size:10px;">🎯 Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
-                    <button class="btn-outline" style="color:var(--danger); width:100%; margin-top:10px;" onclick="apagarTreino('${h.id}')">Excluir</button>
-                </div>
-            </div>`;
-        }).join('');
-        hist.slice().reverse().slice(0, 5).forEach(h => {
-            const m = h.metaSalva || 2000;
-            const ctx = document.getElementById(`ringSmall-${h.id}`).getContext('2d');
-            new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [h.calM||0, h.calC||0, Math.max(0, m - h.calTotal)], backgroundColor: ['#0A84FF', '#FC4C02', '#3A3A3C'], borderWidth: 0, cutout: '80%' }] }, options: { plugins: { legend: false, tooltip: false }, maintainAspectRatio: false } });
-        });
-    }
-
-    // --- AUXILIARES ---
-    function toggleExpand(id) { document.getElementById(`hist-${id}`).classList.toggle('expanded'); }
-    function updateHistValue(id, field, val) { const idx = hist.findIndex(x => x.id == id); hist[idx][field] = Number(val); hist[idx].calTotal = Number(hist[idx].calM || 0) + Number(hist[idx].calC || 0); saveRef(); }
-    function saveRef() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); renderHistInferior(); }
-    function apagarTreino(id) { if(confirm("Apagar?")) { hist = hist.filter(h => h.id != id); saveRef(); } }
-    function salvarFicha() { fichas.push({ id: Date.now(), t: document.getElementById('titFicha').value, txt: document.getElementById('txtFicha').value }); localStorage.setItem('fichas_nikho', JSON.stringify(fichas)); location.reload(); }
-    function renderFichas() {
-        document.getElementById('listaFichas').innerHTML = fichas.map((f, i) => `<div class="card"><input type="text" value="${f.t}" onchange="fichas[${i}].t=this.value; saveFichas();"><textarea rows="4" onchange="fichas[${i}].txt=this.value; saveFichas();">${f.txt}</textarea><button class="btn-outline" style="color:var(--danger)" onclick="fichas=fichas.filter(x=>x.id!=${f.id});saveFichas();renderFichas();">🗑️</button></div>`).join('');
-    }
-    function saveFichas() { localStorage.setItem('fichas_nikho', JSON.stringify(fichas)); renderAtalhosFichas(); }
-    function renderAtalhosFichas() { document.getElementById('atalhosFicha').innerHTML = fichas.map(f => `<button class="btn-outline" onclick="f.txt.split('\\n').forEach(ex => { if(ex.trim()){ document.getElementById('exNome').value=ex; addEx(); } });">${f.t}</button>`).join(''); }
     function exportarDados() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ hist, fichas })], { type: 'application/json' })); a.download = 'backup.json'; a.click(); }
-    function importarDados(i) { const r = new FileReader(); r.onload = () => { const d = JSON.parse(r.result); localStorage.setItem('hist_nikho', JSON.stringify(d.hist)); localStorage.setItem('fichas_nikho', JSON.stringify(d.fichas)); location.reload(); }; r.readAsText(i.files[0]); }
-    function autorizar() { window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&approval_prompt=force&scope=activity:read_all`; }
+    function renderAtalhosFichas() { document.getElementById('atalhosFicha').innerHTML = fichas.map(f => `<button class="btn-outline" onclick="f.txt.split('\\n').forEach(ex => { if(ex.trim()){ document.getElementById('exNome').value=ex; addEx(); } });">${f.t}</button>`).join(''); }
+    function salvarFicha() { fichas.push({ id: Date.now(), t: document.getElementById('titFicha').value, txt: document.getElementById('txtFicha').value }); localStorage.setItem('fichas_nikho', JSON.stringify(fichas)); switchTab('treinar'); }
 
-    const code = new URLSearchParams(window.location.search).get('code');
-    if (code) { fetch('https://www.strava.com/oauth/token', { method: 'POST', body: JSON.stringify({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code: code, grant_type: 'authorization_code' }), headers: { 'Content-Type': 'application/json' } }).then(r => r.json()).then(d => { if(d.access_token) { localStorage.setItem('strava_access_token', d.access_token); window.location.href = REDIRECT_URI; }}); }
-    
-    async function listarAtividades() { const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', { headers: { 'Authorization': `Bearer ${token}` } }); const data = await r.json(); document.getElementById('listaAtividadesStrava').innerHTML = data.map(act => `<div class="strava-list-item" style="background:#2C2C2E; padding:10px; margin-top:5px; border-radius:10px; font-size:12px;" onclick="buscarDetalhesAtividade(${act.id})">🏃 ${act.name}</div>`).join(''); }
-    async function buscarDetalhesAtividade(id) { const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, { headers: { 'Authorization': `Bearer ${token}` } }); const data = await r.json(); document.getElementById('cC').value = Math.round(data.calories || 0); updateRingChart(); }
-
-    window.addEventListener('DOMContentLoaded', () => { renderHistInferior(); renderAtalhosFichas(); updateRingChart(); if(token){document.getElementById('stravaAcoes').style.display='block';} });
+    window.addEventListener('DOMContentLoaded', () => { switchTab('treinar'); });
 </script>
 </body>
 </html>
