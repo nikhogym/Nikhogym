@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nikho Gym Connect</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
             --primary: #0A84FF; /* Musculação: Azul */
@@ -37,16 +36,10 @@
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
 
         .btn-strava-outline { background: transparent; border: 2px solid var(--strava); color: var(--strava); }
+        .strava-logo-img { height: 16px; filter: invert(38%) sepia(98%) saturate(3015%) hue-rotate(1deg) brightness(102%) contrast(105%); }
+        
         .ref-badge { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 10px; display: block; }
         
-        /* Estilização da fonte Strava */
-        .strava-font { 
-            font-family: 'Inter', sans-serif; 
-            font-weight: 800; 
-            letter-spacing: -0.5px; 
-            text-transform: none;
-        }
-
         .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
         .serie-row { display: grid; grid-template-columns: 25px 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 5px; }
 
@@ -61,6 +54,7 @@
         .cal-summary { display: flex; flex-direction: column; gap: 2px; font-size: 10px; }
         .tag-musc { color: var(--primary); font-weight: bold; }
         .tag-cardio { color: var(--cardio); font-weight: bold; }
+        .tag-diff { color: #8E8E93; font-size: 9px; }
 
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
         .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; position: relative; background: #1C1C1E; border-radius: 10px; font-size: 11px; }
@@ -97,13 +91,13 @@
             
             <button id="btnConnectStrava" class="btn btn-strava-outline" onclick="autorizarStrava()">
                 <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                Conectar <span class="strava-font">Strava</span>
+                Conectar <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
             </button>
 
             <div id="stravaAcoes" style="display:none; margin-top:10px;">
                 <button class="btn btn-strava-outline" onclick="puxarAtividadesStrava()">
                     <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                    Conectar <span class="strava-font">Strava</span>
+                    Conectar <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
                 </button>
                 <div id="listaAtividadesStrava" style="max-height: 150px; overflow-y: auto;"></div>
             </div>
@@ -257,6 +251,7 @@
         const container = document.getElementById('historicoInferior');
         container.innerHTML = hist.slice().reverse().slice(0, 10).map(h => {
             const m = h.metaSalva || 2000;
+            const diff = Math.max(0, h.calTotal - ((h.calM || 0) + (h.calC || 0)));
             return `
             <div class="historico-item" id="hist-${h.id}" onclick="toggleExpand('${h.id}')">
                 <div class="hist-header">
@@ -266,12 +261,15 @@
                     </div>
                     <div style="flex:1;">
                         <div class="hist-meta">📅 ${h.data}</div>
-                        <div class="cal-summary"><span class="tag-musc">💪 ${h.calM || 0}</span> | <span class="tag-cardio">🏃 ${h.calC || 0}</span></div>
+                        <div class="cal-summary">
+                            <span class="tag-musc">💪 ${h.calM || 0}</span> | <span class="tag-cardio">🏃 ${h.calC || 0}</span>
+                            <br><span class="tag-diff">Outras: ${diff} kcal</span>
+                        </div>
                     </div>
                     <div style="text-align:right"><strong>${h.calTotal}</strong><br><small>▼</small></div>
                 </div>
                 <div class="hist-details-pane" onclick="event.stopPropagation()">
-                    <label style="font-size:10px;">🔥 Total Dia</label>
+                    <label style="font-size:10px;">🔥 Total Dia (Smartwatch)</label>
                     <input type="number" value="${h.calTotal}" onchange="updateHistValue('${h.id}', 'calTotal', this.value)">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         <div><label style="font-size:10px;">💪 Treino</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
