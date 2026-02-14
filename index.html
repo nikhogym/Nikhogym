@@ -6,7 +6,16 @@
     <title>Nikho Gym Connect</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #FF453A; --cardio: #0A84FF; --strava: #FC4C02; --success: #30D158; --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --input-bg: #2C2C2E; }
+        :root { 
+            --primary: #0A84FF; /* Musculação agora é Azul */
+            --cardio: #FC4C02;  /* Cardio agora é Laranja Strava */
+            --strava: #FC4C02; 
+            --success: #30D158; 
+            --bg: #000000; 
+            --card: #1C1C1E; 
+            --text: #FFFFFF; 
+            --input-bg: #2C2C2E; 
+        }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; padding-top: 80px; }
         
@@ -24,12 +33,11 @@
         input, select, textarea { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 12px; width: 100%; margin-bottom: 10px; font-size: 14px; outline: none; }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-finish { background: var(--success); color: white; }
-        
-        /* Botão Strava Estilo Outline solicitado */
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
+
+        /* Botão Strava Outline */
         .btn-strava-outline { background: transparent; border: 2px solid var(--strava); color: var(--strava); }
         .btn-strava-outline:active { background: rgba(252, 76, 2, 0.1); }
-
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
 
         .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
         .serie-row { display: grid; grid-template-columns: 25px 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 5px; }
@@ -61,7 +69,7 @@
 <div class="container">
     <div id="treinar" class="content active">
         <div class="card" style="text-align: center;">
-            <div class="section-title">🎯 Meta Diária</div>
+            <div class="section-title" style="justify-content: center;">🎯 Meta Diária</div>
             <div style="position: relative; height: 160px; width: 160px; margin: auto;">
                 <canvas id="ringChart"></canvas>
                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%;">
@@ -89,7 +97,7 @@
         </div>
 
         <div class="card">
-            <div class="section-title">🏋️ Musculação</div>
+            <div class="section-title" style="color: var(--primary);">🏋️ Musculação</div>
             <div id="atalhosFicha" style="margin-bottom: 10px;"></div>
             <input type="text" id="exNome" placeholder="Ex: Supino Reto">
             <button class="btn" style="background:#3A3A3C; color:white;" onclick="addEx()">➕ Iniciar Exercício</button>
@@ -97,7 +105,7 @@
         </div>
 
         <div class="card">
-            <div class="section-title">🔥 Finalizar</div>
+            <div class="section-title" style="color: var(--success);">🔥 Finalizar</div>
             <input type="number" id="cM" placeholder="Calorias Musculação" oninput="updateRingChart()">
             <button class="btn btn-finish" onclick="enviarParaPlanilha()">✅ Salvar Treino</button>
         </div>
@@ -148,19 +156,22 @@
         if(aba === 'evolucao') popularSelectExercicios();
     }
 
+    // --- ANEL COM CORES INVERTIDAS (AZUL MUSC / LARANJA CARDIO) ---
     function updateRingChart() {
         const meta = parseFloat(document.getElementById('metaDiaria').value) || 1;
         const musc = parseFloat(document.getElementById('cM').value) || 0;
         const cardio = parseFloat(document.getElementById('cC').value) || 0;
         const total = musc + cardio;
         const perc = Math.min(Math.round((total / meta) * 100), 100);
+
         document.getElementById('txtPorcentagem').innerText = perc + "%";
         document.getElementById('txtCaloriasRing').innerText = total + " / " + meta + " kcal";
 
         const data = {
             datasets: [{
+                // Musculação (Azul) , Cardio (Laranja)
                 data: [musc, cardio, Math.max(0, meta - total)],
-                backgroundColor: ['#FF453A', '#0A84FF', '#2C2C2E'],
+                backgroundColor: ['#0A84FF', '#FC4C02', '#2C2C2E'],
                 borderWidth: 0, cutout: '85%', borderRadius: 15
             }]
         };
@@ -168,6 +179,7 @@
         else { myRingChart = new Chart(document.getElementById('ringChart').getContext('2d'), { type: 'doughnut', data: data, options: { plugins: { legend: false, tooltip: false }, maintainAspectRatio: false } }); }
     }
 
+    // --- HISTÓRICO ---
     function renderHistInferior() {
         const container = document.getElementById('historicoInferior');
         container.innerHTML = hist.slice().reverse().slice(0, 10).map(h => {
@@ -190,7 +202,7 @@
                 </div>
                 <div class="hist-details-pane" onclick="event.stopPropagation()">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <div><label style="font-size:10px;">💪 Treino</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
+                        <div><label style="font-size:10px;">💪 Musc.</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
                         <div><label style="font-size:10px;">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
                     </div>
                     <label style="font-size:10px;">🎯 Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
@@ -210,7 +222,7 @@
         hist.slice().reverse().slice(0, 10).forEach(h => {
             const m = h.metaSalva || 2000;
             const ctx = document.getElementById(`ringSmall-${h.id}`).getContext('2d');
-            new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [h.calM||0, h.calC||0, Math.max(0, m - h.calTotal)], backgroundColor: ['#FF453A', '#0A84FF', '#3A3A3C'], borderWidth: 0, cutout: '80%' }] }, options: { plugins: { legend: false, tooltip: false }, maintainAspectRatio: false } });
+            new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [h.calM||0, h.calC||0, Math.max(0, m - h.calTotal)], backgroundColor: ['#0A84FF', '#FC4C02', '#3A3A3C'], borderWidth: 0, cutout: '80%' }] }, options: { plugins: { legend: false, tooltip: false }, maintainAspectRatio: false } });
         });
     }
 
@@ -263,7 +275,7 @@
         const ex = document.getElementById('selectExGrafico').value; if(!ex) return;
         const dados = hist.filter(t => t.exercicios && t.exercicios.some(e => e.nome === ex)).map(t => ({ data: t.data, peso: Math.max(...t.exercicios.find(e => e.nome === ex).series.map(s => parseFloat(s.p) || 0)) }));
         if (chartCargaInstance) chartCargaInstance.destroy();
-        chartCargaInstance = new Chart(document.getElementById('chartCarga').getContext('2d'), { type: 'line', data: { labels: dados.map(d => d.data), datasets: [{ label: 'kg', data: dados.map(d => d.peso), borderColor: '#FF453A' }] }, options: { responsive: true, maintainAspectRatio: false } });
+        chartCargaInstance = new Chart(document.getElementById('chartCarga').getContext('2d'), { type: 'line', data: { labels: dados.map(d => d.data), datasets: [{ label: 'kg', data: dados.map(d => d.peso), borderColor: '#0A84FF' }] }, options: { responsive: true, maintainAspectRatio: false } });
     }
     function salvarFicha() { fichas.push({ id: Date.now(), t: document.getElementById('titFicha').value, txt: document.getElementById('txtFicha').value }); saveFichas(); renderFichas(); }
     function renderAtalhosFichas() { document.getElementById('atalhosFicha').innerHTML = fichas.map(f => `<button class="btn-outline" onclick="f.txt.split('\\n').forEach(ex => { if(ex.trim()){ document.getElementById('exNome').value=ex; addEx(); } });">${f.t}</button>`).join(''); }
