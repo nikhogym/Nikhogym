@@ -52,10 +52,9 @@
         .cal-summary { display: flex; flex-direction: column; gap: 2px; font-size: 10px; }
         .tag-musc { color: var(--primary); font-weight: bold; }
         .tag-cardio { color: var(--cardio); font-weight: bold; }
-        .tag-diff { color: #8E8E93; font-size: 9px; }
 
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; position: relative; background: #1C1C1E; border-radius: 10px; font-size: 11px; border: 1px solid transparent; }
+        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; position: relative; background: #1C1C1E; border-radius: 10px; font-size: 11px; }
         .cal-ring-mini { position: absolute; width: 100%; height: 100%; }
         .strava-icon { width: 18px; height: 18px; fill: currentColor; }
     </style>
@@ -89,14 +88,15 @@
             
             <button id="btnConnectStrava" class="btn btn-strava-outline" onclick="autorizarStrava()">
                 <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                Conectar Strava
+                Conectar Strava tm
             </button>
 
             <div id="stravaAcoes" style="display:none; margin-top:10px;">
                 <button class="btn btn-strava-outline" onclick="puxarAtividadesStrava()">
-                    📥 Puxar Atividades do Strava
+                    <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
+                    Puxar Treinos Strava tm
                 </button>
-                <div id="listaAtividadesStrava"></div>
+                <div id="listaAtividadesStrava" style="max-height: 150px; overflow-y: auto;"></div>
             </div>
         </div>
 
@@ -170,7 +170,28 @@
         if(aba === 'fichas') renderFichas();
     }
 
-    // --- LÓGICA STRAVA ATUALIZADA ---
+    // --- CORREÇÃO: FICHA PRÉ DEFINIDA ---
+    function renderAtalhosFichas() {
+        const container = document.getElementById('atalhosFicha');
+        container.innerHTML = fichas.map(f => {
+            // Escapar aspas para evitar quebra no HTML
+            const exerciciosString = f.txt.replace(/'/g, "\\'").replace(/\n/g, "\\n");
+            return `<button class="btn-outline" onclick="carregarExerciciosDaFicha('${exerciciosString}')">${f.t}</button>`;
+        }).join('');
+    }
+
+    function carregarExerciciosDaFicha(txt) {
+        const linhas = txt.split('\n');
+        linhas.forEach(ex => {
+            if (ex.trim()) {
+                document.getElementById('exNome').value = ex.trim();
+                addEx();
+            }
+        });
+        document.getElementById('exNome').value = ""; // Limpar campo após adicionar todos
+    }
+
+    // --- LÓGICA STRAVA ---
     function autorizarStrava() {
         const REDIRECT = encodeURIComponent(window.location.href.split('?')[0]);
         window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT}&approval_prompt=force&scope=activity:read_all`;
@@ -189,7 +210,7 @@
                     🏃 ${act.name} (${new Date(act.start_date).toLocaleDateString()})
                 </div>
             `).join('');
-        } catch (e) { alert("Erro ao buscar dados do Strava."); }
+        } catch (e) { alert("Erro ao buscar dados."); }
     }
 
     async function buscarDetalhesAtividade(id) {
@@ -200,7 +221,6 @@
             const data = await r.json();
             document.getElementById('cC').value = Math.round(data.calories || 0);
             updateRingChart();
-            alert("Calorias importadas!");
         } catch (e) { alert("Erro ao buscar detalhes."); }
     }
 
@@ -234,7 +254,6 @@
         const container = document.getElementById('historicoInferior');
         container.innerHTML = hist.slice().reverse().slice(0, 10).map(h => {
             const m = h.metaSalva || 2000;
-            const diff = Math.max(0, h.calTotal - ((h.calM || 0) + (h.calC || 0)));
             return `
             <div class="historico-item" id="hist-${h.id}" onclick="toggleExpand('${h.id}')">
                 <div class="hist-header">
@@ -244,16 +263,12 @@
                     </div>
                     <div style="flex:1;">
                         <div class="hist-meta">📅 ${h.data}</div>
-                        <div class="cal-summary">
-                            <span class="tag-musc">💪 ${h.calM || 0}</span>
-                            <span class="tag-cardio">🏃 ${h.calC || 0}</span>
-                            <span class="tag-diff">Outras: ${diff} kcal</span>
-                        </div>
+                        <div class="cal-summary"><span class="tag-musc">💪 ${h.calM || 0}</span> | <span class="tag-cardio">🏃 ${h.calC || 0}</span></div>
                     </div>
                     <div style="text-align:right"><strong>${h.calTotal}</strong><br><small>▼</small></div>
                 </div>
                 <div class="hist-details-pane" onclick="event.stopPropagation()">
-                    <label style="font-size:10px;">🔥 Total Dia (Smartwatch)</label>
+                    <label style="font-size:10px;">🔥 Total Dia</label>
                     <input type="number" value="${h.calTotal}" onchange="updateHistValue('${h.id}', 'calTotal', this.value)">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         <div><label style="font-size:10px;">💪 Treino</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
@@ -324,6 +339,7 @@
         document.getElementById('selectExGrafico').innerHTML = nomes.map(n => `<option value="${n}">${n}</option>`).join('');
         renderizarGraficoEvolucao();
     }
+
     function renderizarGraficoEvolucao() {
         const ex = document.getElementById('selectExGrafico').value; if(!ex) return;
         const dados = hist.filter(t => t.exercicios && t.exercicios.some(e => e.nome === ex)).map(t => ({ data: t.data, peso: Math.max(...t.exercicios.find(e => e.nome === ex).series.map(s => parseFloat(s.p) || 0)) }));
@@ -334,9 +350,8 @@
     function exportarDados() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ hist, fichas })], { type: 'application/json' })); a.download = 'backup.json'; a.click(); }
     function importarDados(i) { const r = new FileReader(); r.onload = () => { const d = JSON.parse(r.result); localStorage.setItem('hist_nikho', JSON.stringify(d.hist)); localStorage.setItem('fichas_nikho', JSON.stringify(d.fichas)); location.reload(); }; r.readAsText(i.files[0]); }
     function renderFichas() { document.getElementById('listaFichas').innerHTML = fichas.map((f, i) => `<div class="card"><input type="text" value="${f.t}" onchange="fichas[${i}].t=this.value; localStorage.setItem('fichas_nikho', JSON.stringify(fichas));"><textarea onchange="fichas[${i}].txt=this.value; localStorage.setItem('fichas_nikho', JSON.stringify(fichas));">${f.txt}</textarea><button onclick="fichas.splice(${i},1);localStorage.setItem('fichas_nikho', JSON.stringify(fichas));renderFichas();">🗑️</button></div>`).join(''); }
-    function renderAtalhosFichas() { document.getElementById('atalhosFicha').innerHTML = fichas.map(f => `<button class="btn-outline" onclick="f.txt.split('\\n').forEach(ex => { if(ex.trim()){ document.getElementById('exNome').value=ex; addEx(); buscarReferencia(ex); } });">${f.t}</button>`).join(''); }
+    function salvarFicha() { fichas.push({ id: Date.now(), t: document.getElementById('titFicha').value, txt: document.getElementById('txtFicha').value }); localStorage.setItem('fichas_nikho', JSON.stringify(fichas)); renderFichas(); }
 
-    // --- CAPTURA DE CÓDIGO STRAVA ---
     const code = new URLSearchParams(window.location.search).get('code');
     if (code) {
         fetch('https://www.strava.com/oauth/token', {
@@ -351,7 +366,10 @@
         });
     }
 
-    window.addEventListener('DOMContentLoaded', () => { switchTab('treinar'); if(token){document.getElementById('stravaAcoes').style.display='block'; document.getElementById('btnConnectStrava').style.display='none';} });
+    window.addEventListener('DOMContentLoaded', () => { 
+        switchTab('treinar'); 
+        if(token){document.getElementById('stravaAcoes').style.display='block'; document.getElementById('btnConnectStrava').style.display='none';} 
+    });
 </script>
 </body>
 </html>
