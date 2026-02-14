@@ -6,7 +6,7 @@
     <title>Nikho Gym Connect</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #FF453A; --cardio: #0A84FF; --success: #30D158; --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --input-bg: #2C2C2E; }
+        :root { --primary: #FF453A; --cardio: #0A84FF; --strava: #FC4C02; --success: #30D158; --bg: #000000; --card: #1C1C1E; --text: #FFFFFF; --input-bg: #2C2C2E; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; padding-top: 80px; }
         
@@ -22,14 +22,13 @@
         .section-title { font-size: 16px; margin-bottom: 15px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
         
         input, select, textarea { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 12px; width: 100%; margin-bottom: 10px; font-size: 14px; outline: none; }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-finish { background: var(--success); color: white; }
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
 
         .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
         .serie-row { display: grid; grid-template-columns: 25px 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 5px; }
 
-        /* Estilos Histórico Expansível */
         .historico-item { background: var(--card); padding: 15px; border-radius: 18px; margin-bottom: 10px; border: 1px solid #3A3A3C; cursor: pointer; }
         .hist-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         .hist-details-pane { display: none; margin-top: 15px; border-top: 1px solid #2C2C2E; padding-top: 15px; }
@@ -42,6 +41,8 @@
         .tag-musc { color: var(--primary); font-weight: bold; }
         .tag-cardio { color: var(--cardio); font-weight: bold; }
         .tag-total { color: var(--success); font-weight: bold; }
+        
+        .strava-icon { width: 20px; height: 20px; fill: currentColor; }
     </style>
 </head>
 <body>
@@ -68,9 +69,15 @@
 
         <div class="card">
             <div class="section-title" style="color: var(--cardio);">🏃 Cardio</div>
-            <button class="btn" style="background: var(--cardio); color:white;" onclick="autorizar()">🔗 Conectar Strava</button>
+            <button id="btnAuth" class="btn" style="background: var(--strava); color:white;" onclick="autorizar()">
+                <svg class="strava-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
+                Conectar Strava
+            </button>
             <div id="stravaAcoes" style="display:none;">
-                <button class="btn" style="background: var(--cardio); color:white;" onclick="listarAtividades()">📥 Escolher do Strava</button>
+                <button class="btn" style="background: var(--strava); color:white;" onclick="listarAtividades()">
+                    <svg class="strava-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
+                    Escolher do Strava
+                </button>
                 <div id="listaAtividadesStrava"></div>
             </div>
             <input type="number" id="cC" placeholder="Calorias Cardio Total" readonly oninput="updateRingChart()">
@@ -136,14 +143,12 @@
         if(aba === 'evolucao') popularSelectExercicios();
     }
 
-    // --- ANEL COM DUAS CORES (VERMELHO MUSC / AZUL CARDIO) ---
     function updateRingChart() {
         const meta = parseFloat(document.getElementById('metaDiaria').value) || 1;
         const musc = parseFloat(document.getElementById('cM').value) || 0;
         const cardio = parseFloat(document.getElementById('cC').value) || 0;
         const total = musc + cardio;
         const perc = Math.min(Math.round((total / meta) * 100), 100);
-
         document.getElementById('txtPorcentagem').innerText = perc + "%";
         document.getElementById('txtCaloriasRing').innerText = total + " / " + meta + " kcal";
 
@@ -151,17 +156,13 @@
             datasets: [{
                 data: [musc, cardio, Math.max(0, meta - total)],
                 backgroundColor: ['#FF453A', '#0A84FF', '#2C2C2E'],
-                borderWidth: 0,
-                cutout: '85%',
-                borderRadius: 15
+                borderWidth: 0, cutout: '85%', borderRadius: 15
             }]
         };
-
         if (myRingChart) { myRingChart.data = data; myRingChart.update(); } 
         else { myRingChart = new Chart(document.getElementById('ringChart').getContext('2d'), { type: 'doughnut', data: data, options: { plugins: { legend: false, tooltip: false }, maintainAspectRatio: false } }); }
     }
 
-    // --- HISTÓRICO RECENTE EXPANSÍVEL ---
     function renderHistInferior() {
         const container = document.getElementById('historicoInferior');
         container.innerHTML = hist.slice().reverse().slice(0, 10).map(h => {
@@ -177,39 +178,30 @@
                     <div style="flex:1;">
                         <div class="hist-meta">📅 ${h.data}</div>
                         <div class="cal-summary">
-                            <span class="tag-musc">💪 ${h.calM || 0}</span> + 
-                            <span class="tag-cardio">🏃 ${h.calC || 0}</span> = 
-                            <span class="tag-total">${h.calTotal} kcal</span>
+                            <span class="tag-musc">💪 ${h.calM || 0}</span> + <span class="tag-cardio">🏃 ${h.calC || 0}</span> = <span class="tag-total">${h.calTotal} kcal</span>
                         </div>
                     </div>
-                    <span style="color:#8E8E93">▼</span>
+                    <span>▼</span>
                 </div>
                 <div class="hist-details-pane" onclick="event.stopPropagation()">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <div><label style="font-size:10px;">💪 Musc.</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
+                        <div><label style="font-size:10px;">💪 Treino</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
                         <div><label style="font-size:10px;">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
                     </div>
-                    <label style="font-size:10px;">🎯 Meta do Dia</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
-                    
-                    <div style="margin-top:10px;">
-                        <strong>Exercícios:</strong><br>
-                        ${h.exercicios ? h.exercicios.map((e, ei) => `
-                            <div style="margin-bottom:10px; background:#2C2C2E; padding:10px; border-radius:10px;">
-                                <input type="text" value="${e.nome}" onchange="updateExName('${h.id}', ${ei}, this.value)">
-                                ${e.series.map((s, si) => `
-                                    <div style="display:flex; gap:5px; margin-top:5px;">
-                                        <input type="number" value="${s.r}" placeholder="R" onchange="updateSerie('${h.id}', ${ei}, ${si}, 'r', this.value)">
-                                        <input type="number" value="${s.p}" placeholder="Kg" onchange="updateSerie('${h.id}', ${ei}, ${si}, 'p', this.value)">
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `).join('') : 'Sem exercícios'}
-                    </div>
-                    <button class="btn-outline" style="color:var(--danger); width:100%;" onclick="apagarTreino('${h.id}')">Excluir Registro</button>
+                    <label style="font-size:10px;">🎯 Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
+                    ${h.exercicios ? h.exercicios.map((e, ei) => `
+                        <div style="background:#2C2C2E; padding:10px; border-radius:10px; margin-top:10px;">
+                            <input type="text" value="${e.nome}" onchange="updateExName('${h.id}', ${ei}, this.value)">
+                            ${e.series.map((s, si) => `
+                                <div style="display:flex; gap:5px; margin-top:5px;">
+                                    <input type="number" value="${s.r}" placeholder="R" onchange="updateSerie('${h.id}', ${ei}, ${si}, 'r', this.value)">
+                                    <input type="number" value="${s.p}" placeholder="Kg" onchange="updateSerie('${h.id}', ${ei}, ${si}, 'p', this.value)">
+                                </div>`).join('')}
+                        </div>`).join('') : ''}
+                    <button class="btn-outline" style="color:var(--danger); width:100%; margin-top:10px;" onclick="apagarTreino('${h.id}')">Excluir Registro</button>
                 </div>
             </div>`;
         }).join('');
-
         hist.slice().reverse().slice(0, 10).forEach(h => {
             const m = h.metaSalva || 2000;
             const ctx = document.getElementById(`ringSmall-${h.id}`).getContext('2d');
@@ -224,7 +216,6 @@
     function saveRef() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); renderHistInferior(); }
     function apagarTreino(id) { if(confirm("Apagar?")) { hist = hist.filter(h => h.id != id); saveRef(); } }
 
-    // --- FICHAS EDITÁVEIS ---
     function renderFichas() {
         document.getElementById('listaFichas').innerHTML = fichas.map((f, i) => `
             <div class="card">
@@ -235,7 +226,6 @@
     }
     function saveFichas() { localStorage.setItem('fichas_nikho', JSON.stringify(fichas)); renderAtalhosFichas(); }
 
-    // --- TREINO ---
     function addEx() {
         const n = document.getElementById('exNome').value;
         if(n) { sessao.push({ id: Date.now()+Math.random(), nome: n, series: [{ r: '', p: '' }] }); renderSessao(); document.getElementById('exNome').value = ""; }
@@ -248,7 +238,7 @@
                 <input type="number" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[i].r=this.value">
                 <input type="number" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[i].p=this.value">
                 <span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(i,1);renderSessao();">✕</span></div>`).join('')}
-                <button class="btn" style="background:#3A3A3C; color:white; padding:8px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:'',p:''});renderSessao();">+ Série</button>
+                <button class="btn" style="background:#3A3A3C; color:white; padding:8px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:sessao.find(e=>e.id==${ex.id}).series[sessao.find(e=>e.id==${ex.id}).series.length-1].r, p:sessao.find(e=>e.id==${ex.id}).series[sessao.find(e=>e.id==${ex.id}).series.length-1].p});renderSessao();">+ Série</button>
             </div>`).join('');
     }
 
@@ -259,7 +249,6 @@
         location.reload();
     }
 
-    // --- AUXILIARES ---
     function popularSelectExercicios() {
         const nomes = [...new Set(hist.flatMap(t => t.exercicios ? t.exercicios.map(e => e.nome) : []))];
         document.getElementById('selectExGrafico').innerHTML = nomes.map(n => `<option value="${n}">${n}</option>`).join('');
@@ -280,6 +269,9 @@
     const code = new URLSearchParams(window.location.search).get('code');
     if (code) { fetch('https://www.strava.com/oauth/token', { method: 'POST', body: JSON.stringify({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code: code, grant_type: 'authorization_code' }), headers: { 'Content-Type': 'application/json' } }).then(r => r.json()).then(d => { if(d.access_token) { localStorage.setItem('strava_access_token', d.access_token); window.location.href = REDIRECT_URI; }}); }
     
+    async function listarAtividades() { const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', { headers: { 'Authorization': `Bearer ${token}` } }); const data = await r.json(); document.getElementById('listaAtividadesStrava').innerHTML = data.map(act => `<div class="strava-list-item" style="background:#2C2C2E; padding:10px; margin-top:5px; border-radius:10px; font-size:12px;" onclick="buscarDetalhesAtividade(${act.id})">🏃 ${act.name}</div>`).join(''); }
+    async function buscarDetalhesAtividade(id) { const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, { headers: { 'Authorization': `Bearer ${token}` } }); const data = await r.json(); document.getElementById('cC').value = Math.round(data.calories || 0); updateRingChart(); }
+
     window.addEventListener('DOMContentLoaded', () => { renderHistInferior(); renderAtalhosFichas(); updateRingChart(); if(token){document.getElementById('stravaAcoes').style.display='block';} });
 </script>
 </body>
