@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nikho Gym Connect</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap" rel="stylesheet">
     <style>
         :root { 
             --primary: #0A84FF; /* Musculação: Azul */
@@ -38,6 +39,14 @@
         .btn-strava-outline { background: transparent; border: 2px solid var(--strava); color: var(--strava); }
         .ref-badge { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 10px; display: block; }
         
+        /* Estilização da fonte Strava */
+        .strava-font { 
+            font-family: 'Inter', sans-serif; 
+            font-weight: 800; 
+            letter-spacing: -0.5px; 
+            text-transform: none;
+        }
+
         .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
         .serie-row { display: grid; grid-template-columns: 25px 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 5px; }
 
@@ -76,10 +85,10 @@
                 <canvas id="ringChart"></canvas>
                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%;">
                     <span id="txtPorcentagem" style="font-size: 20px; font-weight: bold; display: block;">0%</span>
-                    <span id="txtCaloriasRing" style="font-size: 9px; color: #8E8E93;">0 / 700 kcal</span>
+                    <span id="txtCaloriasRing" style="font-size: 9px; color: #8E8E93;">0 / 2000 kcal</span>
                 </div>
             </div>
-            <input type="number" id="metaDiaria" value="700" oninput="updateRingChart()" style="margin-top: 15px; text-align: center;">
+            <input type="number" id="metaDiaria" value="2000" oninput="updateRingChart()" style="margin-top: 15px; text-align: center;">
         </div>
 
         <div class="card">
@@ -88,13 +97,13 @@
             
             <button id="btnConnectStrava" class="btn btn-strava-outline" onclick="autorizarStrava()">
                 <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                Conectar Strava tm
+                Conectar <span class="strava-font">Strava</span>
             </button>
 
             <div id="stravaAcoes" style="display:none; margin-top:10px;">
-                <button class="btn btn-strava-outline" onclick="ConectarStrava()">
+                <button class="btn btn-strava-outline" onclick="puxarAtividadesStrava()">
                     <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                    Conectar Strava
+                    Conectar <span class="strava-font">Strava</span>
                 </button>
                 <div id="listaAtividadesStrava" style="max-height: 150px; overflow-y: auto;"></div>
             </div>
@@ -170,11 +179,9 @@
         if(aba === 'fichas') renderFichas();
     }
 
-    // --- CORREÇÃO: FICHA PRÉ DEFINIDA ---
     function renderAtalhosFichas() {
         const container = document.getElementById('atalhosFicha');
         container.innerHTML = fichas.map(f => {
-            // Escapar aspas para evitar quebra no HTML
             const exerciciosString = f.txt.replace(/'/g, "\\'").replace(/\n/g, "\\n");
             return `<button class="btn-outline" onclick="carregarExerciciosDaFicha('${exerciciosString}')">${f.t}</button>`;
         }).join('');
@@ -188,10 +195,9 @@
                 addEx();
             }
         });
-        document.getElementById('exNome').value = ""; // Limpar campo após adicionar todos
+        document.getElementById('exNome').value = "";
     }
 
-    // --- LÓGICA STRAVA ---
     function autorizarStrava() {
         const REDIRECT = encodeURIComponent(window.location.href.split('?')[0]);
         window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT}&approval_prompt=force&scope=activity:read_all`;
@@ -224,7 +230,6 @@
         } catch (e) { alert("Erro ao buscar detalhes."); }
     }
 
-    // --- RECONHECIMENTO DE PESO ---
     function buscarReferencia(nome) {
         if (!nome || nome.length < 2) { document.getElementById('referenciaPeso').innerText = ""; return; }
         const termo = nome.toLowerCase().trim();
@@ -236,7 +241,6 @@
         } else { document.getElementById('referenciaPeso').innerText = ""; }
     }
 
-    // --- ANEL E GRÁFICOS ---
     function updateRingChart() {
         const meta = parseFloat(document.getElementById('metaDiaria').value) || 1;
         const musc = parseFloat(document.getElementById('cM').value) || 0;
@@ -249,7 +253,6 @@
         else { myRingChart = new Chart(document.getElementById('ringChart').getContext('2d'), { type: 'doughnut', data: data, options: { plugins: { legend: false }, maintainAspectRatio: false } }); }
     }
 
-    // --- HISTÓRICO ---
     function renderHistInferior() {
         const container = document.getElementById('historicoInferior');
         container.innerHTML = hist.slice().reverse().slice(0, 10).map(h => {
