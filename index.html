@@ -17,23 +17,48 @@
             --input-bg: #2C2C2E; 
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; padding-top: 80px; }
+        body { 
+            font-family: -apple-system, system-ui, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding: 10px; 
+            padding-top: 80px; 
+            transition: background 0.3s;
+        }
         
+        /* NAVEGAÇÃO */
         .tabs { display: flex; gap: 5px; position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 15px 10px; z-index: 1000; border-bottom: 1px solid #3A3A3C; }
-        .tab-btn { flex: 1; padding: 10px 5px; border: none; border-radius: 12px; background: var(--input-bg); color: #8E8E93; font-weight: bold; font-size: 10px; }
-        .tab-btn.active { background: var(--primary); color: white; }
+        .tab-btn { flex: 1; padding: 10px 5px; border: none; border-radius: 12px; background: var(--input-bg); color: #8E8E93; font-weight: bold; font-size: 10px; transition: 0.2s; }
+        .tab-btn.active { background: var(--primary); color: white; transform: scale(1.05); }
 
         .container { max-width: 450px; margin: auto; }
         .content { display: none; }
         .content.active { display: block; }
 
-        .card { background: var(--card); padding: 20px; border-radius: 22px; margin-bottom: 15px; border: 1px solid #2C2C2E; }
-        .section-title { font-size: 16px; margin-bottom: 15px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        /* CARDS E MICROINTERAÇÕES */
+        .card { 
+            background: var(--card); 
+            padding: 20px; 
+            border-radius: 22px; 
+            margin-bottom: 15px; 
+            border: 1px solid #2C2C2E; 
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 15px rgba(10, 132, 255, 0.1); 
+        }
         
-        input, select, textarea { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 12px; width: 100%; margin-bottom: 10px; font-size: 14px; outline: none; }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .section-title { font-size: 16px; margin-bottom: 15px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; letter-spacing: -0.5px; }
+        
+        input, select, textarea { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 12px; width: 100%; margin-bottom: 10px; font-size: 14px; outline: none; transition: border 0.3s; }
+        input:focus { border-color: var(--primary); }
+
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn:active { transform: scale(0.98); }
         .btn-finish { background: var(--success); color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; font-weight: bold; }
 
         .btn-strava-outline { background: transparent; border: 2px solid var(--strava); color: var(--strava); }
         .strava-logo-img { height: 16px; filter: invert(38%) sepia(98%) saturate(3015%) hue-rotate(1deg) brightness(102%) contrast(105%); }
@@ -41,37 +66,40 @@
         .ref-badge { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 10px; display: block; }
         .ref-text { font-size: 10px; color: #8E8E93; margin-bottom: 4px; display: block; font-style: italic; }
         
-        .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
-        .serie-row { display: grid; grid-template-columns: 25px 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 5px; }
+        .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 
-        .historico-item { background: var(--card); padding: 15px; border-radius: 18px; margin-bottom: 10px; border: 1px solid #3A3A3C; cursor: pointer; }
+        /* HISTÓRICO */
+        .historico-item { background: var(--card); padding: 15px; border-radius: 18px; margin-bottom: 10px; border: 1px solid #3A3A3C; cursor: pointer; transition: 0.2s; }
+        .historico-item:hover { border-color: var(--primary); }
         .hist-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
         .hist-details-pane { display: none; margin-top: 15px; border-top: 1px solid #2C2C2E; padding-top: 15px; }
         .historico-item.expanded .hist-details-pane { display: block; }
         
         .ring-container { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
-        .ring-text-small { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; }
+        .ring-text-small { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: 900; }
         
         .cal-summary { display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
-        .tag-row { display: flex; align-items: center; gap: 6px; }
         .tag-musc { color: var(--primary); font-weight: bold; }
         .tag-cardio { color: var(--cardio); font-weight: bold; }
-        .tag-diff { color: #8E8E93; font-size: 10px; margin-top: 2px; }
 
-        /* --- VISUAL CALENDÁRIO MELHORADO --- */
+        /* CALENDÁRIO */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
-        .cal-weekday { font-size: 9px; color: #8E8E93; font-weight: bold; padding-bottom: 5px; }
-        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; position: relative; background: #2C2C2E; border-radius: 12px; font-size: 12px; font-weight: 500; cursor: pointer; transition: 0.2s; }
-        .cal-day:active { transform: scale(0.9); background: #3A3A3C; }
+        .cal-weekday { font-size: 9px; color: #8E8E93; font-weight: 900; padding-bottom: 5px; }
+        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; position: relative; background: #2C2C2E; border-radius: 12px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .cal-day:hover { background: #3A3A3C; border: 1px solid var(--primary); }
         .cal-day.empty { background: transparent; cursor: default; }
         .cal-ring-mini { position: absolute; width: 100%; height: 100%; pointer-events: none; }
 
+        /* DASHBOARD */
         #dashCalendario { display: none; margin-top: 20px; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .dash-item { background: var(--input-bg); padding: 12px; border-radius: 15px; text-align: center; }
-        .dash-label { font-size: 10px; color: #8E8E93; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .dash-value { font-size: 16px; font-weight: bold; }
+        .dash-item { background: var(--input-bg); padding: 12px; border-radius: 15px; text-align: center; border-bottom: 2px solid transparent; transition: 0.3s; }
+        .dash-item:hover { border-bottom-color: var(--primary); }
+        .dash-label { font-size: 10px; color: #8E8E93; text-transform: uppercase; margin-bottom: 5px; display: block; font-weight: 800; }
+        .dash-value { font-size: 18px; font-weight: 900; }
+        
         .strava-icon { width: 18px; height: 18px; fill: currentColor; }
     </style>
 </head>
@@ -87,37 +115,34 @@
 <div class="container">
     <div id="treinar" class="content active">
         <div class="card" style="text-align: center;">
-            <div class="section-title" style="justify-content: center;">🎯 Meta Diária</div>
-            <div style="position: relative; height: 150px; width: 150px; margin: auto;">
+            <div class="section-title" style="justify-content: center;">🎯 META DIÁRIA</div>
+            <div style="position: relative; height: 160px; width: 160px; margin: auto;">
                 <canvas id="ringChart"></canvas>
                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%;">
-                    <span id="txtPorcentagem" style="font-size: 20px; font-weight: bold; display: block;">0%</span>
-                    <span id="txtCaloriasRing" style="font-size: 9px; color: #8E8E93;">0 / 2000 kcal</span>
+                    <span id="txtPorcentagem" style="font-size: 26px; font-weight: 900; display: block;">0%</span>
+                    <span id="txtCaloriasRing" style="font-size: 10px; color: #8E8E93; font-weight: bold;">0 / 2000 kcal</span>
                 </div>
             </div>
-            <input type="number" id="metaDiaria" value="2000" oninput="updateRingChart()" style="margin-top: 15px; text-align: center;">
+            <input type="number" id="metaDiaria" value="2000" oninput="updateRingChart()" style="margin-top: 15px; text-align: center; font-weight: 900; font-size: 18px;">
         </div>
 
         <div class="card">
-            <div class="section-title" style="color: var(--cardio);">🏃 Cardio</div>
+            <div class="section-title" style="color: var(--cardio);">🏃 CARDIO</div>
             <input type="number" id="cC" placeholder="Calorias Cardio Manual" oninput="updateRingChart()">
-            
             <button id="btnConnectStrava" class="btn btn-strava-outline" onclick="autorizarStrava()">
                 <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
                 Conectar <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
             </button>
-
             <div id="stravaAcoes" style="display:none; margin-top:10px;">
                 <button class="btn btn-strava-outline" onclick="puxarAtividadesStrava()">
-                    <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                    Conectar <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
+                    📥 Importar do <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
                 </button>
                 <div id="listaAtividadesStrava" style="max-height: 150px; overflow-y: auto;"></div>
             </div>
         </div>
 
         <div class="card">
-            <div class="section-title">🏋️ Musculação</div>
+            <div class="section-title">🏋️ MUSCULAÇÃO</div>
             <div id="atalhosFicha" style="margin-bottom: 10px;"></div>
             <div id="referenciaPeso" class="ref-badge"></div>
             <input type="text" id="exNome" placeholder="Nome do exercício" oninput="buscarReferencia(this.value)">
@@ -126,18 +151,18 @@
         </div>
 
         <div class="card">
-            <div class="section-title" style="color: var(--success);">🔥 Finalizar</div>
+            <div class="section-title" style="color: var(--success);">🔥 FINALIZAR</div>
             <input type="number" id="cM" placeholder="Calorias Musculação" oninput="updateRingChart()">
             <button class="btn btn-finish" onclick="enviarParaPlanilha()">✅ Salvar Treino</button>
         </div>
 
-        <h3 style="margin-left: 10px; font-size: 18px;">📜 Histórico Recente</h3>
+        <h3 style="margin-left: 10px; font-size: 18px; font-weight: 900; letter-spacing: -0.5px;">📜 HISTÓRICO RECENTE</h3>
         <div id="historicoInferior"></div>
     </div>
 
     <div id="fichas" class="content">
         <div class="card">
-            <div class="section-title">📝 Fichas</div>
+            <div class="section-title">📝 FICHAS</div>
             <input type="text" id="titFicha" placeholder="Nome da Ficha">
             <textarea id="txtFicha" rows="4" placeholder="Exercícios (um por linha)"></textarea>
             <button class="btn btn-finish" onclick="salvarFicha()">Salvar Ficha</button>
@@ -156,7 +181,7 @@
             <div class="cal-grid" id="calBody"></div>
         </div>
         <div id="dashCalendario" class="card">
-            <div class="section-title" id="dashDataTitulo">📅 Métricas do Dia</div>
+            <div class="section-title" id="dashDataTitulo">📅 MÉTRICAS DO DIA</div>
             <div class="dash-grid">
                 <div class="dash-item"><span class="dash-label">Total Dia</span><div id="vTotal" class="dash-value">-</div></div>
                 <div class="dash-item"><span class="dash-label">Musculação</span><div id="vMusc" class="dash-value" style="color:var(--primary)">-</div></div>
@@ -169,13 +194,13 @@
 
     <div id="evolucao" class="content">
         <div class="card">
-            <div class="section-title">📊 Evolução</div>
+            <div class="section-title">📊 EVOLUÇÃO</div>
             <select id="selectExGrafico" onchange="renderizarGraficoEvolucao()"></select>
             <div style="height: 180px;"><canvas id="chartCarga"></canvas></div>
             <div style="height: 180px; margin-top: 20px;"><canvas id="chartCalEvolucao"></canvas></div>
         </div>
         <div class="card">
-            <div class="section-title">💾 Backup</div>
+            <div class="section-title">💾 BACKUP</div>
             <button class="btn-outline" onclick="exportarDados()">📤 Exportar</button>
             <button class="btn-outline" onclick="document.getElementById('importFile').click()">📥 Importar Backup</button>
             <input type="file" id="importFile" style="display:none" onchange="importarDados(this)">
@@ -214,18 +239,18 @@
         return "Sem histórico";
     }
 
+    function carregarExerciciosDaFicha(txt) {
+        const linhas = txt.split(/\\n|\n/);
+        linhas.forEach(ex => { if (ex.trim()) { sessao.push({ id: Date.now() + Math.random(), nome: ex.trim(), series: [{ r: '', p: '' }] }); } });
+        renderSessao();
+    }
+
     function renderAtalhosFichas() {
         const container = document.getElementById('atalhosFicha');
         container.innerHTML = fichas.map(f => {
             const exerciciosString = f.txt.replace(/'/g, "\\'").replace(/\n/g, "\\n");
             return `<button class="btn-outline" onclick="carregarExerciciosDaFicha('${exerciciosString}')">${f.t}</button>`;
         }).join('');
-    }
-
-    function carregarExerciciosDaFicha(txt) {
-        const linhas = txt.split(/\\n|\n/);
-        linhas.forEach(ex => { if (ex.trim()) { sessao.push({ id: Date.now() + Math.random(), nome: ex.trim(), series: [{ r: '', p: '' }] }); } });
-        renderSessao();
     }
 
     function renderHistInferior() {
@@ -241,23 +266,23 @@
                         <div class="ring-text-small">${Math.round((h.calTotal/m)*100)}%</div>
                     </div>
                     <div style="flex:1;">
-                        <div class="hist-meta">📅 ${h.data}</div>
+                        <div class="hist-meta" style="font-weight: 800; font-size: 14px;">📅 ${h.data}</div>
                         <div class="cal-summary">
-                            <div class="tag-row"><span class="tag-musc">💪 ${h.calM || 0}</span></div>
-                            <div class="tag-row"><span class="tag-cardio">🏃 ${h.calC || 0}</span></div>
-                            <div class="tag-diff">Outras: ${diff} kcal</div>
+                            <span class="tag-musc">💪 ${h.calM || 0} kcal</span>
+                            <span class="tag-cardio">🏃 ${h.calC || 0} kcal</span>
+                            <span class="tag-diff">Outras: ${diff} kcal</span>
                         </div>
                     </div>
-                    <div style="text-align:right"><strong>${h.calTotal}</strong><br><small>▼</small></div>
+                    <div style="text-align:right"><strong style="font-size:18px;">${h.calTotal}</strong><br><small style="color:#8E8E93">TOTAL</small></div>
                 </div>
                 <div class="hist-details-pane" onclick="event.stopPropagation()">
-                    <label style="font-size:10px; color:var(--success)">🔥 Total Dia (Smartwatch)</label>
+                    <label style="font-size:10px; color:var(--success); font-weight:800;">🔥 TOTAL DIA (SMARTWATCH)</label>
                     <input type="number" value="${h.calTotal}" onchange="updateHistValue('${h.id}', 'calTotal', this.value)">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <div><label style="font-size:10px;">💪 Treino</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
-                        <div><label style="font-size:10px;">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
+                        <div><label style="font-size:10px; font-weight:800;">💪 TREINO</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
+                        <div><label style="font-size:10px; font-weight:800;">🏃 CARDIO</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
                     </div>
-                    <label style="font-size:10px;">🎯 Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
+                    <label style="font-size:10px; font-weight:800;">🎯 META</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
                     <div style="margin-top:10px;">
                         <strong>Exercícios:</strong>
                         ${h.exercicios ? h.exercicios.map((e, ei) => `
@@ -270,7 +295,7 @@
                                     </div>`).join('')}
                             </div>`).join('') : ''}
                     </div>
-                    <button class="btn-outline" style="color:var(--danger); width:100%; margin-top:10px;" onclick="apagarTreino('${h.id}')">🗑️ Excluir</button>
+                    <button class="btn-outline" style="color:var(--danger); border-color:var(--danger); width:100%; margin-top:10px;" onclick="apagarTreino('${h.id}')">🗑️ Excluir</button>
                 </div>
             </div>`;
         }).join('');
@@ -296,19 +321,14 @@
     function renderSessao() { document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `<div class="ex-item-card"><div class="ex-header"><strong>${ex.nome}</strong><span onclick="sessao=sessao.filter(e=>e.id!=${ex.id});renderSessao();">✕</span></div>${ex.series.map((s, i) => { const ref = getSerieReferencia(ex.nome, i); return `<span class="ref-text">💡 ${ref}</span><div class="serie-row"><span>${i+1}º</span><input type="number" placeholder="R" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].r=this.value"><input type="number" placeholder="Kg" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].p=this.value"><span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(${i},1);renderSessao();">✕</span></div>`; }).join('')}<button class="btn" style="background:#3A3A3C; color:white; padding:5px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:'',p:''});renderSessao();">+ Série</button></div>`).join(''); }
     async function enviarParaPlanilha() { const p = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calM: Number(document.getElementById('cM').value), calC: Number(document.getElementById('cC').value), calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value), metaSalva: Number(document.getElementById('metaDiaria').value), exercicios: [...sessao] }; hist.push(p); saveRef(); location.reload(); }
 
-    // --- LÓGICA CALENDÁRIO ATUALIZADA ---
     function renderCalendario() { 
         const body = document.getElementById('calBody'); 
         const now = new Date(); 
         document.getElementById('mesAnoAtual').innerText = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase(); 
         body.innerHTML = ''; 
-
         const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
         const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); 
-
-        // Preenchimento dias vazios início do mês
         for (let i = 0; i < firstDay; i++) { body.innerHTML += `<div class="cal-day empty"></div>`; }
-
         for (let d = 1; d <= daysInMonth; d++) { 
             const ds = `${d.toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`; 
             const t = hist.find(h => h.data === ds); 
