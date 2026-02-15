@@ -193,13 +193,16 @@
         if(aba === 'fichas') renderFichas();
     }
 
+    // --- MELHORIA: BUSCAR REFERÊNCIA DE CADA SÉRIE + TOTAL DE SÉRIES ---
     function getSerieReferencia(nomeEx, indexSerie) {
         const termo = nomeEx.toLowerCase().trim();
         const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo)));
         if (ultimo) {
             const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
+            const totalSeries = exData.series.length;
             const serieData = exData.series[indexSerie];
-            if (serieData) return `Último: ${serieData.r} reps / ${serieData.p}kg`;
+            if (serieData) return `Último: ${serieData.r} reps / ${serieData.p}kg (${totalSeries} séries)`;
+            return `Último: [Fora do range] (${totalSeries} séries totais)`;
         }
         return "Sem histórico";
     }
@@ -212,20 +215,9 @@
         }).join('');
     }
 
-    // --- CORREÇÃO AQUI: SEPARA OS EXERCÍCIOS POR QUEBRA DE LINHA ---
     function carregarExerciciosDaFicha(txt) {
-        // Normaliza as quebras de linha e separa por linha
         const linhas = txt.split(/\\n|\n/);
-        linhas.forEach(ex => {
-            if (ex.trim()) {
-                // Adiciona cada exercício individualmente na sessão
-                sessao.push({ 
-                    id: Date.now() + Math.random(), 
-                    nome: ex.trim(), 
-                    series: [{ r: '', p: '' }] 
-                });
-            }
-        });
+        linhas.forEach(ex => { if (ex.trim()) { sessao.push({ id: Date.now() + Math.random(), nome: ex.trim(), series: [{ r: '', p: '' }] }); } });
         renderSessao();
     }
 
@@ -293,15 +285,7 @@
     async function buscarDetalhesAtividade(id) { try { const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, { headers: { 'Authorization': `Bearer ${token}` } }); const data = await r.json(); document.getElementById('cC').value = Math.round(data.calories || 0); updateRingChart(); } catch (e) { alert("Erro ao buscar detalhes."); } }
     function buscarReferencia(nome) { if (!nome || nome.length < 2) { document.getElementById('referenciaPeso').innerText = ""; return; } const termo = nome.toLowerCase().trim(); const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo))); if (ultimo) { const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo)); const maiorPeso = Math.max(...exData.series.map(s => parseFloat(s.p) || 0)); document.getElementById('referenciaPeso').innerText = `💡 Último: ${maiorPeso}kg (${exData.series.length} spts)`; } else { document.getElementById('referenciaPeso').innerText = ""; } }
     function updateRingChart() { const meta = parseFloat(document.getElementById('metaDiaria').value) || 1; const musc = parseFloat(document.getElementById('cM').value) || 0; const cardio = parseFloat(document.getElementById('cC').value) || 0; const total = musc + cardio; document.getElementById('txtPorcentagem').innerText = Math.min(Math.round((total / meta) * 100), 100) + "%"; document.getElementById('txtCaloriasRing').innerText = total + " / " + meta + " kcal"; const data = { datasets: [{ data: [musc, cardio, Math.max(0, meta - total)], backgroundColor: ['#0A84FF', '#FC4C02', '#2C2C2E'], borderWidth: 0, cutout: '85%', borderRadius: 15 }] }; if (myRingChart) { myRingChart.data = data; myRingChart.update(); } else { myRingChart = new Chart(document.getElementById('ringChart').getContext('2d'), { type: 'doughnut', data: data, options: { plugins: { legend: false }, maintainAspectRatio: false } }); } }
-    
-    function addEx() { 
-        const n = document.getElementById('exNome').value; 
-        if(n) { 
-            sessao.push({ id: Date.now() + Math.random(), nome: n, series: [{ r: '', p: '' }] }); 
-            renderSessao(); 
-            document.getElementById('exNome').value = ""; 
-        } 
-    }
+    function addEx() { const n = document.getElementById('exNome').value; if(n) { sessao.push({ id: Date.now() + Math.random(), nome: n, series: [{ r: '', p: '' }] }); renderSessao(); document.getElementById('exNome').value = ""; } }
     
     function renderSessao() { 
         document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `
