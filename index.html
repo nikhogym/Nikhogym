@@ -39,11 +39,11 @@
         .strava-logo-img { height: 16px; filter: invert(38%) sepia(98%) saturate(3015%) hue-rotate(1deg) brightness(102%) contrast(105%); }
         
         .ref-badge { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 10px; display: block; }
+        .ref-text { font-size: 10px; color: #8E8E93; margin-bottom: 4px; display: block; font-style: italic; }
         
         .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
         .serie-row { display: grid; grid-template-columns: 25px 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 5px; }
 
-        /* Histórico Expansível */
         .historico-item { background: var(--card); padding: 15px; border-radius: 18px; margin-bottom: 10px; border: 1px solid #3A3A3C; cursor: pointer; }
         .hist-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
         .hist-details-pane { display: none; margin-top: 15px; border-top: 1px solid #2C2C2E; padding-top: 15px; }
@@ -64,7 +64,6 @@
         .cal-ring-mini { position: absolute; width: 100%; height: 100%; }
         .strava-icon { width: 18px; height: 18px; fill: currentColor; }
 
-        /* --- ESTILO ADICIONAL: DASHBOARD CALENDÁRIO --- */
         #dashCalendario { display: none; margin-top: 20px; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
@@ -148,7 +147,6 @@
             <div class="section-title" id="mesAnoAtual" style="justify-content: center;"></div>
             <div class="cal-grid" id="calBody"></div>
         </div>
-        
         <div id="dashCalendario" class="card">
             <div class="section-title" id="dashDataTitulo">📅 Métricas do Dia</div>
             <div class="dash-grid">
@@ -195,6 +193,18 @@
         if(aba === 'fichas') renderFichas();
     }
 
+    // --- MELHORIA: BUSCAR REFERÊNCIA DE CADA SÉRIE ---
+    function getSerieReferencia(nomeEx, indexSerie) {
+        const termo = nomeEx.toLowerCase().trim();
+        const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo)));
+        if (ultimo) {
+            const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
+            const serieData = exData.series[indexSerie];
+            if (serieData) return `Último: ${serieData.r} reps / ${serieData.p}kg`;
+        }
+        return "Sem histórico";
+    }
+
     function renderAtalhosFichas() {
         const container = document.getElementById('atalhosFicha');
         container.innerHTML = fichas.map(f => {
@@ -204,7 +214,7 @@
     }
 
     function carregarExerciciosDaFicha(txt) {
-        const linhas = txt.split('\n');
+        const linhas = txt.split('\\n');
         linhas.forEach(ex => { if (ex.trim()) { document.getElementById('exNome').value = ex.trim(); addEx(); } });
         document.getElementById('exNome').value = "";
     }
@@ -271,12 +281,30 @@
     function autorizarStrava() { const REDIRECT = encodeURIComponent(window.location.href.split('?')[0]); window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT}&approval_prompt=force&scope=activity:read_all`; }
     async function puxarAtividadesStrava() { if (!token) return alert("Conecte ao Strava primeiro!"); try { const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', { headers: { 'Authorization': `Bearer ${token}` } }); const activities = await r.json(); const container = document.getElementById('listaAtividadesStrava'); container.innerHTML = activities.map(act => `<div style="background:#2C2C2E; padding:10px; border-radius:10px; margin-top:5px; font-size:12px; cursor:pointer;" onclick="buscarDetalhesAtividade(${act.id})">🏃 ${act.name} (${new Date(act.start_date).toLocaleDateString()})</div>`).join(''); } catch (e) { alert("Erro ao buscar dados."); } }
     async function buscarDetalhesAtividade(id) { try { const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, { headers: { 'Authorization': `Bearer ${token}` } }); const data = await r.json(); document.getElementById('cC').value = Math.round(data.calories || 0); updateRingChart(); } catch (e) { alert("Erro ao buscar detalhes."); } }
-    function buscarReferencia(nome) { if (!nome || nome.length < 2) { document.getElementById('referenciaPeso').innerText = ""; return; } const termo = nome.toLowerCase().trim(); const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim() === termo)); if (ultimo) { const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim() === termo); const maiorPeso = Math.max(...exData.series.map(s => parseFloat(s.p) || 0)); document.getElementById('referenciaPeso').innerText = `💡 Último: ${maiorPeso}kg (${exData.series.length} spts)`; } else { document.getElementById('referenciaPeso').innerText = ""; } }
+    function buscarReferencia(nome) { if (!nome || nome.length < 2) { document.getElementById('referenciaPeso').innerText = ""; return; } const termo = nome.toLowerCase().trim(); const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo))); if (ultimo) { const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo)); const maiorPeso = Math.max(...exData.series.map(s => parseFloat(s.p) || 0)); document.getElementById('referenciaPeso').innerText = `💡 Último: ${maiorPeso}kg (${exData.series.length} spts)`; } else { document.getElementById('referenciaPeso').innerText = ""; } }
     function updateRingChart() { const meta = parseFloat(document.getElementById('metaDiaria').value) || 1; const musc = parseFloat(document.getElementById('cM').value) || 0; const cardio = parseFloat(document.getElementById('cC').value) || 0; const total = musc + cardio; document.getElementById('txtPorcentagem').innerText = Math.min(Math.round((total / meta) * 100), 100) + "%"; document.getElementById('txtCaloriasRing').innerText = total + " / " + meta + " kcal"; const data = { datasets: [{ data: [musc, cardio, Math.max(0, meta - total)], backgroundColor: ['#0A84FF', '#FC4C02', '#2C2C2E'], borderWidth: 0, cutout: '85%', borderRadius: 15 }] }; if (myRingChart) { myRingChart.data = data; myRingChart.update(); } else { myRingChart = new Chart(document.getElementById('ringChart').getContext('2d'), { type: 'doughnut', data: data, options: { plugins: { legend: false }, maintainAspectRatio: false } }); } }
     function addEx() { const n = document.getElementById('exNome').value; if(n) { sessao.push({ id: Date.now(), nome: n, series: [{ r: '', p: '' }] }); renderSessao(); document.getElementById('exNome').value = ""; } }
-    function renderSessao() { document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `<div class="ex-item-card"><div class="ex-header"><strong>${ex.nome}</strong><span onclick="sessao=sessao.filter(e=>e.id!=${ex.id});renderSessao();">✕</span></div>${ex.series.map((s, i) => `<div class="serie-row"><span>${i+1}º</span><input type="number" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[i].r=this.value"><input type="number" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[i].p=this.value"><span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(i,1);renderSessao();">✕</span></div>`).join('')}<button class="btn" style="background:#3A3A3C; color:white; padding:5px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:'',p:''});renderSessao();">+ Série</button></div>`).join(''); }
-    async function enviarParaPlanilha() { const p = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calM: Number(document.getElementById('cM').value), calC: Number(document.getElementById('cC').value), calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value), metaSalva: Number(document.getElementById('metaDiaria').value), exercicios: [...sessao] }; hist.push(p); saveRef(); location.reload(); }
+    
+    function renderSessao() { 
+        document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `
+            <div class="ex-item-card">
+                <div class="ex-header"><strong>${ex.nome}</strong><span onclick="sessao=sessao.filter(e=>e.id!=${ex.id});renderSessao();">✕</span></div>
+                ${ex.series.map((s, i) => {
+                    const ref = getSerieReferencia(ex.nome, i);
+                    return `
+                    <span class="ref-text">💡 ${ref}</span>
+                    <div class="serie-row"><span>${i+1}º</span>
+                    <input type="number" placeholder="R" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].r=this.value">
+                    <input type="number" placeholder="Kg" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].p=this.value">
+                    <span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(${i},1);renderSessao();">✕</span></div>`;
+                }).join('')}
+                <button class="btn" style="background:#3A3A3C; color:white; padding:5px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:'',p:''});renderSessao();">+ Série</button>
+            </div>`).join(''); 
+    }
 
+    async function enviarParaPlanilha() { const p = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calM: Number(document.getElementById('cM').value), calC: Number(document.getElementById('cC').value), calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value), metaSalva: Number(document.getElementById('metaDiaria').value), exercicios: [...sessao] }; hist.push(p); saveRef(); location.reload(); }
+    function renderCalendario() { const body = document.getElementById('calBody'); const now = new Date(); document.getElementById('mesAnoAtual').innerText = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }); body.innerHTML = ''; const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); for (let d = 1; d <= days; d++) { const ds = `${d.toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`; const t = hist.find(h => h.data === ds); body.innerHTML += `<div class="cal-day" onclick="mostrarDashCalendario('${ds}')">${d}${t ? `<canvas class="cal-ring-mini" id="cR-${d}"></canvas>` : ''}</div>`; if(t) setTimeout(() => { const ctx = document.getElementById(`cR-${d}`).getContext('2d'); new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [t.calM, t.calC, Math.max(0, (t.metaSalva||2000)-t.calTotal)], backgroundColor: ['#0A84FF', '#FC4C02', '#3A3A3C'], borderWidth: 0 }] }, options: { plugins: { legend: false } } }); }, 10); } }
+    function mostrarDashCalendario(dataString) { const treino = hist.find(h => h.data === dataString); const dash = document.getElementById('dashCalendario'); document.getElementById('dashDataTitulo').innerText = `📅 Métricas de ${dataString}`; if (treino) { const outras = Math.max(0, treino.calTotal - ((treino.calM || 0) + (treino.calC || 0))); document.getElementById('vTotal').innerText = `${treino.calTotal} kcal`; document.getElementById('vMusc').innerText = `${treino.calM} kcal`; document.getElementById('vCardio').innerText = `${treino.calC} kcal`; document.getElementById('vOutras').innerText = `${outras} kcal`; let htmlEx = "<strong>Exercícios:</strong><br>"; if (treino.exercicios && treino.exercicios.length > 0) { treino.exercicios.forEach(ex => { htmlEx += `• ${ex.nome} (${ex.series.length} séries)<br>`; }); } else { htmlEx += "Nenhum exercício registrado."; } document.getElementById('dashExercicios').innerHTML = htmlEx; } else { document.getElementById('vTotal').innerText = "Sem dados"; document.getElementById('vMusc').innerText = "-"; document.getElementById('vCardio').innerText = "-"; document.getElementById('vOutras').innerText = "-"; document.getElementById('dashExercicios').innerHTML = "Nenhuma atividade registrada neste dia."; } dash.style.display = 'block'; dash.scrollIntoView({ behavior: 'smooth' }); }
     function renderizarGraficoCaloriasEvolucao() { if (chartCalEvInstance) chartCalEvInstance.destroy(); const ctx = document.getElementById('chartCalEvolucao').getContext('2d'); const dados = hist.slice(-15); chartCalEvInstance = new Chart(ctx, { type: 'line', data: { labels: dados.map(d => d.data.split('/')[0]), datasets: [{ label: 'Cal Total', data: dados.map(d => d.calTotal), borderColor: '#30D158', tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } }); }
     function popularSelectExercicios() { const nomes = [...new Set(hist.flatMap(t => t.exercicios ? t.exercicios.map(e => e.nome) : []))]; document.getElementById('selectExGrafico').innerHTML = nomes.map(n => `<option value="${n}">${n}</option>`).join(''); renderizarGraficoEvolucao(); }
     function renderizarGraficoEvolucao() { const ex = document.getElementById('selectExGrafico').value; if(!ex) return; const dados = hist.filter(t => t.exercicios && t.exercicios.some(e => e.nome === ex)).map(t => ({ data: t.data, peso: Math.max(...t.exercicios.find(e => e.nome === ex).series.map(s => parseFloat(s.p) || 0)) })); if (chartCargaInstance) chartCargaInstance.destroy(); chartCargaInstance = new Chart(document.getElementById('chartCarga').getContext('2d'), { type: 'line', data: { labels: dados.map(d => d.data.split('/')[0]), datasets: [{ label: 'kg', data: dados.map(d => d.peso), borderColor: '#0A84FF' }] }, options: { responsive: true, maintainAspectRatio: false } }); }
@@ -287,54 +315,6 @@
 
     const code = new URLSearchParams(window.location.search).get('code');
     if (code) { fetch('https://www.strava.com/oauth/token', { method: 'POST', body: JSON.stringify({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code: code, grant_type: 'authorization_code' }), headers: { 'Content-Type': 'application/json' } }).then(r => r.json()).then(d => { if(d.access_token) { localStorage.setItem('strava_access_token', d.access_token); window.location.href = window.location.href.split('?')[0]; } }); }
-
-    /* --- LÓGICA ADICIONAL: CALENDÁRIO E DASHBOARD --- */
-    function renderCalendario() { 
-        const body = document.getElementById('calBody'); 
-        const now = new Date(); 
-        document.getElementById('mesAnoAtual').innerText = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }); 
-        body.innerHTML = ''; 
-        const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); 
-        for (let d = 1; d <= days; d++) { 
-            const ds = `${d.toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`; 
-            const t = hist.find(h => h.data === ds); 
-            body.innerHTML += `<div class="cal-day" onclick="mostrarDashCalendario('${ds}')">${d}${t ? `<canvas class="cal-ring-mini" id="cR-${d}"></canvas>` : ''}</div>`; 
-            if(t) setTimeout(() => { 
-                const ctx = document.getElementById(`cR-${d}`).getContext('2d'); 
-                new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [t.calM, t.calC, Math.max(0, (t.metaSalva||2000)-t.calTotal)], backgroundColor: ['#0A84FF', '#FC4C02', '#3A3A3C'], borderWidth: 0 }] }, options: { plugins: { legend: false } } }); 
-            }, 10); 
-        } 
-    }
-
-    function mostrarDashCalendario(dataString) {
-        const treino = hist.find(h => h.data === dataString);
-        const dash = document.getElementById('dashCalendario');
-        document.getElementById('dashDataTitulo').innerText = `📅 Métricas de ${dataString}`;
-        
-        if (treino) {
-            const outras = Math.max(0, treino.calTotal - ((treino.calM || 0) + (treino.calC || 0)));
-            document.getElementById('vTotal').innerText = `${treino.calTotal} kcal`;
-            document.getElementById('vMusc').innerText = `${treino.calM} kcal`;
-            document.getElementById('vCardio').innerText = `${treino.calC} kcal`;
-            document.getElementById('vOutras').innerText = `${outras} kcal`;
-            
-            let htmlEx = "<strong>Exercícios:</strong><br>";
-            if (treino.exercicios && treino.exercicios.length > 0) {
-                treino.exercicios.forEach(ex => {
-                    htmlEx += `• ${ex.nome} (${ex.series.length} séries)<br>`;
-                });
-            } else { htmlEx += "Nenhum exercício registrado."; }
-            document.getElementById('dashExercicios').innerHTML = htmlEx;
-        } else {
-            document.getElementById('vTotal').innerText = "Sem dados";
-            document.getElementById('vMusc').innerText = "-";
-            document.getElementById('vCardio').innerText = "-";
-            document.getElementById('vOutras').innerText = "-";
-            document.getElementById('dashExercicios').innerHTML = "Nenhuma atividade registrada neste dia.";
-        }
-        dash.style.display = 'block';
-        dash.scrollIntoView({ behavior: 'smooth' });
-    }
 
     window.addEventListener('DOMContentLoaded', () => { 
         switchTab('treinar'); 
