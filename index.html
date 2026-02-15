@@ -193,7 +193,6 @@
         if(aba === 'fichas') renderFichas();
     }
 
-    // --- MELHORIA: BUSCAR REFERÊNCIA DE CADA SÉRIE + TOTAL DE SÉRIES ---
     function getSerieReferencia(nomeEx, indexSerie) {
         const termo = nomeEx.toLowerCase().trim();
         const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo)));
@@ -283,7 +282,21 @@
     function autorizarStrava() { const REDIRECT = encodeURIComponent(window.location.href.split('?')[0]); window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT}&approval_prompt=force&scope=activity:read_all`; }
     async function puxarAtividadesStrava() { if (!token) return alert("Conecte ao Strava primeiro!"); try { const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', { headers: { 'Authorization': `Bearer ${token}` } }); const activities = await r.json(); const container = document.getElementById('listaAtividadesStrava'); container.innerHTML = activities.map(act => `<div style="background:#2C2C2E; padding:10px; border-radius:10px; margin-top:5px; font-size:12px; cursor:pointer;" onclick="buscarDetalhesAtividade(${act.id})">🏃 ${act.name} (${new Date(act.start_date).toLocaleDateString()})</div>`).join(''); } catch (e) { alert("Erro ao buscar dados."); } }
     async function buscarDetalhesAtividade(id) { try { const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, { headers: { 'Authorization': `Bearer ${token}` } }); const data = await r.json(); document.getElementById('cC').value = Math.round(data.calories || 0); updateRingChart(); } catch (e) { alert("Erro ao buscar detalhes."); } }
-    function buscarReferencia(nome) { if (!nome || nome.length < 2) { document.getElementById('referenciaPeso').innerText = ""; return; } const termo = nome.toLowerCase().trim(); const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo))); if (ultimo) { const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo)); const maiorPeso = Math.max(...exData.series.map(s => parseFloat(s.p) || 0)); document.getElementById('referenciaPeso').innerText = `💡 Último: ${maiorPeso}kg (${exData.series.length} spts)`; } else { document.getElementById('referenciaPeso').innerText = ""; } }
+    
+    // --- CORREÇÃO: BUSCAR REFERÊNCIA COMPLETA NA SUGESTÃO (BADGE VERDE) ---
+    function buscarReferencia(nome) {
+        if (!nome || nome.length < 2) { document.getElementById('referenciaPeso').innerText = ""; return; }
+        const termo = nome.toLowerCase().trim();
+        const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo)));
+        if (ultimo) {
+            const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
+            const totalSpts = exData.series.length;
+            // Pega os dados da primeira série como exemplo principal de reps/peso
+            const primeiraSerie = exData.series[0];
+            document.getElementById('referenciaPeso').innerText = `💡 Último: ${primeiraSerie.r} reps / ${primeiraSerie.p}kg (${totalSpts} séries)`;
+        } else { document.getElementById('referenciaPeso').innerText = ""; }
+    }
+
     function updateRingChart() { const meta = parseFloat(document.getElementById('metaDiaria').value) || 1; const musc = parseFloat(document.getElementById('cM').value) || 0; const cardio = parseFloat(document.getElementById('cC').value) || 0; const total = musc + cardio; document.getElementById('txtPorcentagem').innerText = Math.min(Math.round((total / meta) * 100), 100) + "%"; document.getElementById('txtCaloriasRing').innerText = total + " / " + meta + " kcal"; const data = { datasets: [{ data: [musc, cardio, Math.max(0, meta - total)], backgroundColor: ['#0A84FF', '#FC4C02', '#2C2C2E'], borderWidth: 0, cutout: '85%', borderRadius: 15 }] }; if (myRingChart) { myRingChart.data = data; myRingChart.update(); } else { myRingChart = new Chart(document.getElementById('ringChart').getContext('2d'), { type: 'doughnut', data: data, options: { plugins: { legend: false }, maintainAspectRatio: false } }); } }
     function addEx() { const n = document.getElementById('exNome').value; if(n) { sessao.push({ id: Date.now() + Math.random(), nome: n, series: [{ r: '', p: '' }] }); renderSessao(); document.getElementById('exNome').value = ""; } }
     
