@@ -158,6 +158,7 @@
         .content { display: none; }
         .content.active { display: block; }
         .strava-logo-img { height: 16px; filter: invert(38%) sepia(98%) saturate(3015%) hue-rotate(1deg) brightness(102%) contrast(105%); }
+        .strava-act-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin-bottom: 5px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -195,9 +196,13 @@
         <div class="card">
             <div class="section-title" style="color: var(--cardio);">🏃 Cardio</div>
             <input type="number" id="cC" placeholder="Calorias Cardio Manual" oninput="updateRingChart()">
-            <button class="btn btn-strava-outline" style="width: 100%" onclick="autorizarStrava()">
+            <button id="btnStravaMain" class="btn btn-strava-outline" style="width: 100%" onclick="autorizarStrava()">
                 Conectar <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
             </button>
+            <div id="stravaPanel" style="display:none; margin-top:10px;">
+                <p style="font-size:10px; color:var(--muted)">Atividades recentes:</p>
+                <div id="listaAtividadesStrava"></div>
+            </div>
         </div>
 
         <div class="card">
@@ -262,6 +267,7 @@
     let fichas = JSON.parse(localStorage.getItem('fichas_nikho')) || [];
     let token = localStorage.getItem('strava_access_token');
     const CLIENT_ID = '201889';
+    const CLIENT_SECRET = 'f9b59003e315ec7961d6c89e94d76941bd39c72b'; // Note: In production, secrets should not be client-side.
 
     function toggleTheme() {
         const body = document.body;
@@ -298,17 +304,6 @@
         document.getElementById('ring-outras-main').style.strokeDashoffset = 150.80 * (1 - Math.min(total/meta, 1));
     }
 
-    function getSerieReferencia(nomeEx, indexSerie) {
-        const termo = nomeEx.toLowerCase().trim();
-        const ultimo = hist.slice().reverse().find(t => (t.exercicios || []).some(e => e.nome.toLowerCase().trim().includes(termo)));
-        if (ultimo) {
-            const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
-            const serieData = exData.series[indexSerie];
-            if (serieData) return `Último: ${serieData.r} reps / ${serieData.p}kg (${exData.series.length} séries)`;
-        }
-        return "Sem histórico";
-    }
-
     function buscarReferencia(nome) {
         if (!nome || nome.length < 2) { document.getElementById('referenciaPeso').innerText = ""; return; }
         const termo = nome.toLowerCase().trim();
@@ -322,7 +317,18 @@
     function addEx() {
         const n = document.getElementById('exNome').value;
         if(n) {
-            sessao.push({ id: Date.now(), nome: n, series: [{ r: '', p: '' }] });
+            const termo = n.toLowerCase().trim();
+            const ultimo = hist.slice().reverse().find(t => (t.exercicios || []).some(e => e.nome.toLowerCase().trim().includes(termo)));
+            
+            let seriesIniciais = [{ r: '', p: '' }];
+            
+            // CARGA PROGRESSIVA AUTOMÁTICA: Se houver histórico, preenche com as mesmas séries e pesos
+            if (ultimo) {
+                const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
+                seriesIniciais = exData.series.map(s => ({ r: s.r, p: s.p }));
+            }
+
+            sessao.push({ id: Date.now(), nome: n, series: seriesIniciais });
             renderSessao();
             document.getElementById('exNome').value = "";
         }
@@ -332,18 +338,14 @@
         document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `
             <div class="ex-item-card">
                 <div style="display:flex; justify-content:space-between"><strong>${ex.nome}</strong> <span onclick="removerEx(${ex.id})">✕</span></div>
-                ${ex.series.map((s, i) => {
-                    const ref = getSerieReferencia(ex.nome, i);
-                    return `<span class="ref-text">💡 ${ref}</span>
+                ${ex.series.map((s, i) => `
                     <div class="serie-row">
                         <span>${i+1}º</span>
                         <input type="number" placeholder="R" value="${s.r}" onchange="editSerie(${ex.id}, ${i}, 'r', this.value)">
                         <input type="number" placeholder="Kg" value="${s.p}" onchange="editSerie(${ex.id}, ${i}, 'p', this.value)">
-                    </div>`;
-                }).join('')}
+                    </div>`).join('')}
                 <button class="btn-outline" style="width:100%" onclick="addSerie(${ex.id})">+ Série</button>
-            </div>
-        `).join('');
+            </div>`).join('');
     }
 
     function editSerie(id, i, f, v) { sessao.find(e => e.id === id).series[i][f] = v; }
@@ -388,12 +390,13 @@
                     <strong>${h.calTotal} kcal</strong>
                 </div>
                 <div class="hist-details-pane" onclick="event.stopPropagation()">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
                         <div><label style="font-size:10px">Total</label><input type="number" value="${h.calTotal}" onchange="updateHistValue('${h.id}', 'calTotal', this.value)"></div>
                         <div><label style="font-size:10px">Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)"></div>
                         <div><label style="font-size:10px; color:var(--cardio)">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
                         <div><label style="font-size:10px; color:var(--primary)">💪 Musc.</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
                     </div>
+                    <strong>Exercícios:</strong>
                     ${(h.exercicios || []).map((ex, exIdx) => `
                         <div style="background:var(--bg); padding:8px; border-radius:10px; margin-top:5px;">
                             <input type="text" value="${ex.nome}" onchange="updateHistEx('${h.id}', ${exIdx}, this.value)">
@@ -401,10 +404,8 @@
                                 <div style="display:flex; gap:5px;">
                                     <input type="number" value="${s.r}" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'r', this.value)">
                                     <input type="number" value="${s.p}" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'p', this.value)">
-                                </div>
-                            `).join('')}
-                        </div>
-                    `).join('')}
+                                </div>`).join('')}
+                        </div>`).join('')}
                     <button class="btn-outline" style="width:100%; margin-top:10px; border-color:#FF453A; color:#FF453A" onclick="apagarTreino('${h.id}')">Excluir</button>
                 </div>
             </div>`;
@@ -462,11 +463,76 @@
     }
     function exportarDados() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({hist, fichas})], {type: 'application/json'})); a.download = 'nikho_backup.json'; a.click(); }
     function importarDados(i) { const r = new FileReader(); r.onload = () => { const d = JSON.parse(r.result); localStorage.setItem('hist_nikho', JSON.stringify(d.hist)); localStorage.setItem('fichas_nikho', JSON.stringify(d.fichas)); location.reload(); }; r.readAsText(i.files[0]); }
-    function autorizarStrava() { window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(window.location.href.split('?')[0])}&approval_prompt=force&scope=activity:read_all`; }
+    
+    // --- LÓGICA STRAVA CORRIGIDA ---
+    function autorizarStrava() { 
+        const REDIRECT_URI = window.location.href.split('?')[0];
+        window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&approval_prompt=force&scope=activity:read_all`; 
+    }
 
-    window.onload = () => {
+    async function puxarAtividadesStrava() {
+        if (!token) return;
+        try {
+            const r = await fetch(`https://www.strava.com/api/v3/athlete/activities?per_page=5`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const activities = await r.json();
+            const list = document.getElementById('listaAtividadesStrava');
+            list.innerHTML = activities.map(act => `
+                <div class="strava-act-item" onclick="importarCaloriasStrava(${act.calories || 0})">
+                    <b>${act.name}</b><br>
+                    ${Math.round(act.calories || 0)} kcal • ${new Date(act.start_date).toLocaleDateString()}
+                </div>
+            `).join('');
+            document.getElementById('stravaPanel').style.display = 'block';
+        } catch (e) { console.error("Erro Strava:", e); }
+    }
+
+    function importarCaloriasStrava(cal) {
+        if(cal > 0) {
+            document.getElementById('cC').value = Math.round(cal);
+            updateRingChart();
+            alert("Calorias importadas!");
+        } else {
+            alert("Esta atividade não possui dados de calorias.");
+        }
+    }
+
+    // Processamento do retorno do Strava
+    window.onload = async () => {
         const savedTheme = localStorage.getItem('theme_nikho');
         if(savedTheme === 'performance') document.body.setAttribute('data-theme', 'performance');
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        
+        if (code) {
+            // Limpa a URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            try {
+                const response = await fetch('https://www.strava.com/api/v3/oauth/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        client_id: CLIENT_ID,
+                        client_secret: CLIENT_SECRET,
+                        code: code,
+                        grant_type: 'authorization_code'
+                    })
+                });
+                const data = await response.json();
+                if(data.access_token) {
+                    token = data.access_token;
+                    localStorage.setItem('strava_access_token', token);
+                    document.getElementById('btnStravaMain').innerText = "✅ Strava Conectado";
+                    puxarAtividadesStrava();
+                }
+            } catch (e) { console.error("Erro na troca de token:", e); }
+        } else if (token) {
+            puxarAtividadesStrava();
+        }
+        
         switchTab('treinar');
     };
 </script>
