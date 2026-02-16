@@ -158,7 +158,8 @@
         .content { display: none; }
         .content.active { display: block; }
         .strava-logo-img { height: 16px; filter: invert(38%) sepia(98%) saturate(3015%) hue-rotate(1deg) brightness(102%) contrast(105%); }
-        .strava-act-item { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; margin-bottom: 5px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); }
+        .strava-act-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 13px; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; }
+        .strava-act-item:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
@@ -197,10 +198,11 @@
             <div class="section-title" style="color: var(--cardio);">🏃 Cardio</div>
             <input type="number" id="cC" placeholder="Calorias Cardio Manual" oninput="updateRingChart()">
             <button id="btnStravaMain" class="btn btn-strava-outline" style="width: 100%" onclick="autorizarStrava()">
+               <svg class="strava-icon" style="width:18px; height:18px; fill:currentColor; margin-right:8px;" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
                 Conectar <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
             </button>
             <div id="stravaPanel" style="display:none; margin-top:10px;">
-                <p style="font-size:10px; color:var(--muted)">Atividades recentes:</p>
+                <p style="font-size:10px; color:var(--muted); margin-bottom: 8px;">Toque na atividade para importar calorias:</p>
                 <div id="listaAtividadesStrava"></div>
             </div>
         </div>
@@ -267,7 +269,7 @@
     let fichas = JSON.parse(localStorage.getItem('fichas_nikho')) || [];
     let token = localStorage.getItem('strava_access_token');
     const CLIENT_ID = '201889';
-    const CLIENT_SECRET = 'f9b59003e315ec7961d6c89e94d76941bd39c72b'; // Note: In production, secrets should not be client-side.
+    const CLIENT_SECRET = 'f9b59003e315ec7961d6c89e94d76941bd39c72b';
 
     function toggleTheme() {
         const body = document.body;
@@ -319,15 +321,11 @@
         if(n) {
             const termo = n.toLowerCase().trim();
             const ultimo = hist.slice().reverse().find(t => (t.exercicios || []).some(e => e.nome.toLowerCase().trim().includes(termo)));
-            
             let seriesIniciais = [{ r: '', p: '' }];
-            
-            // CARGA PROGRESSIVA AUTOMÁTICA: Se houver histórico, preenche com as mesmas séries e pesos
             if (ultimo) {
                 const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
                 seriesIniciais = exData.series.map(s => ({ r: s.r, p: s.p }));
             }
-
             sessao.push({ id: Date.now(), nome: n, series: seriesIniciais });
             renderSessao();
             document.getElementById('exNome').value = "";
@@ -396,7 +394,6 @@
                         <div><label style="font-size:10px; color:var(--cardio)">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
                         <div><label style="font-size:10px; color:var(--primary)">💪 Musc.</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
                     </div>
-                    <strong>Exercícios:</strong>
                     ${(h.exercicios || []).map((ex, exIdx) => `
                         <div style="background:var(--bg); padding:8px; border-radius:10px; margin-top:5px;">
                             <input type="text" value="${ex.nome}" onchange="updateHistEx('${h.id}', ${exIdx}, this.value)">
@@ -473,32 +470,37 @@
     async function puxarAtividadesStrava() {
         if (!token) return;
         try {
+            // Busca a listagem básica
             const r = await fetch(`https://www.strava.com/api/v3/athlete/activities?per_page=5`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const activities = await r.json();
+            
             const list = document.getElementById('listaAtividadesStrava');
-            list.innerHTML = activities.map(act => `
-                <div class="strava-act-item" onclick="importarCaloriasStrava(${act.calories || 0})">
-                    <b>${act.name}</b><br>
-                    ${Math.round(act.calories || 0)} kcal • ${new Date(act.start_date).toLocaleDateString()}
-                </div>
-            `).join('');
+            list.innerHTML = '';
+
+            for (let act of activities) {
+                // Para cada atividade, busca o detalhe para obter as calorias (que não vêm na listagem padrão)
+                const detailR = await fetch(`https://www.strava.com/api/v3/activities/${act.id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const detailData = await detailR.json();
+                const calories = Math.round(detailData.calories || 0);
+
+                const item = document.createElement('div');
+                item.className = 'strava-act-item';
+                item.innerHTML = `<b>${act.name}</b><br>${calories} kcal • ${new Date(act.start_date).toLocaleDateString()}`;
+                item.onclick = () => {
+                    document.getElementById('cC').value = calories;
+                    updateRingChart();
+                    alert(`Calorias (${calories}) importadas de "${act.name}"`);
+                };
+                list.appendChild(item);
+            }
             document.getElementById('stravaPanel').style.display = 'block';
         } catch (e) { console.error("Erro Strava:", e); }
     }
 
-    function importarCaloriasStrava(cal) {
-        if(cal > 0) {
-            document.getElementById('cC').value = Math.round(cal);
-            updateRingChart();
-            alert("Calorias importadas!");
-        } else {
-            alert("Esta atividade não possui dados de calorias.");
-        }
-    }
-
-    // Processamento do retorno do Strava
     window.onload = async () => {
         const savedTheme = localStorage.getItem('theme_nikho');
         if(savedTheme === 'performance') document.body.setAttribute('data-theme', 'performance');
@@ -507,9 +509,7 @@
         const code = urlParams.get('code');
         
         if (code) {
-            // Limpa a URL
             window.history.replaceState({}, document.title, window.location.pathname);
-            
             try {
                 const response = await fetch('https://www.strava.com/api/v3/oauth/token', {
                     method: 'POST',
@@ -525,14 +525,14 @@
                 if(data.access_token) {
                     token = data.access_token;
                     localStorage.setItem('strava_access_token', token);
-                    document.getElementById('btnStravaMain').innerText = "✅ Strava Conectado";
+                    document.getElementById('btnStravaMain').innerHTML = `✅ Strava Conectado <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">`;
                     puxarAtividadesStrava();
                 }
-            } catch (e) { console.error("Erro na troca de token:", e); }
+            } catch (e) { console.error("Erro troca token:", e); }
         } else if (token) {
+            document.getElementById('btnStravaMain').innerHTML = `✅ Strava Conectado <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">`;
             puxarAtividadesStrava();
         }
-        
         switchTab('treinar');
     };
 </script>
