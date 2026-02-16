@@ -126,7 +126,7 @@
             <input type="number" id="cC" placeholder="Calorias Cardio Manual" oninput="updateRingChart()">
             <button id="btnConnectStrava" class="btn btn-strava-outline" onclick="autorizarStrava()">
                 <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                Conectar <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
+                Conectar Strava
             </button>
             <div id="stravaAcoes" style="display:none; margin-top:10px;">
                 <button class="btn btn-strava-outline" onclick="puxarAtividadesStrava()">Conectar Strava</button>
@@ -242,61 +242,13 @@
         document.getElementById('ring-outras-main').style.strokeDashoffset = 150.80 * (1 - pTotal);
     }
 
-    // FUNÇÕES DE REFERÊNCIA (PESO/REP/SÉRIES)
-    function getSerieReferencia(nomeEx, indexSerie) {
-        const termo = nomeEx.toLowerCase().trim();
-        const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo)));
-        if (ultimo) {
-            const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
-            const totalSeries = exData.series.length;
-            const serieData = exData.series[indexSerie];
-            if (serieData) return `Último: ${serieData.r} reps / ${serieData.p}kg (${totalSeries} séries)`;
-            return `Último: [Fim do histórico] (${totalSeries} séries totais)`;
-        }
-        return "Sem histórico";
-    }
-
-    function buscarReferencia(nome) {
-        if (!nome || nome.length < 2) {
-            document.getElementById('referenciaPeso').innerText = "";
-            return;
-        }
-        const termo = nome.toLowerCase().trim();
-        const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo)));
-        if (ultimo) {
-            const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
-            const primeira = exData.series[0];
-            document.getElementById('referenciaPeso').innerText = `💡 Último: ${primeira.r} reps / ${primeira.p}kg (${exData.series.length} séries)`;
-        } else {
-            document.getElementById('referenciaPeso').innerText = "";
-        }
-    }
-
-    function renderSessao() {
-        document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `
-            <div class="ex-item-card">
-                <div class="ex-header"><strong>${ex.nome}</strong><span onclick="sessao=sessao.filter(e=>e.id!=${ex.id});renderSessao();">✕</span></div>
-                ${ex.series.map((s, i) => {
-                    const ref = getSerieReferencia(ex.nome, i);
-                    return `
-                    <span class="ref-text">💡 ${ref}</span>
-                    <div class="serie-row">
-                        <span>${i+1}º</span>
-                        <input type="number" placeholder="R" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].r=this.value">
-                        <input type="number" placeholder="Kg" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].p=this.value">
-                        <span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(${i},1);renderSessao();">✕</span>
-                    </div>`;
-                }).join('')}
-                <button class="btn" style="background:#3A3A3C; color:white; padding:5px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:'',p:''});renderSessao();">+ Série</button>
-            </div>`).join('');
-    }
-
     function renderHistInferior() {
         const container = document.getElementById('historicoInferior');
         container.innerHTML = hist.slice().reverse().slice(0, 10).map(h => {
             const m = h.metaSalva || 2000;
             const perc = Math.round((h.calTotal/m)*100);
             const isMeta = perc >= 100 ? 'meta-atingida' : '';
+            const outras = Math.max(0, h.calTotal - (h.calM + h.calC));
             return `
             <div class="historico-item" id="hist-${h.id}" onclick="toggleExpand('${h.id}')">
                 <div class="hist-header">
@@ -309,6 +261,7 @@
                         <div class="cal-summary">
                             <div class="tag-row"><span class="tag-cardio">🏃 ${h.calC || 0}</span></div>
                             <div class="tag-row"><span class="tag-musc">💪 ${h.calM || 0}</span></div>
+                            <div class="tag-row"><span class="tag-diff" style="color:var(--outras)">🌿 ${outras}</span></div>
                         </div>
                     </div>
                     <div style="text-align:right"><strong>${h.calTotal}</strong><br><small>▼</small></div>
@@ -322,6 +275,7 @@
                     </div>
                     <label style="font-size:10px;">🎯 Meta</label>
                     <input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
+                    
                     <div style="margin-top:10px;">
                         <strong>Exercícios:</strong>
                         ${(h.exercicios || []).map((ex, exIdx) => `
@@ -342,7 +296,21 @@
         }).join('');
         hist.slice().reverse().slice(0, 10).forEach(h => {
             const ctx = document.getElementById(`ringSmall-${h.id}`).getContext('2d');
-            new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [h.calC, h.calM, Math.max(0, h.calTotal - (h.calM + h.calC))], backgroundColor: ['#FC4C02', '#0A84FF', '#30D158'], borderWidth: 0, cutout: '80%' }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } });
+            const meta = h.metaSalva || 2000;
+            const preenchimento = Math.min(h.calTotal, meta);
+            const vazio = Math.max(0, meta - h.calTotal);
+            new Chart(ctx, { 
+                type: 'doughnut', 
+                data: { 
+                    datasets: [{ 
+                        data: [h.calC, h.calM, Math.max(0, preenchimento - (h.calC + h.calM)), vazio], 
+                        backgroundColor: ['#FC4C02', '#0A84FF', '#30D158', '#3A3A3C'], 
+                        borderWidth: 0, 
+                        cutout: '80%' 
+                    }] 
+                }, 
+                options: { plugins: { legend: false }, maintainAspectRatio: false } 
+            });
         });
     }
 
@@ -365,14 +333,32 @@
             body.innerHTML += `<div class="cal-day" onclick="mostrarDashCalendario('${ds}')">${d}${t ? `<canvas class="cal-ring-mini ${isMeta}" id="cR-${d}"></canvas>` : ''}</div>`; 
             if(t) setTimeout(() => { 
                 const ctx = document.getElementById(`cR-${d}`).getContext('2d'); 
-                new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [t.calC, t.calM, Math.max(0, t.calTotal - (t.calM + t.calC))], backgroundColor: ['#FC4C02', '#0A84FF', '#30D158'], borderWidth: 0 }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } }); 
+                const meta = t.metaSalva || 2000;
+                const preenchimento = Math.min(t.calTotal, meta);
+                const vazio = Math.max(0, meta - t.calTotal);
+                new Chart(ctx, { 
+                    type: 'doughnut', 
+                    data: { 
+                        datasets: [{ 
+                            data: [t.calC, t.calM, Math.max(0, preenchimento - (t.calC + t.calM)), vazio], 
+                            backgroundColor: ['#FC4C02', '#0A84FF', '#30D158', '#3A3A3C'], 
+                            borderWidth: 0 
+                        }] 
+                    }, 
+                    options: { plugins: { legend: false }, maintainAspectRatio: false } 
+                }); 
             }, 10); 
         } 
     }
 
+    // Funções de Referência
+    function getSerieReferencia(nomeEx, indexSerie) { const termo = nomeEx.toLowerCase().trim(); const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo))); if (ultimo) { const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo)); const serieData = exData.series[indexSerie]; if (serieData) return `Último: ${serieData.r} reps / ${serieData.p}kg (${exData.series.length} séries)`; } return "Sem histórico"; }
+    function buscarReferencia(nome) { if (!nome || nome.length < 2) { document.getElementById('referenciaPeso').innerText = ""; return; } const termo = nome.toLowerCase().trim(); const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo))); if (ultimo) { const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo)); const primeira = exData.series[0]; document.getElementById('referenciaPeso').innerText = `💡 Último: ${primeira.r} reps / ${primeira.p}kg (${exData.series.length} séries)`; } else { document.getElementById('referenciaPeso').innerText = ""; } }
+    
     // Funcionalidades preservadas
     function renderAtalhosFichas() { const container = document.getElementById('atalhosFicha'); container.innerHTML = fichas.map(f => `<button class="btn-outline" onclick="carregarExerciciosDaFicha('${f.txt.replace(/'/g, "\\'").replace(/\n/g, "\\n")}')">${f.t}</button>`).join(''); }
     function carregarExerciciosDaFicha(txt) { txt.split(/\\n|\n/).forEach(ex => { if (ex.trim()) sessao.push({ id: Date.now() + Math.random(), nome: ex.trim(), series: [{ r: '', p: '' }] }); }); renderSessao(); }
+    function renderSessao() { document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `<div class="ex-item-card"><div class="ex-header"><strong>${ex.nome}</strong><span onclick="sessao=sessao.filter(e=>e.id!=${ex.id});renderSessao();">✕</span></div>${ex.series.map((s, i) => `<div class="serie-row"><span>${i+1}º</span><input type="number" placeholder="R" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].r=this.value"><input type="number" placeholder="Kg" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].p=this.value"><span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(${i},1);renderSessao();">✕</span></div>`).join('')}<button class="btn" style="background:#3A3A3C; color:white; padding:5px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:'',p:''});renderSessao();">+ Série</button></div>`).join(''); }
     function toggleExpand(id) { document.getElementById(`hist-${id}`).classList.toggle('expanded'); }
     function saveRef() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); }
     function apagarTreino(id) { if(confirm("Apagar?")) { hist = hist.filter(h => h.id != id); saveRef(); renderHistInferior(); } }
@@ -397,4 +383,3 @@
 </script>
 </body>
 </html>
-
