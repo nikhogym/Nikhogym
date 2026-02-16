@@ -15,6 +15,7 @@
     <style>
         /* --- ARQUITETURA DE TEMAS --- */
         :root {
+            /* Tema 1: Apple Neon */
             --bg: #000000;
             --card: #1C1C1E;
             --input-bg: #2C2C2E;
@@ -29,9 +30,16 @@
             --tab-pos-top: 0;
             --tab-pos-bottom: auto;
             --tab-transform: none;
+            
+            /* Emojis Apple */
+            --emoji-treinar: "💪";
+            --emoji-fichas: "📋";
+            --emoji-calendario: "📅";
+            --emoji-evolucao: "📈";
         }
 
         [data-theme="performance"] {
+            /* Tema 2: Performance */
             --bg: #0D1117;
             --card: #161B22;
             --input-bg: #0D1117;
@@ -46,131 +54,459 @@
             --tab-pos-top: auto;
             --tab-pos-bottom: 20px;
             --tab-transform: translateX(-50%);
+            
+            /* Emojis Performance */
+            --emoji-treinar: "🔥";
+            --emoji-fichas: "🎯";
+            --emoji-calendario: "⚡";
+            --emoji-evolucao: "🏆";
+        }
+
+        [data-theme="ecosystem"] {
+            /* Tema 3: Ecosystem Premium Tech */
+            --bg: #08090a; 
+            --card: rgba(18, 20, 24, 0.8); 
+            --input-bg: #1a1d23; 
+            --text: #f0f2f5;
+            --muted: #9ba3af;
+            --border: #2d333b;
+            --primary: #00ffa3; 
+            --cardio: #ff4d00; 
+            --outras: #00ffa3;
+            --radius-card: 24px;
+            --radius-btn: 14px;
+            --tab-pos-top: auto;
+            --tab-pos-bottom: 25px;
+            --tab-transform: translateX(-50%);
+            
+            /* Emojis Ecosystem Tech */
+            --emoji-treinar: "🤖";
+            --emoji-fichas: "📡";
+            --emoji-calendario: "🗓️";
+            --emoji-evolucao: "🧬";
+        }
+
+        [data-theme="nebula"] {
+            /* Tema 4: Nebula */
+            --bg: #0f0c29; 
+            --card: rgba(255, 255, 255, 0.05); 
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --text: #e0e7ff;
+            --muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --primary: #d946ef; 
+            --cardio: #8b5cf6;
+            --outras: #06b6d4;
+            --radius-card: 20px;
+            --radius-btn: 50px;
+            --tab-pos-top: auto;
+            --tab-pos-bottom: 25px;
+            --tab-transform: translateX(-50%);
+            
+            /* Emojis Nebula */
+            --emoji-treinar: "🪐";
+            --emoji-fichas: "💠";
+            --emoji-calendario: "🌌";
+            --emoji-evolucao: "🚀";
+        }
+
+        [data-theme="titanium"] {
+            /* Tema 5: Titanium Pro */
+            --bg: #1c1c1e;
+            --card: #2c2c2e;
+            --input-bg: #3a3a3c;
+            --text: #f2f2f7;
+            --muted: #aeaeb2;
+            --border: #48484a;
+            --primary: #ff9f0a;
+            --cardio: #ff453a;
+            --outras: #32d74b;
+            --radius-card: 16px;
+            --radius-btn: 12px;
+            --tab-pos-top: auto;
+            --tab-pos-bottom: 25px;
+            --tab-transform: translateX(-50%);
+            
+            /* Emojis Titanium */
+            --emoji-treinar: "🏋️";
+            --emoji-fichas: "🗒️";
+            --emoji-calendario: "📆";
+            --emoji-evolucao: "📊";
+        }
+
+        [data-theme="vitality"] {
+            /* Tema 6: Vitality */
+            --bg: #12100e; 
+            --card: #1f1b18; 
+            --input-bg: #2b2622;
+            --text: #f5e6d3; 
+            --muted: #a89f91;
+            --border: #3d342b;
+            --primary: #fbbf24; 
+            --cardio: #f87171;  
+            --outras: #34d399;  
+            --radius-card: 26px;
+            --radius-btn: 18px;
+            --tab-pos-top: auto;
+            --tab-pos-bottom: 25px;
+            --tab-transform: translateX(-50%);
+            
+            /* Emojis Vitality */
+            --emoji-treinar: "🦁";
+            --emoji-fichas: "📜";
+            --emoji-calendario: "🌅";
+            --emoji-evolucao: "✨";
+        }
+
+        [data-theme="aurora"] {
+            /* Tema 7: Aurora */
+            --bg: #041C2C; 
+            --card: rgba(255, 255, 255, 0.08); 
+            --input-bg: rgba(0, 0, 0, 0.2);
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --border: rgba(94, 234, 212, 0.2);
+            --primary: #5eead4; 
+            --cardio: #a855f7;  
+            --outras: #2dd4bf;  
+            --radius-card: 20px;
+            --radius-btn: 50px;
+            --tab-pos-top: auto;
+            --tab-pos-bottom: 25px;
+            --tab-transform: translateX(-50%);
+            
+            /* Emojis Aurora */
+            --emoji-treinar: "🏔️";
+            --emoji-fichas: "🧊";
+            --emoji-calendario: "🌙";
+            --emoji-evolucao: "💠";
+        }
+
+        [data-theme="volt"] {
+            /* Tema 8: Volt */
+            --bg: #0a0a0a;
+            --card: #141414;
+            --input-bg: #262626;
+            --text: #ffffff;
+            --muted: #808080;
+            --border: #333333;
+            --primary: #ccff00; 
+            --cardio: #ff0055;  
+            --outras: #00e5ff;  
+            --radius-card: 4px; 
+            --radius-btn: 4px;
+            --tab-pos-top: auto;
+            --tab-pos-bottom: 25px;
+            --tab-transform: translateX(-50%);
+            
+            /* Emojis Volt */
+            --emoji-treinar: "⚡";
+            --emoji-fichas: "🔋";
+            --emoji-calendario: "⏱️";
+            --emoji-evolucao: "🚀";
+        }
+
+        [data-theme="apex"] {
+            /* Tema 9: Apex */
+            --bg: #1a1a1a;
+            --card: #252525;
+            --input-bg: #333333;
+            --text: #ffffff;
+            --muted: #b0b0b0;
+            --border: #C0C0C0;
+            --primary: #FF0000; 
+            --cardio: #C0C0C0;  
+            --outras: #FF0000;
+            --radius-card: 10px;
+            --radius-btn: 20px;
+            --tab-pos-top: auto;
+            --tab-pos-bottom: 25px;
+            --tab-transform: translateX(-50%);
+            
+            /* Emojis Apex */
+            --emoji-treinar: "🥊";
+            --emoji-fichas: "🏎️";
+            --emoji-calendario: "🏁";
+            --emoji-evolucao: "🔺";
+        }
+
+        [data-theme="liquid"] {
+            /* Tema 10: Liquid Glass (Novo - Vidro Líquido) */
+            --bg: #001f3f;
+            --card: rgba(255, 255, 255, 0.1);
+            --input-bg: rgba(0, 0, 0, 0.25);
+            --text: #e0f7fa;
+            --muted: #81d4fa;
+            --border: rgba(0, 255, 255, 0.25);
+            --primary: #00ffff; /* Ciano Neon */
+            --cardio: #ff0055;  /* Rosa Neon para contraste */
+            --outras: #00e676;  /* Verde Água */
+            --radius-card: 24px;
+            --radius-btn: 20px;
+            --tab-pos-top: auto;
+            --tab-pos-bottom: 25px;
+            --tab-transform: translateX(-50%);
+            
+            /* Emojis Liquid */
+            --emoji-treinar: "💧";
+            --emoji-fichas: "🌊";
+            --emoji-calendario: "🏄";
+            --emoji-evolucao: "🐳";
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body { 
             font-family: -apple-system, system-ui, sans-serif; 
             background: var(--bg); 
             color: var(--text); 
             margin: 0; 
             padding: 10px; 
-            padding-top: 80px; 
+            padding-top: 100px;
             transition: all 0.3s ease;
         }
 
-        [data-theme="performance"] body { padding-top: 20px; padding-bottom: 100px; }
+        /* Backgrounds Especiais */
+        [data-theme="ecosystem"] body {
+            background-image: 
+                linear-gradient(var(--border) 1.5px, transparent 1.5px),
+                linear-gradient(90deg, var(--border) 1.5px, transparent 1.5px);
+            background-size: 40px 40px;
+            background-attachment: fixed;
+        }
+
+        [data-theme="nebula"] body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background-attachment: fixed;
+        }
+
+        [data-theme="titanium"] body {
+            background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
+            background-attachment: fixed;
+        }
+
+        [data-theme="vitality"] body {
+            background: radial-gradient(circle at top, #2a1f16, #12100e 70%);
+            background-attachment: fixed;
+        }
+
+        [data-theme="aurora"] body {
+            background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+            background-attachment: fixed;
+        }
+
+        [data-theme="volt"] body {
+            background-image: repeating-linear-gradient(45deg, #111 0, #111 2px, transparent 0, transparent 50%);
+            background-size: 10px 10px;
+            background-attachment: fixed;
+        }
+
+        [data-theme="apex"] body {
+            background-image: radial-gradient(#333 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-color: #1a1a1a;
+            background-attachment: fixed;
+        }
+
+        [data-theme="liquid"] body {
+            background: radial-gradient(circle at center, #004e92, #000428);
+            background-attachment: fixed;
+        }
+
+        [data-theme="performance"] body, 
+        [data-theme="ecosystem"] body,
+        [data-theme="nebula"] body,
+        [data-theme="titanium"] body,
+        [data-theme="vitality"] body,
+        [data-theme="aurora"] body,
+        [data-theme="volt"] body,
+        [data-theme="apex"] body,
+        [data-theme="liquid"] body { 
+            padding-top: 80px; 
+            padding-bottom: 120px; 
+        }
 
         .theme-switcher {
-            position: fixed; top: 20px; right: 15px; z-index: 2000;
+            position: fixed; top: 20px; right: 15px; z-index: 4000;
             background: var(--primary); color: #000; border: none;
             padding: 8px 12px; border-radius: 20px; font-size: 10px;
             font-weight: 900; text-transform: uppercase;
             box-shadow: 0 0 15px var(--primary); cursor: pointer;
+            transition: 0.3s;
         }
 
+        [data-theme="titanium"] .theme-switcher { background: #636366; color: #fff; box-shadow: none; border: 1px solid #8e8e93; }
+        [data-theme="vitality"] .theme-switcher { background: linear-gradient(90deg, #fbbf24, #f59e0b); color: #12100e; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); }
+        [data-theme="aurora"] .theme-switcher { background: rgba(94, 234, 212, 0.2); color: #5eead4; border: 1px solid #5eead4; backdrop-filter: blur(10px); box-shadow: 0 0 15px rgba(94, 234, 212, 0.2); }
+        [data-theme="volt"] .theme-switcher { background: #000; color: var(--primary); border: 1px solid var(--primary); box-shadow: 0 0 10px var(--primary); }
+        [data-theme="apex"] .theme-switcher { background: #FF0000; color: white; box-shadow: 0 0 15px rgba(255, 0, 0, 0.6); }
+        [data-theme="liquid"] .theme-switcher { background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid #00ffff; backdrop-filter: blur(8px); box-shadow: 0 0 20px rgba(0, 255, 255, 0.4); }
+
         .tabs { 
-            display: flex; gap: 5px; position: fixed; 
+            display: flex; gap: 12px; 
+            position: fixed; 
             top: var(--tab-pos-top); bottom: var(--tab-pos-bottom); 
             left: 0; right: 0; 
             background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 15px 10px; 
-            z-index: 1000; border-bottom: 1px solid var(--border);
+            z-index: 2000; border-bottom: 1px solid var(--border);
             transform: var(--tab-transform);
         }
 
-        [data-theme="performance"] .tabs {
-            left: 50%; width: 90%; max-width: 400px; 
-            border-radius: 20px; border: 1px solid var(--border);
-            background: rgba(22, 27, 34, 0.95);
+        [data-theme="performance"] .tabs,
+        [data-theme="ecosystem"] .tabs,
+        [data-theme="nebula"] .tabs,
+        [data-theme="titanium"] .tabs,
+        [data-theme="vitality"] .tabs,
+        [data-theme="aurora"] .tabs,
+        [data-theme="volt"] .tabs,
+        [data-theme="apex"] .tabs,
+        [data-theme="liquid"] .tabs {
+            left: 50%; width: 92%; max-width: 420px; 
+            border-radius: 25px; border: 1px solid var(--border);
+            background: rgba(22, 27, 34, 0.85);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+            padding: 10px;
         }
+
+        [data-theme="nebula"] .tabs, 
+        [data-theme="aurora"] .tabs { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); }
+        
+        [data-theme="liquid"] .tabs { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(15px); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); }
+
+        [data-theme="titanium"] .tabs { background: rgba(44, 44, 46, 0.9); border: 1px solid #48484a; }
+        [data-theme="vitality"] .tabs { background: rgba(31, 27, 24, 0.9); border: 1px solid #3d342b; }
+        [data-theme="volt"] .tabs { border-radius: 4px; border: 1px solid var(--primary); background: #000; box-shadow: 0 0 15px rgba(204, 255, 0, 0.15); }
+        [data-theme="apex"] .tabs { background: #252525; border: 1px solid #FF0000; box-shadow: 0 0 15px rgba(255, 0, 0, 0.2); }
 
         .tab-btn { 
-            flex: 1; padding: 10px 5px; border: none; border-radius: 12px; 
+            flex: 1; padding: 12px 5px; border: none; border-radius: 14px; 
             background: var(--input-bg); color: var(--muted); font-weight: bold; font-size: 10px; 
+            transition: 0.2s;
         }
-        .tab-btn.active { background: var(--primary); color: white; }
-        [data-theme="performance"] .tab-btn.active { color: #000; }
-
-        .card { 
-            background: var(--card); padding: 20px; border-radius: var(--radius-card); 
-            margin-bottom: 15px; border: 1px solid var(--border); position: relative; overflow: hidden;
-        }
+        .tab-btn.active { background: var(--primary); color: white; transform: scale(1.05); }
         
-        [data-theme="performance"] .card::before {
-            content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-            background: var(--primary); opacity: 0.7;
-        }
-
-        .section-title { 
-            font-size: 16px; margin-bottom: 15px; font-weight: bold; 
-            color: var(--primary); display: flex; align-items: center; gap: 8px; 
-        }
-
-        input, select, textarea { 
-            background: var(--input-bg); border: 1px solid var(--border); 
-            border-radius: 12px; color: white; padding: 12px; width: 100%; 
-            margin-bottom: 10px; font-size: 14px; outline: none; 
-        }
+        [data-theme="performance"] .tab-btn.active,
+        [data-theme="ecosystem"] .tab-btn.active { color: #000; }
         
-        .btn { 
-            width: 100%; padding: 16px; border: none; border-radius: var(--radius-btn); 
-            font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; 
-            margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; 
-        }
+        [data-theme="nebula"] .tab-btn.active { background: linear-gradient(90deg, var(--primary), var(--cardio)); color: white; box-shadow: 0 0 15px var(--primary); }
+        [data-theme="titanium"] .tab-btn.active { background: #636366; color: #ff9f0a; border: 1px solid #ff9f0a; }
+        [data-theme="vitality"] .tab-btn.active { background: #fbbf24; color: #12100e; box-shadow: 0 2px 10px rgba(251, 191, 36, 0.2); }
+        [data-theme="aurora"] .tab-btn.active { background: linear-gradient(135deg, #5eead4, #2dd4bf); color: #0f2027; box-shadow: 0 0 20px rgba(94, 234, 212, 0.4); }
+        [data-theme="volt"] .tab-btn.active { background: var(--primary); color: black; border-radius: 4px; box-shadow: 0 0 10px var(--primary); }
+        [data-theme="volt"] .tab-btn { border-radius: 4px; }
+        [data-theme="apex"] .tab-btn.active { background: #FF0000; color: white; box-shadow: 0 0 10px rgba(255,0,0,0.5); border: 1px solid #FF0000; }
+        [data-theme="liquid"] .tab-btn.active { background: rgba(0, 255, 255, 0.4); color: white; box-shadow: 0 0 15px rgba(0, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.4); }
+
+        /* Emojis via CSS */
+        #tab-treinar::before { content: var(--emoji-treinar) " "; }
+        #tab-fichas::before { content: var(--emoji-fichas) " "; }
+        #tab-calendario::before { content: var(--emoji-calendario) " "; }
+        #tab-evolucao::before { content: var(--emoji-evolucao) " "; }
+
+        .card { background: var(--card); padding: 20px; border-radius: var(--radius-card); margin-bottom: 15px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+        
+        [data-theme="ecosystem"] .card, 
+        [data-theme="nebula"] .card,
+        [data-theme="aurora"] .card,
+        [data-theme="liquid"] .card { backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        [data-theme="performance"] .card::before, 
+        [data-theme="ecosystem"] .card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); opacity: 0.7; }
+        
+        [data-theme="nebula"] .card,
+        [data-theme="aurora"] .card { border-top: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
+        
+        [data-theme="titanium"] .card { background: linear-gradient(145deg, #2c2c2e, #1c1c1e); border: 1px solid #3a3a3c; box-shadow: 5px 5px 10px #141414, -5px -5px 10px #262626; }
+        
+        [data-theme="vitality"] .card { border: 1px solid rgba(251, 191, 36, 0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        
+        [data-theme="volt"] .card { border: 1px solid #333; box-shadow: none; }
+        [data-theme="volt"] .card:hover { border-color: var(--primary); }
+        
+        [data-theme="apex"] .card { border-left: 4px solid #FF0000; border-radius: 10px; background: linear-gradient(145deg, #252525, #1e1e1e); }
+        
+        [data-theme="liquid"] .card { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2); }
+
+        .section-title { font-size: 16px; margin-bottom: 15px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        
+        input, select, textarea { background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; color: white; padding: 12px; width: 100%; margin-bottom: 10px; font-size: 14px; outline: none; }
+        [data-theme="volt"] input { border-radius: 4px; border: 1px solid #444; }
+        [data-theme="volt"] input:focus { border-color: var(--primary); box-shadow: 0 0 5px var(--primary); }
+        [data-theme="apex"] input { border-radius: 8px; border: 1px solid #555; }
+        [data-theme="apex"] input:focus { border-color: #FF0000; }
+        [data-theme="liquid"] input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; }
+        
+        .btn { width: 100%; padding: 16px; border: none; border-radius: var(--radius-btn); font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-finish { background: var(--outras); color: white; }
+        
+        [data-theme="ecosystem"] .btn-finish { background: linear-gradient(135deg, #00ffa3, #00d1ff); color: #08090a; box-shadow: 0 4px 15px rgba(0, 255, 163, 0.4); }
+        [data-theme="nebula"] .btn-finish { background: linear-gradient(135deg, var(--primary), var(--cardio)); color: white; box-shadow: 0 4px 20px rgba(217, 70, 239, 0.4); }
         [data-theme="performance"] .btn-finish { color: #000; }
+        [data-theme="titanium"] .btn-finish { background: #32d74b; color: #000; }
+        [data-theme="vitality"] .btn-finish { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #12100e; }
+        [data-theme="aurora"] .btn-finish { background: linear-gradient(135deg, #5eead4, #34d399); color: #0f2027; box-shadow: 0 4px 20px rgba(94, 234, 212, 0.3); }
+        [data-theme="volt"] .btn-finish { background: var(--primary); color: black; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; box-shadow: 0 0 15px var(--primary); }
+        [data-theme="apex"] .btn-finish { background: linear-gradient(90deg, #FF0000, #b90000); color: white; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4); }
+        [data-theme="liquid"] .btn-finish { background: linear-gradient(135deg, #00e676, #00c853); color: #fff; box-shadow: 0 4px 15px rgba(0, 230, 118, 0.4); border: 1px solid rgba(255,255,255,0.2); }
 
-        .btn-outline { 
-            background: transparent; border: 1px solid var(--primary); color: var(--primary); 
-            padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; 
-            display: inline-block; margin-right: 5px; margin-bottom: 5px; 
-        }
-
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
+        [data-theme="volt"] .btn-outline { border-radius: 4px; border-width: 1px; text-transform: uppercase; font-weight: bold; }
+        [data-theme="apex"] .btn-outline { border: 1px solid #C0C0C0; color: #C0C0C0; }
+        [data-theme="liquid"] .btn-outline { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--primary); color: var(--primary); backdrop-filter: blur(4px); }
+        
         .rings-container { position: relative; width: 180px; height: 180px; margin: auto; display: flex; align-items: center; justify-content: center; }
         .rings-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
         .ring-bg { fill: none; stroke-width: 14; opacity: 0.1; }
         .ring-progress { fill: none; stroke-width: 14; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
         
+        [data-theme="ecosystem"] .ring-progress,
+        [data-theme="nebula"] .ring-progress,
+        [data-theme="aurora"] .ring-progress,
+        [data-theme="liquid"] .ring-progress { stroke-width: 16; filter: drop-shadow(0 0 5px var(--primary)); }
+        
+        [data-theme="volt"] .ring-progress { filter: drop-shadow(0 0 4px var(--primary)); }
+        [data-theme="apex"] .ring-progress { filter: drop-shadow(0 0 3px #FF0000); }
+
         .meta-atingida { animation: pulseGlow 2s infinite alternate; }
         @keyframes pulseGlow { from { filter: drop-shadow(0 0 2px var(--outras)); } to { filter: drop-shadow(0 0 12px var(--outras)); } }
-
+        
         .ring-label-center { position: absolute; text-align: center; }
         .ring-label-center span { display: block; }
-
         .ref-badge { font-size: 11px; color: var(--outras); font-weight: bold; margin-bottom: 10px; display: block; }
         .ref-text { font-size: 10px; color: var(--muted); margin-bottom: 4px; display: block; font-style: italic; }
         
         .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+        [data-theme="volt"] .ex-item-card { border-radius: 4px; border: 1px solid #333; border-left: 4px solid var(--primary); }
+        [data-theme="apex"] .ex-item-card { border-left: 4px solid #FF0000; background: #333; border-radius: 8px; }
+        [data-theme="liquid"] .ex-item-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-left: 4px solid var(--primary); }
+        
         .serie-row { display: grid; grid-template-columns: 25px 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 5px; }
-
         .historico-item { background: var(--card); padding: 15px; border-radius: var(--radius-card); margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; }
         .historico-item.expanded .hist-details-pane { display: block; }
         .hist-details-pane { display: none; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px; }
-        
         .tag-row { display: flex; align-items: center; gap: 6px; font-size: 12px; }
-
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
         .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; position: relative; background: var(--input-bg); border-radius: 12px; font-size: 12px; border: 1px solid var(--border); cursor: pointer;}
+        [data-theme="volt"] .cal-day { border-radius: 4px; }
+        [data-theme="apex"] .cal-day { border-radius: 6px; border: 1px solid #444; }
         .cal-day.active-day { border-color: var(--primary); box-shadow: inset 0 0 5px var(--primary); }
         .cal-ring-mini { position: absolute; width: 100%; height: 100%; pointer-events: none; }
-
         .container { max-width: 450px; margin: auto; }
         .content { display: none; }
         .content.active { display: block; }
         .strava-logo-img { height: 16px; filter: invert(38%) sepia(98%) saturate(3015%) hue-rotate(1deg) brightness(102%) contrast(105%); }
-        .strava-act-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 13px; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; }
-        .strava-act-item:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
+        .strava-act-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 13px; cursor: pointer; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
-<button class="theme-switcher" onclick="toggleTheme()">Trocar Tema</button>
+<button class="theme-switcher" onclick="toggleTheme()"> Apple Neon</button>
 
 <div class="tabs">
-    <button id="tab-treinar" class="tab-btn active" onclick="switchTab('treinar')">💪 Treinar</button>
-    <button id="tab-fichas" class="tab-btn" onclick="switchTab('fichas')">📋 Fichas</button>
-    <button id="tab-calendario" class="tab-btn" onclick="switchTab('calendario')">📅 Calen.</button>
-    <button id="tab-evolucao" class="tab-btn" onclick="switchTab('evolucao')">📈 Evol.</button>
+    <button id="tab-treinar" class="tab-btn active" onclick="switchTab('treinar')">Treinar</button>
+    <button id="tab-fichas" class="tab-btn" onclick="switchTab('fichas')">Fichas</button>
+    <button id="tab-calendario" class="tab-btn" onclick="switchTab('calendario')">Calen.</button>
+    <button id="tab-evolucao" class="tab-btn" onclick="switchTab('evolucao')">Evol.</button>
 </div>
 
 <div class="container">
@@ -198,11 +534,9 @@
             <div class="section-title" style="color: var(--cardio);">🏃 Cardio</div>
             <input type="number" id="cC" placeholder="Calorias Cardio Manual" oninput="updateRingChart()">
             <button id="btnStravaMain" class="btn btn-strava-outline" style="width: 100%" onclick="autorizarStrava()">
-               <svg class="strava-icon" style="width:18px; height:18px; fill:currentColor; margin-right:8px;" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
                 Conectar <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
             </button>
             <div id="stravaPanel" style="display:none; margin-top:10px;">
-                <p style="font-size:10px; color:var(--muted); margin-bottom: 8px;">Toque na atividade para importar calorias:</p>
                 <div id="listaAtividadesStrava"></div>
             </div>
         </div>
@@ -273,10 +607,52 @@
 
     function toggleTheme() {
         const body = document.body;
-        const theme = body.getAttribute('data-theme') === 'performance' ? 'apple' : 'performance';
-        if (theme === 'performance') body.setAttribute('data-theme', 'performance');
-        else body.removeAttribute('data-theme');
-        localStorage.setItem('theme_nikho', theme);
+        const current = body.getAttribute('data-theme');
+        const switcherBtn = document.querySelector('.theme-switcher');
+        let next = '';
+
+        if (!current) {
+            next = 'performance';
+            body.setAttribute('data-theme', 'performance');
+            switcherBtn.innerHTML = "⚡ Performance";
+        } else if (current === 'performance') {
+            next = 'ecosystem';
+            body.setAttribute('data-theme', 'ecosystem');
+            switcherBtn.innerHTML = "🧬 Ecosystem";
+        } else if (current === 'ecosystem') {
+            next = 'nebula';
+            body.setAttribute('data-theme', 'nebula');
+            switcherBtn.innerHTML = "🌌 Nebula";
+        } else if (current === 'nebula') {
+            next = 'titanium';
+            body.setAttribute('data-theme', 'titanium');
+            switcherBtn.innerHTML = "🔩 Titanium";
+        } else if (current === 'titanium') {
+            next = 'vitality';
+            body.setAttribute('data-theme', 'vitality');
+            switcherBtn.innerHTML = "🦁 Vitality";
+        } else if (current === 'vitality') {
+            next = 'aurora';
+            body.setAttribute('data-theme', 'aurora');
+            switcherBtn.innerHTML = "🏔️ Aurora";
+        } else if (current === 'aurora') {
+            next = 'volt';
+            body.setAttribute('data-theme', 'volt');
+            switcherBtn.innerHTML = "⚡ Volt";
+        } else if (current === 'volt') {
+            next = 'apex';
+            body.setAttribute('data-theme', 'apex');
+            switcherBtn.innerHTML = "🏁 Apex";
+        } else if (current === 'apex') {
+            next = 'liquid';
+            body.setAttribute('data-theme', 'liquid');
+            switcherBtn.innerHTML = "💧 Liquid";
+        } else {
+            next = 'apple';
+            body.removeAttribute('data-theme');
+            switcherBtn.innerHTML = " Apple Neon";
+        }
+        localStorage.setItem('theme_nikho', next);
     }
 
     function switchTab(aba) {
@@ -304,6 +680,18 @@
         document.getElementById('ring-cardio-main').style.strokeDashoffset = 376.99 * (1 - Math.min(cardio/meta, 1));
         document.getElementById('ring-musc-main').style.strokeDashoffset = 263.89 * (1 - Math.min(musc/meta, 1));
         document.getElementById('ring-outras-main').style.strokeDashoffset = 150.80 * (1 - Math.min(total/meta, 1));
+    }
+
+    function getSerieReferencia(nomeEx, indexSerie) {
+        const termo = nomeEx.toLowerCase().trim();
+        const ultimo = hist.slice().reverse().find(t => (t.exercicios || []).some(e => e.nome.toLowerCase().trim().includes(termo)));
+        if (ultimo) {
+            const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
+            const totalSeries = exData.series.length;
+            const serieData = exData.series[indexSerie];
+            if (serieData) return `Último: ${serieData.r} reps / ${serieData.p}kg (${totalSeries} séries)`;
+        }
+        return "Sem histórico";
     }
 
     function buscarReferencia(nome) {
@@ -388,7 +776,7 @@
                     <strong>${h.calTotal} kcal</strong>
                 </div>
                 <div class="hist-details-pane" onclick="event.stopPropagation()">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         <div><label style="font-size:10px">Total</label><input type="number" value="${h.calTotal}" onchange="updateHistValue('${h.id}', 'calTotal', this.value)"></div>
                         <div><label style="font-size:10px">Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)"></div>
                         <div><label style="font-size:10px; color:var(--cardio)">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
@@ -461,7 +849,6 @@
     function exportarDados() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({hist, fichas})], {type: 'application/json'})); a.download = 'nikho_backup.json'; a.click(); }
     function importarDados(i) { const r = new FileReader(); r.onload = () => { const d = JSON.parse(r.result); localStorage.setItem('hist_nikho', JSON.stringify(d.hist)); localStorage.setItem('fichas_nikho', JSON.stringify(d.fichas)); location.reload(); }; r.readAsText(i.files[0]); }
     
-    // --- LÓGICA STRAVA CORRIGIDA ---
     function autorizarStrava() { 
         const REDIRECT_URI = window.location.href.split('?')[0];
         window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&approval_prompt=force&scope=activity:read_all`; 
@@ -470,30 +857,25 @@
     async function puxarAtividadesStrava() {
         if (!token) return;
         try {
-            // Busca a listagem básica
             const r = await fetch(`https://www.strava.com/api/v3/athlete/activities?per_page=5`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const activities = await r.json();
-            
             const list = document.getElementById('listaAtividadesStrava');
             list.innerHTML = '';
-
             for (let act of activities) {
-                // Para cada atividade, busca o detalhe para obter as calorias (que não vêm na listagem padrão)
                 const detailR = await fetch(`https://www.strava.com/api/v3/activities/${act.id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const detailData = await detailR.json();
                 const calories = Math.round(detailData.calories || 0);
-
                 const item = document.createElement('div');
                 item.className = 'strava-act-item';
                 item.innerHTML = `<b>${act.name}</b><br>${calories} kcal • ${new Date(act.start_date).toLocaleDateString()}`;
                 item.onclick = () => {
                     document.getElementById('cC').value = calories;
                     updateRingChart();
-                    alert(`Calorias (${calories}) importadas de "${act.name}"`);
+                    alert(`Calorias (${calories}) importadas!`);
                 };
                 list.appendChild(item);
             }
@@ -503,23 +885,47 @@
 
     window.onload = async () => {
         const savedTheme = localStorage.getItem('theme_nikho');
-        if(savedTheme === 'performance') document.body.setAttribute('data-theme', 'performance');
+        const switcherBtn = document.querySelector('.theme-switcher');
+        if(savedTheme === 'performance') {
+            document.body.setAttribute('data-theme', 'performance');
+            switcherBtn.innerHTML = "⚡ Performance";
+        } else if(savedTheme === 'ecosystem') {
+            document.body.setAttribute('data-theme', 'ecosystem');
+            switcherBtn.innerHTML = "🧬 Ecosystem";
+        } else if(savedTheme === 'nebula') {
+            document.body.setAttribute('data-theme', 'nebula');
+            switcherBtn.innerHTML = "🌌 Nebula";
+        } else if(savedTheme === 'titanium') {
+            document.body.setAttribute('data-theme', 'titanium');
+            switcherBtn.innerHTML = "🔩 Titanium";
+        } else if(savedTheme === 'vitality') {
+            document.body.setAttribute('data-theme', 'vitality');
+            switcherBtn.innerHTML = "🦁 Vitality";
+        } else if(savedTheme === 'aurora') {
+            document.body.setAttribute('data-theme', 'aurora');
+            switcherBtn.innerHTML = "🏔️ Aurora";
+        } else if(savedTheme === 'volt') {
+            document.body.setAttribute('data-theme', 'volt');
+            switcherBtn.innerHTML = "⚡ Volt";
+        } else if(savedTheme === 'apex') {
+            document.body.setAttribute('data-theme', 'apex');
+            switcherBtn.innerHTML = "🏁 Apex";
+        } else if(savedTheme === 'liquid') {
+            document.body.setAttribute('data-theme', 'liquid');
+            switcherBtn.innerHTML = "💧 Liquid";
+        } else {
+            switcherBtn.innerHTML = " Apple Neon";
+        }
         
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
-        
         if (code) {
             window.history.replaceState({}, document.title, window.location.pathname);
             try {
                 const response = await fetch('https://www.strava.com/api/v3/oauth/token', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        client_id: CLIENT_ID,
-                        client_secret: CLIENT_SECRET,
-                        code: code,
-                        grant_type: 'authorization_code'
-                    })
+                    body: JSON.stringify({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code: code, grant_type: 'authorization_code' })
                 });
                 const data = await response.json();
                 if(data.access_token) {
