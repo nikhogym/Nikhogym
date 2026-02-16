@@ -6,100 +6,175 @@
     <title>Nikho Gym Connect</title>
     
     <link rel="apple-touch-icon" href="https://img.icons8.com/neon/150/dumbbell.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="https://img.icons8.com/neon/152/dumbbell.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://img.icons8.com/neon/180/dumbbell.png">
     <link rel="icon" type="image/png" href="https://img.icons8.com/neon/150/dumbbell.png">
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="NikhoGym">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { 
-            --primary: #0A84FF; /* Musculação: Azul */
-            --cardio: #FC4C02;  /* Cardio: Laranja Strava */
-            --outras: #30D158;  /* Outras: Verde */
-            --strava: #FC4C02; 
-            --success: #30D158; 
-            --bg: #000000; 
-            --card: #1C1C1E; 
-            --text: #FFFFFF; 
-            --input-bg: #2C2C2E; 
+        /* --- ARQUITETURA DE TEMAS --- */
+        :root {
+            /* Tema 1: Apple Neon (Padrão) */
+            --bg: #000000;
+            --card: #1C1C1E;
+            --input-bg: #2C2C2E;
+            --text: #FFFFFF;
+            --muted: #8E8E93;
+            --border: #3A3A3C;
+            --primary: #0A84FF; /* Azul Musc */
+            --cardio: #FC4C02;  /* Laranja Cardio */
+            --outras: #30D158;  /* Verde Sucesso */
+            --radius-card: 22px;
+            --radius-btn: 16px;
+            --tab-pos-top: 0;
+            --tab-pos-bottom: auto;
+            --tab-transform: none;
         }
+
+        /* Tema 2: Performance Industrial */
+        [data-theme="performance"] {
+            --bg: #0D1117;
+            --card: #161B22;
+            --input-bg: #0D1117;
+            --text: #FFFFFF;
+            --muted: #8B949E;
+            --border: #30363D;
+            --primary: #9DFF2B; /* Verde Limão Neon */
+            --cardio: #FC4C02;
+            --outras: #9DFF2B;
+            --radius-card: 12px;
+            --radius-btn: 8px;
+            --tab-pos-top: auto;
+            --tab-pos-bottom: 20px;
+            --tab-transform: translateX(-50%);
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; padding-top: 80px; }
-        
-        .tabs { display: flex; gap: 5px; position: fixed; top: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 15px 10px; z-index: 1000; border-bottom: 1px solid #3A3A3C; }
-        .tab-btn { flex: 1; padding: 10px 5px; border: none; border-radius: 12px; background: var(--input-bg); color: #8E8E93; font-weight: bold; font-size: 10px; }
+        body { 
+            font-family: -apple-system, system-ui, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding: 10px; 
+            padding-top: 80px; 
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="performance"] body { padding-top: 20px; padding-bottom: 100px; }
+
+        .theme-switcher {
+            position: fixed;
+            top: 20px;
+            right: 15px;
+            z-index: 2000;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--primary);
+            cursor: pointer;
+        }
+
+        /* --- NAVEGAÇÃO --- */
+        .tabs { 
+            display: flex; gap: 5px; position: fixed; 
+            top: var(--tab-pos-top); bottom: var(--tab-pos-bottom); 
+            left: 0; right: 0; 
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 15px 10px; 
+            z-index: 1000; border-bottom: 1px solid var(--border);
+            transform: var(--tab-transform);
+        }
+
+        [data-theme="performance"] .tabs {
+            left: 50%; width: 90%; max-width: 400px; 
+            border-radius: 20px; border: 1px solid var(--border);
+            background: rgba(22, 27, 34, 0.95);
+        }
+
+        .tab-btn { 
+            flex: 1; padding: 10px 5px; border: none; border-radius: 12px; 
+            background: var(--input-bg); color: var(--muted); font-weight: bold; font-size: 10px; 
+        }
         .tab-btn.active { background: var(--primary); color: white; }
+        [data-theme="performance"] .tab-btn.active { color: #000; }
 
-        .container { max-width: 450px; margin: auto; }
-        .content { display: none; }
-        .content.active { display: block; }
-
-        .card { background: var(--card); padding: 20px; border-radius: 22px; margin-bottom: 15px; border: 1px solid #2C2C2E; }
-        .section-title { font-size: 16px; margin-bottom: 15px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        /* --- CARDS --- */
+        .card { 
+            background: var(--card); padding: 20px; border-radius: var(--radius-card); 
+            margin-bottom: 15px; border: 1px solid var(--border); position: relative; overflow: hidden;
+        }
         
-        input, select, textarea { background: var(--input-bg); border: 1px solid #3A3A3C; border-radius: 12px; color: white; padding: 12px; width: 100%; margin-bottom: 10px; font-size: 14px; outline: none; }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-finish { background: var(--success); color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
+        [data-theme="performance"] .card::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--primary); opacity: 0.7;
+        }
 
-        .btn-strava-outline { background: transparent; border: 2px solid var(--strava); color: var(--strava); }
-        .strava-logo-img { height: 16px; filter: invert(38%) sepia(98%) saturate(3015%) hue-rotate(1deg) brightness(102%) contrast(105%); }
+        .section-title { 
+            font-size: 16px; margin-bottom: 15px; font-weight: bold; 
+            color: var(--primary); display: flex; align-items: center; gap: 8px; 
+        }
+
+        input, select, textarea { 
+            background: var(--input-bg); border: 1px solid var(--border); 
+            border-radius: 12px; color: white; padding: 12px; width: 100%; 
+            margin-bottom: 10px; font-size: 14px; outline: none; 
+        }
         
+        .btn { 
+            width: 100%; padding: 16px; border: none; border-radius: var(--radius-btn); 
+            font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; 
+            margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; 
+        }
+        .btn-finish { background: var(--outras); color: white; }
+        [data-theme="performance"] .btn-finish { color: #000; }
+
+        .btn-outline { 
+            background: transparent; border: 1px solid var(--primary); color: var(--primary); 
+            padding: 8px 12px; font-size: 12px; border-radius: 10px; width: auto; 
+            display: inline-block; margin-right: 5px; margin-bottom: 5px; 
+        }
+
+        /* --- ANÉIS E PERFORMANCE --- */
         .rings-container { position: relative; width: 180px; height: 180px; margin: auto; display: flex; align-items: center; justify-content: center; }
         .rings-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
         .ring-bg { fill: none; stroke-width: 14; opacity: 0.1; }
-        .ring-progress { fill: none; stroke-width: 14; stroke-linecap: round; transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .ring-progress { fill: none; stroke-width: 14; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
         
         .meta-atingida { animation: pulseGlow 2s infinite alternate; }
-        @keyframes pulseGlow {
-            from { filter: drop-shadow(0 0 2px var(--success)); }
-            to { filter: drop-shadow(0 0 12px var(--success)); }
-        }
+        @keyframes pulseGlow { from { filter: drop-shadow(0 0 2px var(--outras)); } to { filter: drop-shadow(0 0 12px var(--outras)); } }
 
         .ring-label-center { position: absolute; text-align: center; }
         .ring-label-center span { display: block; }
 
-        .ref-badge { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 10px; display: block; }
-        .ref-text { font-size: 10px; color: #8E8E93; margin-bottom: 4px; display: block; font-style: italic; }
+        .ref-badge { font-size: 11px; color: var(--outras); font-weight: bold; margin-bottom: 10px; display: block; }
+        .ref-text { font-size: 10px; color: var(--muted); margin-bottom: 4px; display: block; font-style: italic; }
         
         .ex-item-card { background: var(--input-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
         .serie-row { display: grid; grid-template-columns: 25px 1fr 1fr 30px; gap: 8px; align-items: center; margin-bottom: 5px; }
 
-        .historico-item { background: var(--card); padding: 15px; border-radius: 18px; margin-bottom: 10px; border: 1px solid #3A3A3C; cursor: pointer; }
-        .hist-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-        .hist-details-pane { display: none; margin-top: 15px; border-top: 1px solid #2C2C2E; padding-top: 15px; }
+        .historico-item { background: var(--card); padding: 15px; border-radius: var(--radius-card); margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; }
         .historico-item.expanded .hist-details-pane { display: block; }
+        .hist-details-pane { display: none; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px; }
         
-        .ring-container { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
-        .ring-text-small { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; font-weight: bold; }
-        
-        .cal-summary { display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
-        .tag-row { display: flex; align-items: center; gap: 6px; }
-        .tag-musc { color: var(--primary); font-weight: bold; }
-        .tag-cardio { color: var(--cardio); font-weight: bold; }
-        .tag-diff { color: var(--outras); font-size: 10px; margin-top: 2px; }
+        .tag-row { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+        .cal-summary { display: flex; flex-direction: column; gap: 4px; }
 
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
-        .cal-weekday { font-size: 9px; color: #8E8E93; font-weight: bold; padding-bottom: 5px; }
-        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; position: relative; background: #2C2C2E; border-radius: 12px; font-size: 12px; font-weight: 500; cursor: pointer; transition: 0.2s; }
-        .cal-day:active { transform: scale(0.9); background: #3A3A3C; }
-        .cal-day.empty { background: transparent; cursor: default; }
+        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; position: relative; background: var(--input-bg); border-radius: 12px; font-size: 12px; border: 1px solid var(--border); }
+        .cal-day.active-day { border-color: var(--primary); box-shadow: inset 0 0 5px var(--primary); }
         .cal-ring-mini { position: absolute; width: 100%; height: 100%; pointer-events: none; }
 
-        #dashCalendario { display: none; margin-top: 20px; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .dash-item { background: var(--input-bg); padding: 12px; border-radius: 15px; text-align: center; }
-        .dash-label { font-size: 10px; color: #8E8E93; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .dash-value { font-size: 16px; font-weight: bold; }
-        .strava-icon { width: 18px; height: 18px; fill: currentColor; }
+        .strava-logo-img { height: 16px; filter: invert(38%) sepia(98%) saturate(3015%) hue-rotate(1deg) brightness(102%) contrast(105%); }
     </style>
 </head>
 <body>
+
+<button class="theme-switcher" onclick="toggleTheme()">Trocar Tema</button>
 
 <div class="tabs">
     <button id="tab-t" class="tab-btn active" onclick="switchTab('treinar')">💪 Treinar</button>
@@ -112,7 +187,6 @@
     <div id="treinar" class="content active">
         <div class="card" style="text-align: center;">
             <div class="section-title" style="justify-content: center;">🎯 Meta Diária</div>
-            
             <div class="rings-container" id="mainRingContainer">
                 <svg class="rings-svg" viewBox="0 0 150 150">
                     <circle class="ring-bg" cx="75" cy="75" r="60" stroke="var(--cardio)"></circle>
@@ -124,29 +198,18 @@
                 </svg>
                 <div class="ring-label-center">
                     <span id="txtPorcentagem" style="font-size: 22px; font-weight: bold;">0%</span>
-                    <span id="txtCaloriasRing" style="font-size: 9px; color: #8E8E93;">0 / 2000 kcal</span>
+                    <span id="txtCaloriasRing" style="font-size: 9px; color: var(--muted);">0 / 2000 kcal</span>
                 </div>
             </div>
-
             <input type="number" id="metaDiaria" value="2000" oninput="updateRingChart()" style="margin-top: 15px; text-align: center;">
         </div>
 
         <div class="card">
             <div class="section-title" style="color: var(--cardio);">🏃 Cardio</div>
             <input type="number" id="cC" placeholder="Calorias Cardio Manual" oninput="updateRingChart()">
-            
-            <button id="btnConnectStrava" class="btn btn-strava-outline" onclick="autorizarStrava()">
-                <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
+            <button class="btn btn-strava-outline" style="width: 100%" onclick="autorizarStrava()">
                 Conectar <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
             </button>
-
-            <div id="stravaAcoes" style="display:none; margin-top:10px;">
-                <button class="btn btn-strava-outline" onclick="puxarAtividadesStrava()">
-                   <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                   Puxar Dados <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
-                </button>
-                <div id="listaAtividadesStrava" style="max-height: 150px; overflow-y: auto;"></div>
-            </div>
         </div>
 
         <div class="card">
@@ -154,25 +217,25 @@
             <div id="atalhosFicha" style="margin-bottom: 10px;"></div>
             <div id="referenciaPeso" class="ref-badge"></div>
             <input type="text" id="exNome" placeholder="Nome do exercício" oninput="buscarReferencia(this.value)">
-            <button class="btn" style="background:#3A3A3C; color:white;" onclick="addEx()">➕ Iniciar Exercício</button>
+            <button class="btn" style="background:var(--border); color:white;" onclick="addEx()">➕ Iniciar Exercício</button>
             <div id="listaTreinoAtivo"></div>
         </div>
 
         <div class="card">
-            <div class="section-title" style="color: var(--success);">🔥 Finalizar</div>
+            <div class="section-title" style="color: var(--outras);">🔥 Finalizar</div>
             <input type="number" id="cM" placeholder="Calorias Musculação" oninput="updateRingChart()">
             <button class="btn btn-finish" onclick="enviarParaPlanilha()">✅ Salvar Treino</button>
         </div>
 
-        <h3 style="margin-left: 10px; font-size: 18px;">📜 Histórico Recente</h3>
+        <h3 style="margin-left: 10px;">📜 Histórico Recente</h3>
         <div id="historicoInferior"></div>
     </div>
 
     <div id="fichas" class="content">
         <div class="card">
-            <div class="section-title">📝 Fichas</div>
-            <input type="text" id="titFicha" placeholder="Nome da Ficha">
-            <textarea id="txtFicha" rows="4" placeholder="Exercícios (um por linha)"></textarea>
+            <div class="section-title">📝 Arquitetura de Treino</div>
+            <input type="text" id="titFicha" placeholder="Título (Ex: Treino A)">
+            <textarea id="txtFicha" rows="5" placeholder="Exercícios (um por linha)"></textarea>
             <button class="btn btn-finish" onclick="salvarFicha()">Salvar Ficha</button>
         </div>
         <div id="listaFichas"></div>
@@ -180,83 +243,77 @@
 
     <div id="calendario" class="content">
         <div class="card">
-            <div class="section-title" id="mesAnoAtual" style="justify-content: center; margin-bottom: 20px; font-size: 18px;"></div>
-            <div class="cal-grid" style="margin-bottom: 10px;">
-                <div class="cal-weekday">DOM</div><div class="cal-weekday">SEG</div><div class="cal-weekday">TER</div>
-                <div class="cal-weekday">QUA</div><div class="cal-weekday">QUI</div><div class="cal-weekday">SEX</div>
-                <div class="cal-weekday">SÁB</div>
-            </div>
+            <div class="section-title" id="mesAnoAtual" style="justify-content: center;">MÊS ATUAL</div>
             <div class="cal-grid" id="calBody"></div>
         </div>
-        <div id="dashCalendario" class="card">
-            <div class="section-title" id="dashDataTitulo">📅 Métricas do Dia</div>
-            <div class="dash-grid">
-                <div class="dash-item"><span class="dash-label">Total Dia</span><div id="vTotal" class="dash-value">-</div></div>
-                <div class="dash-item"><span class="dash-label">Musculação</span><div id="vMusc" class="dash-value" style="color:var(--primary)">-</div></div>
-                <div class="dash-item"><span class="dash-label">Cardio</span><div id="vCardio" class="dash-value" style="color:var(--cardio)">-</div></div>
-                <div class="dash-item"><span class="dash-label">Gasto Passivo</span><div id="vOutras" class="dash-value" style="color:var(--outras)">-</div></div>
-            </div>
-            <div id="dashExercicios" style="margin-top: 15px; font-size: 12px; color: #8E8E93; border-top: 1px solid #3A3A3C; padding-top: 10px;"></div>
+        <div id="dashCalendario" class="card" style="display:none">
+            <div class="section-title">Métricas do Dia</div>
+            <div id="vTotal" style="font-size: 24px; font-weight: bold; color: var(--primary);"></div>
+            <div id="dashExercicios" style="font-size: 12px; margin-top: 10px; color: var(--muted);"></div>
         </div>
     </div>
 
     <div id="evolucao" class="content">
         <div class="card">
-            <div class="section-title">📊 Evolução</div>
+            <div class="section-title">📈 Evolução de Carga</div>
             <select id="selectExGrafico" onchange="renderizarGraficoEvolucao()"></select>
             <div style="height: 180px;"><canvas id="chartCarga"></canvas></div>
-            <div style="height: 180px; margin-top: 20px;"><canvas id="chartCalEvolucao"></canvas></div>
         </div>
         <div class="card">
             <div class="section-title">💾 Backup</div>
-            <button class="btn-outline" onclick="exportarDados()">📤 Exportar</button>
-            <button class="btn-outline" onclick="document.getElementById('importFile').click()">📥 Importar Backup</button>
-            <input type="file" id="importFile" style="display:none" onchange="importarDados(this)">
+            <button class="btn-outline" style="width:100%" onclick="exportarDados()">📤 Exportar JSON</button>
         </div>
     </div>
 </div>
 
 <script>
-    let sessao = [], chartCargaInstance, chartCalEvInstance;
+    let sessao = [], chartCargaInstance;
     let hist = JSON.parse(localStorage.getItem('hist_nikho')) || [];
     let fichas = JSON.parse(localStorage.getItem('fichas_nikho')) || [];
     let token = localStorage.getItem('strava_access_token');
-    const CLIENT_ID = '201889', CLIENT_SECRET = 'f9b59003e315ec7961d6c89e94d76941bd39c72b';
+    const CLIENT_ID = '201889';
 
+    // --- TEMAS ---
+    function toggleTheme() {
+        const body = document.body;
+        const theme = body.getAttribute('data-theme') === 'performance' ? 'apple' : 'performance';
+        if (theme === 'performance') body.setAttribute('data-theme', 'performance');
+        else body.removeAttribute('data-theme');
+        localStorage.setItem('theme_nikho', theme);
+    }
+
+    // --- NAVEGAÇÃO ---
     function switchTab(aba) {
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(aba).classList.add('active');
-        document.getElementById('tab-' + (aba === 'calendario' ? 'c' : aba.charAt(0))).classList.add('active');
-        if(aba === 'treinar') { renderAtalhosFichas(); renderHistInferior(); updateRingChart(); }
-        if(aba === 'calendario') { renderCalendario(); document.getElementById('dashCalendario').style.display = 'none'; }
-        if(aba === 'evolucao') { popularSelectExercicios(); renderizarGraficoCaloriasEvolucao(); }
+        document.getElementById('tab-' + aba.charAt(0)).classList.add('active');
+        if(aba === 'treinar') { updateRingChart(); renderAtalhos(); renderHist(); }
+        if(aba === 'calendario') renderCalendario();
+        if(aba === 'evolucao') { popularSelect(); renderizarGraficoEvolucao(); }
         if(aba === 'fichas') renderFichas();
     }
 
+    // --- ANÉIS E CALORIAS ---
     function updateRingChart() {
         const meta = parseFloat(document.getElementById('metaDiaria').value) || 2000;
         const musc = parseFloat(document.getElementById('cM').value) || 0;
         const cardio = parseFloat(document.getElementById('cC').value) || 0;
         const total = musc + cardio;
-        const porcentagemTotal = Math.round((total / meta) * 100);
+        const perc = Math.round((total / meta) * 100);
 
-        document.getElementById('txtPorcentagem').innerText = porcentagemTotal + "%";
+        document.getElementById('txtPorcentagem').innerText = perc + "%";
         document.getElementById('txtCaloriasRing').innerText = total + " / " + meta + " kcal";
 
         const container = document.getElementById('mainRingContainer');
-        if (porcentagemTotal >= 100) container.classList.add('meta-atingida');
-        else container.classList.remove('meta-atingida');
+        perc >= 100 ? container.classList.add('meta-atingida') : container.classList.remove('meta-atingida');
 
-        const pCardio = Math.min(cardio / meta, 1);
-        const pMusc = Math.min(musc / meta, 1);
-        const pTotal = Math.min(total / meta, 1);
-
-        document.getElementById('ring-cardio-main').style.strokeDashoffset = 376.99 * (1 - pCardio);
-        document.getElementById('ring-musc-main').style.strokeDashoffset = 263.89 * (1 - pMusc);
-        document.getElementById('ring-outras-main').style.strokeDashoffset = 150.80 * (1 - pTotal);
+        document.getElementById('ring-cardio-main').style.strokeDashoffset = 376.99 * (1 - Math.min(cardio/meta, 1));
+        document.getElementById('ring-musc-main').style.strokeDashoffset = 263.89 * (1 - Math.min(musc/meta, 1));
+        document.getElementById('ring-outras-main').style.strokeDashoffset = 150.80 * (1 - Math.min(total/meta, 1));
     }
 
+    // --- REFERÊNCIA DE TREINO ---
     function getSerieReferencia(nomeEx, indexSerie) {
         const termo = nomeEx.toLowerCase().trim();
         const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo)));
@@ -280,125 +337,161 @@
         } else { document.getElementById('referenciaPeso').innerText = ""; }
     }
 
+    // --- TREINO ATIVO ---
+    function addEx() {
+        const n = document.getElementById('exNome').value;
+        if(n) {
+            sessao.push({ id: Date.now(), nome: n, series: [{ r: '', p: '' }] });
+            renderSessao();
+            document.getElementById('exNome').value = "";
+        }
+    }
+
     function renderSessao() {
         document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `
             <div class="ex-item-card">
-                <div class="ex-header"><strong>${ex.nome}</strong><span onclick="sessao=sessao.filter(e=>e.id!=${ex.id});renderSessao();">✕</span></div>
+                <div style="display:flex; justify-content:space-between"><strong>${ex.nome}</strong> <span onclick="removerEx(${ex.id})">✕</span></div>
                 ${ex.series.map((s, i) => {
                     const ref = getSerieReferencia(ex.nome, i);
-                    return `<span class="ref-text">💡 ${ref}</span>
-                    <div class="serie-row"><span>${i+1}º</span>
-                    <input type="number" placeholder="R" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].r=this.value">
-                    <input type="number" placeholder="Kg" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].p=this.value">
-                    <span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(${i},1);renderSessao();">✕</span></div>`;
+                    return `
+                    <span class="ref-text">💡 ${ref}</span>
+                    <div class="serie-row">
+                        <span>${i+1}º</span>
+                        <input type="number" placeholder="R" value="${s.r}" onchange="editSerie(${ex.id}, ${i}, 'r', this.value)">
+                        <input type="number" placeholder="Kg" value="${s.p}" onchange="editSerie(${ex.id}, ${i}, 'p', this.value)">
+                    </div>`;
                 }).join('')}
-                <button class="btn" style="background:#3A3A3C; color:white; padding:5px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:'',p:''});renderSessao();">+ Série</button>
-            </div>`).join('');
+                <button class="btn-outline" style="width:100%" onclick="addSerie(${ex.id})">+ Série</button>
+            </div>
+        `).join('');
     }
 
-    function renderHistInferior() {
-        const container = document.getElementById('historicoInferior');
-        container.innerHTML = hist.slice().reverse().slice(0, 10).map(h => {
+    function editSerie(id, i, f, v) { sessao.find(e => e.id === id).series[i][f] = v; }
+    function addSerie(id) { sessao.find(e => e.id === id).series.push({r:'',p:''}); renderSessao(); }
+    function removerEx(id) { sessao = sessao.filter(e => e.id !== id); renderSessao(); }
+
+    // --- HISTÓRICO E EDIÇÃO ---
+    async function enviarParaPlanilha() {
+        const p = {
+            id: Date.now(),
+            data: new Date().toLocaleDateString('pt-BR'),
+            calM: Number(document.getElementById('cM').value),
+            calC: Number(document.getElementById('cC').value),
+            calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value),
+            metaSalva: Number(document.getElementById('metaDiaria').value),
+            exercicios: [...sessao]
+        };
+        hist.push(p);
+        localStorage.setItem('hist_nikho', JSON.stringify(hist));
+        location.reload();
+    }
+
+    function renderHist() {
+        document.getElementById('historicoInferior').innerHTML = hist.slice().reverse().slice(0, 10).map(h => {
             const m = h.metaSalva || 2000;
             const perc = Math.round((h.calTotal/m)*100);
             const isMeta = perc >= 100 ? 'meta-atingida' : '';
             const outras = Math.max(0, h.calTotal - (h.calM + h.calC));
             return `
-            <div class="historico-item" id="hist-${h.id}" onclick="toggleExpand('${h.id}')">
-                <div class="hist-header">
-                    <div class="ring-container ${isMeta}">
-                        <canvas id="ringSmall-${h.id}" width="60" height="60"></canvas>
-                        <div class="ring-text-small">${perc}%</div>
+            <div class="historico-item" id="hist-${h.id}" onclick="this.classList.toggle('expanded')">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="ring-container ${isMeta}" style="width:45px; height:45px;">
+                        <canvas id="ringSmall-${h.id}" width="45" height="45"></canvas>
+                        <div class="ring-text-small" style="font-size:8px;">${perc}%</div>
                     </div>
-                    <div style="flex:1;">
-                        <div class="hist-meta">📅 ${h.data}</div>
-                        <div class="cal-summary">
-                            <div class="tag-row"><span class="tag-cardio">🏃 ${h.calC || 0}</span></div>
-                            <div class="tag-row"><span class="tag-musc">💪 ${h.calM || 0}</span></div>
-                            <div class="tag-row"><span class="tag-diff" style="color:var(--outras)">🌿 ${outras}</span></div>
+                    <div style="flex:1; margin-left:10px;">
+                        <strong>📅 ${h.data}</strong>
+                        <div class="tag-row">
+                            <span style="color:var(--cardio)">🏃 ${h.calC}</span>
+                            <span style="color:var(--primary)">💪 ${h.calM}</span>
+                            <span style="color:var(--outras)">🌿 ${outras}</span>
                         </div>
                     </div>
-                    <div style="text-align:right"><strong>${h.calTotal}</strong><br><small>▼</small></div>
+                    <strong>${h.calTotal} kcal</strong>
                 </div>
                 <div class="hist-details-pane" onclick="event.stopPropagation()">
-                    <label style="font-size:10px;">🔥 Total Dia</label>
-                    <input type="number" value="${h.calTotal}" onchange="updateHistValue('${h.id}', 'calTotal', this.value)">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <div><label style="font-size:10px;">💪 Musc.</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
-                        <div><label style="font-size:10px;">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                        <div><label style="font-size:10px">Total Dia</label><input type="number" value="${h.calTotal}" onchange="updateHistValue('${h.id}', 'calTotal', this.value)"></div>
+                        <div><label style="font-size:10px">Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)"></div>
                     </div>
-                    <label style="font-size:10px;">🎯 Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
-                    
-                    <div style="margin-top:10px;">
-                        <strong>Exercícios (Clique para editar):</strong>
-                        ${(h.exercicios || []).map((ex, exIdx) => `
-                            <div style="background:#2C2C2E; padding:8px; border-radius:10px; margin-top:5px;">
-                                <input type="text" value="${ex.nome}" style="margin-bottom:5px; font-weight:bold; font-size:12px; background:transparent; border:none; color:white;" onchange="updateHistEx('${h.id}', ${exIdx}, this.value)">
-                                ${ex.series.map((s, sIdx) => `
-                                    <div style="display:flex; gap:5px;">
-                                        <input type="number" value="${s.r}" style="font-size:12px; padding:5px;" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'r', this.value)">
-                                        <input type="number" value="${s.p}" style="font-size:12px; padding:5px;" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'p', this.value)">
-                                    </div>`).join('')}
-                            </div>
-                        `).join('')}
-                    </div>
-                    <button class="btn-outline" style="color:#FF453A; width:100%; margin-top:10px; border-color:#FF453A;" onclick="apagarTreino('${h.id}')">🗑️ Excluir Registro</button>
+                    <strong>Exercícios (Edição):</strong>
+                    ${(h.exercicios || []).map((ex, exIdx) => `
+                        <div style="background:var(--bg); padding:8px; border-radius:10px; margin-top:5px;">
+                            <input type="text" value="${ex.nome}" style="font-weight:bold" onchange="updateHistEx('${h.id}', ${exIdx}, this.value)">
+                            ${ex.series.map((s, sIdx) => `
+                                <div style="display:flex; gap:5px;">
+                                    <input type="number" value="${s.r}" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'r', this.value)">
+                                    <input type="number" value="${s.p}" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'p', this.value)">
+                                </div>
+                            `).join('')}
+                        </div>
+                    `).join('')}
+                    <button class="btn-outline" style="width:100%; margin-top:10px; border-color:#FF453A; color:#FF453A" onclick="apagarTreino('${h.id}')">🗑️ Excluir</button>
                 </div>
             </div>`;
         }).join('');
+
         hist.slice().reverse().slice(0, 10).forEach(h => {
             const ctx = document.getElementById(`ringSmall-${h.id}`).getContext('2d');
             const meta = h.metaSalva || 2000;
-            const pTotal = Math.min(h.calTotal, meta);
-            new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [h.calC, h.calM, Math.max(0, pTotal-(h.calC+h.calM)), Math.max(0, meta-h.calTotal)], backgroundColor: ['#FC4C02', '#0A84FF', '#30D158', '#3A3A3C'], borderWidth: 0, cutout: '80%' }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } });
+            const p = Math.min(h.calTotal, meta);
+            new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [h.calC, h.calM, Math.max(0, p-(h.calC+h.calM)), Math.max(0, meta-h.calTotal)], backgroundColor: ['#FC4C02', '#0A84FF', '#30D158', '#3A3A3C'], borderWidth: 0, cutout: '80%' }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } });
         });
     }
 
-    function updateHistEx(hId, exIdx, val) { const idx = hist.findIndex(x => x.id == hId); hist[idx].exercicios[exIdx].nome = val; saveRef(); }
-    function updateHistSerie(hId, exIdx, sIdx, field, val) { const idx = hist.findIndex(x => x.id == hId); hist[idx].exercicios[exIdx].series[sIdx][field] = val; saveRef(); }
-    function updateHistValue(id, field, val) { const idx = hist.findIndex(x => x.id == id); hist[idx][field] = Number(val); saveRef(); renderHistInferior(); }
+    function updateHistEx(hId, exIdx, val) { const idx = hist.findIndex(x => x.id == hId); hist[idx].exercicios[exIdx].nome = val; saveAll(); }
+    function updateHistSerie(hId, exIdx, sIdx, field, val) { const idx = hist.findIndex(x => x.id == hId); hist[idx].exercicios[exIdx].series[sIdx][field] = val; saveAll(); }
+    function updateHistValue(id, field, val) { const idx = hist.findIndex(x => x.id == id); hist[idx][field] = Number(val); saveAll(); renderHist(); }
+    function saveAll() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); }
+    function apagarTreino(id) { if(confirm("Apagar Registro?")) { hist = hist.filter(h => h.id != id); saveAll(); renderHist(); } }
 
-    function renderCalendario() { 
-        const body = document.getElementById('calBody'); const now = new Date(); 
-        document.getElementById('mesAnoAtual').innerText = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase(); 
-        body.innerHTML = ''; const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay(); const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); 
-        for (let i = 0; i < firstDay; i++) { body.innerHTML += `<div class="cal-day empty"></div>`; }
-        for (let d = 1; d <= daysInMonth; d++) { 
-            const ds = `${d.toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`; const t = hist.find(h => h.data === ds); 
+    // --- CALENDÁRIO ---
+    function renderCalendario() {
+        const body = document.getElementById('calBody'); const now = new Date();
+        document.getElementById('mesAnoAtual').innerText = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
+        body.innerHTML = ''; const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        for(let d=1; d<=days; d++) {
+            const ds = `${d.toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+            const t = hist.find(h => h.data === ds);
             const isMeta = t && (t.calTotal / (t.metaSalva || 2000) >= 1) ? 'meta-atingida' : '';
-            body.innerHTML += `<div class="cal-day" onclick="mostrarDashCalendario('${ds}')">${d}${t ? `<canvas class="cal-ring-mini ${isMeta}" id="cR-${d}"></canvas>` : ''}</div>`; 
-            if(t) setTimeout(() => { 
+            body.innerHTML += `<div class="cal-day ${t ? 'active-day' : ''}" onclick="showDay('${ds}')">${d}${t ? `<canvas class="cal-ring-mini ${isMeta}" id="cR-${d}"></canvas>` : ''}</div>`;
+            if(t) setTimeout(() => {
                 const ctx = document.getElementById(`cR-${d}`).getContext('2d'); const meta = t.metaSalva || 2000; const p = Math.min(t.calTotal, meta);
-                new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [t.calC, t.calM, Math.max(0, p-(t.calC+t.calM)), Math.max(0, meta-t.calTotal)], backgroundColor: ['#FC4C02', '#0A84FF', '#30D158', '#3A3A3C'], borderWidth: 0 }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } }); 
-            }, 10); 
-        } 
+                new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [t.calC, t.calM, Math.max(0, p-(t.calC+t.calM)), Math.max(0, meta-t.calTotal)], backgroundColor: ['#FC4C02', '#0A84FF', '#30D158', '#3A3A3C'], borderWidth: 0 }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } });
+            }, 10);
+        }
     }
 
-    // APOIO PRESERVADO
-    function addEx() { const n = document.getElementById('exNome').value; if(n) { sessao.push({ id: Date.now() + Math.random(), nome: n, series: [{ r: '', p: '' }] }); renderSessao(); document.getElementById('exNome').value = ""; } }
-    function saveRef() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); }
-    async function enviarParaPlanilha() { const p = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calM: Number(document.getElementById('cM').value), calC: Number(document.getElementById('cC').value), calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value), metaSalva: Number(document.getElementById('metaDiaria').value), exercicios: [...sessao] }; hist.push(p); saveRef(); location.reload(); }
-    function renderAtalhosFichas() { document.getElementById('atalhosFicha').innerHTML = fichas.map(f => `<button class="btn-outline" onclick="carregarExerciciosDaFicha('${f.txt.replace(/'/g, "\\'").replace(/\n/g, "\\n")}')">${f.t}</button>`).join(''); }
-    function carregarExerciciosDaFicha(txt) { txt.split(/\\n|\n/).forEach(ex => { if (ex.trim()) sessao.push({ id: Date.now() + Math.random(), nome: ex.trim(), series: [{ r: '', p: '' }] }); }); renderSessao(); }
-    function toggleExpand(id) { document.getElementById(`hist-${id}`).classList.toggle('expanded'); }
-    function apagarTreino(id) { if(confirm("Apagar Registro?")) { hist = hist.filter(h => h.id != id); saveRef(); renderHistInferior(); } }
-    function autorizarStrava() { const REDIRECT = encodeURIComponent(window.location.href.split('?')[0]); window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT}&approval_prompt=force&scope=activity:read_all`; }
-    async function puxarAtividadesStrava() { if (!token) return alert("Conecte!"); try { const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', { headers: { 'Authorization': `Bearer ${token}` } }); const acts = await r.json(); document.getElementById('listaAtividadesStrava').innerHTML = acts.map(act => `<div style="background:#2C2C2E; padding:10px; border-radius:10px; margin-top:5px; font-size:12px; cursor:pointer;" onclick="buscarDetalhesAtividade(${act.id})">🏃 ${act.name} (${new Date(act.start_date).toLocaleDateString()})</div>`).join(''); } catch (e) { alert("Erro"); } }
-    async function buscarDetalhesAtividade(id) { try { const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, { headers: { 'Authorization': `Bearer ${token}` } }); const d = await r.json(); document.getElementById('cC').value = Math.round(d.calories || 0); updateRingChart(); } catch (e) { alert("Erro"); } }
-    function mostrarDashCalendario(ds) { const t = hist.find(h => h.data === ds); const dash = document.getElementById('dashCalendario'); document.getElementById('dashDataTitulo').innerText = `📅 MÉTRICAS DE ${ds}`; if (t) { const o = Math.max(0, t.calTotal - (t.calM + t.calC)); document.getElementById('vTotal').innerText = `${t.calTotal} kcal`; document.getElementById('vMusc').innerText = `${t.calM} kcal`; document.getElementById('vCardio').innerText = `${t.calC} kcal`; document.getElementById('vOutras').innerText = `${o} kcal`; document.getElementById('dashExercicios').innerHTML = (t.exercicios || []).map(ex => `• ${ex.nome} (${ex.series.length} séries)`).join('<br>') || "Sem exercícios registrados."; } else { document.getElementById('vTotal').innerText = "Sem dados"; ["vMusc","vCardio","vOutras"].forEach(id => document.getElementById(id).innerText = "-"); } dash.style.display = 'block'; dash.scrollIntoView({ behavior: 'smooth' }); }
-    function renderizarGraficoCaloriasEvolucao() { if (chartCalEvInstance) chartCalEvInstance.destroy(); const ctx = document.getElementById('chartCalEvolucao').getContext('2d'); const d = hist.slice(-15); chartCalEvInstance = new Chart(ctx, { type: 'line', data: { labels: d.map(x => x.data.split('/')[0]), datasets: [{ label: 'Cal Total', data: d.map(x => x.calTotal), borderColor: '#30D158', tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } }); }
-    function popularSelectExercicios() { const n = [...new Set(hist.flatMap(t => (t.exercicios || []).map(e => e.nome)))]; document.getElementById('selectExGrafico').innerHTML = n.map(x => `<option value="${x}">${x}</option>`).join(''); renderizarGraficoEvolucao(); }
-    function renderizarGraficoEvolucao() { const ex = document.getElementById('selectExGrafico').value; if(!ex) return; const d = hist.filter(t => (t.exercicios || []).some(e => e.nome === ex)).map(t => ({ data: t.data, peso: Math.max(...t.exercicios.find(e => e.nome === ex).series.map(s => parseFloat(s.p) || 0)) })); if (chartCargaInstance) chartCargaInstance.destroy(); chartCargaInstance = new Chart(document.getElementById('chartCarga').getContext('2d'), { type: 'line', data: { labels: d.map(x => x.data.split('/')[0]), datasets: [{ label: 'kg', data: d.map(x => x.peso), borderColor: '#0A84FF' }] }, options: { responsive: true, maintainAspectRatio: false } }); }
-    function exportarDados() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ hist, fichas })], { type: 'application/json' })); a.download = 'backup.json'; a.click(); }
-    function importarDados(i) { const r = new FileReader(); r.onload = () => { const d = JSON.parse(r.result); localStorage.setItem('hist_nikho', JSON.stringify(d.hist)); localStorage.setItem('fichas_nikho', JSON.stringify(d.fichas)); location.reload(); }; r.readAsText(i.files[0]); }
-    function renderFichas() { document.getElementById('listaFichas').innerHTML = fichas.map((f, i) => `<div class="card"><input type="text" value="${f.t}" onchange="fichas[${i}].t=this.value; saveRef();"><textarea onchange="fichas[${i}].txt=this.value; saveRef();">${f.txt}</textarea><button onclick="fichas.splice(${i},1);saveRef();renderFichas();">🗑️</button></div>`).join(''); }
-    function salvarFicha() { fichas.push({ id: Date.now(), t: document.getElementById('titFicha').value, txt: document.getElementById('txtFicha').value }); localStorage.setItem('fichas_nikho', JSON.stringify(fichas)); renderFichas(); }
+    function showDay(ds) {
+        const t = hist.find(h => h.data === ds);
+        const dash = document.getElementById('dashCalendario');
+        if(t) {
+            document.getElementById('vTotal').innerText = t.calTotal + " kcal";
+            document.getElementById('dashExercicios').innerHTML = (t.exercicios || []).map(ex => `• ${ex.nome} (${ex.series.length} séries)`).join('<br>');
+            dash.style.display = 'block';
+        }
+    }
 
-    const code = new URLSearchParams(window.location.search).get('code');
-    if (code) { fetch('https://www.strava.com/oauth/token', { method: 'POST', body: JSON.stringify({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, code: code, grant_type: 'authorization_code' }), headers: { 'Content-Type': 'application/json' } }).then(r => r.json()).then(d => { if(d.access_token) { localStorage.setItem('strava_access_token', d.access_token); window.location.href = window.location.href.split('?')[0]; } }); }
+    // --- APOIO ---
+    function renderAtalhos() { document.getElementById('atalhosFicha').innerHTML = fichas.map(f => `<button class="btn-outline" onclick="carregarFicha('${f.txt.replace(/\n/g, '|')}')">${f.t}</button>`).join(''); }
+    function carregarFicha(txt) { txt.split('|').forEach(n => { if(n.trim()) sessao.push({ id: Date.now()+Math.random(), nome: n.trim(), series: [{r:'',p:''}] }); }); renderSessao(); }
+    function renderFichas() { document.getElementById('listaFichas').innerHTML = fichas.map((f, i) => `<div class="card"><input type="text" value="${f.t}" onchange="fichas[${i}].t=this.value; localStorage.setItem('fichas_nikho', JSON.stringify(fichas));"><textarea onchange="fichas[${i}].txt=this.value; localStorage.setItem('fichas_nikho', JSON.stringify(fichas));">${f.txt}</textarea><button onclick="fichas.splice(${i},1);localStorage.setItem('fichas_nikho', JSON.stringify(fichas));renderFichas();">🗑️</button></div>`).join(''); }
+    function salvarFicha() { fichas.push({ t: document.getElementById('titFicha').value, txt: document.getElementById('txtFicha').value }); localStorage.setItem('fichas_nikho', JSON.stringify(fichas)); switchTab('treinar'); }
+    function popularSelect() { const n = [...new Set(hist.flatMap(t => (t.exercicios || []).map(e => e.nome)))]; document.getElementById('selectExGrafico').innerHTML = n.map(x => `<option value="${x}">${x}</option>`).join(''); }
+    function renderizarGraficoEvolucao() {
+        const ex = document.getElementById('selectExGrafico').value; if(!ex) return;
+        const d = hist.filter(t => (t.exercicios || []).some(e => e.nome === ex)).map(t => ({ label: t.data.split('/')[0], val: Math.max(...t.exercicios.find(e => e.nome === ex).series.map(s => parseFloat(s.p) || 0)) }));
+        if(chartCargaInstance) chartCargaInstance.destroy();
+        chartCargaInstance = new Chart(document.getElementById('chartCarga'), { type: 'line', data: { labels: d.map(x => x.label), datasets: [{ label: 'kg', data: d.map(x => x.val), borderColor: '#0A84FF', tension: 0.3 }] }, options: { plugins: { legend: { labels: { color: '#FFF' } } } } });
+    }
+    function exportarDados() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({hist, fichas})], {type: 'application/json'})); a.download = 'nikho_backup.json'; a.click(); }
+    function autorizarStrava() { window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(window.location.href.split('?')[0])}&approval_prompt=force&scope=activity:read_all`; }
 
-    window.addEventListener('DOMContentLoaded', () => { switchTab('treinar'); if(token){document.getElementById('stravaAcoes').style.display='block'; document.getElementById('btnConnectStrava').style.display='none';} });
+    window.onload = () => {
+        const savedTheme = localStorage.getItem('theme_nikho');
+        if(savedTheme === 'performance') document.body.setAttribute('data-theme', 'performance');
+        switchTab('treinar');
+    };
 </script>
 </body>
 </html>
-
