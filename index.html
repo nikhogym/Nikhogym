@@ -15,16 +15,15 @@
     <style>
         /* --- ARQUITETURA DE TEMAS --- */
         :root {
-            /* Tema 1: Apple Neon (Padrão) */
             --bg: #000000;
             --card: #1C1C1E;
             --input-bg: #2C2C2E;
             --text: #FFFFFF;
             --muted: #8E8E93;
             --border: #3A3A3C;
-            --primary: #0A84FF; /* Azul Musc */
-            --cardio: #FC4C02;  /* Laranja Cardio */
-            --outras: #30D158;  /* Verde Sucesso */
+            --primary: #0A84FF;
+            --cardio: #FC4C02;
+            --outras: #30D158;
             --radius-card: 22px;
             --radius-btn: 16px;
             --tab-pos-top: 0;
@@ -32,7 +31,6 @@
             --tab-transform: none;
         }
 
-        /* Tema 2: Performance Industrial */
         [data-theme="performance"] {
             --bg: #0D1117;
             --card: #161B22;
@@ -40,7 +38,7 @@
             --text: #FFFFFF;
             --muted: #8B949E;
             --border: #30363D;
-            --primary: #9DFF2B; /* Verde Limão Neon */
+            --primary: #9DFF2B;
             --cardio: #FC4C02;
             --outras: #9DFF2B;
             --radius-card: 12px;
@@ -64,23 +62,13 @@
         [data-theme="performance"] body { padding-top: 20px; padding-bottom: 100px; }
 
         .theme-switcher {
-            position: fixed;
-            top: 20px;
-            right: 15px;
-            z-index: 2000;
-            background: var(--primary);
-            color: #000;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 900;
-            text-transform: uppercase;
-            box-shadow: 0 0 15px var(--primary);
-            cursor: pointer;
+            position: fixed; top: 20px; right: 15px; z-index: 2000;
+            background: var(--primary); color: #000; border: none;
+            padding: 8px 12px; border-radius: 20px; font-size: 10px;
+            font-weight: 900; text-transform: uppercase;
+            box-shadow: 0 0 15px var(--primary); cursor: pointer;
         }
 
-        /* --- NAVEGAÇÃO --- */
         .tabs { 
             display: flex; gap: 5px; position: fixed; 
             top: var(--tab-pos-top); bottom: var(--tab-pos-bottom); 
@@ -103,7 +91,6 @@
         .tab-btn.active { background: var(--primary); color: white; }
         [data-theme="performance"] .tab-btn.active { color: #000; }
 
-        /* --- CARDS --- */
         .card { 
             background: var(--card); padding: 20px; border-radius: var(--radius-card); 
             margin-bottom: 15px; border: 1px solid var(--border); position: relative; overflow: hidden;
@@ -139,7 +126,6 @@
             display: inline-block; margin-right: 5px; margin-bottom: 5px; 
         }
 
-        /* --- ANÉIS E PERFORMANCE --- */
         .rings-container { position: relative; width: 180px; height: 180px; margin: auto; display: flex; align-items: center; justify-content: center; }
         .rings-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
         .ring-bg { fill: none; stroke-width: 14; opacity: 0.1; }
@@ -162,13 +148,15 @@
         .hist-details-pane { display: none; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px; }
         
         .tag-row { display: flex; align-items: center; gap: 6px; font-size: 12px; }
-        .cal-summary { display: flex; flex-direction: column; gap: 4px; }
 
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
-        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; position: relative; background: var(--input-bg); border-radius: 12px; font-size: 12px; border: 1px solid var(--border); }
+        .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; position: relative; background: var(--input-bg); border-radius: 12px; font-size: 12px; border: 1px solid var(--border); cursor: pointer;}
         .cal-day.active-day { border-color: var(--primary); box-shadow: inset 0 0 5px var(--primary); }
         .cal-ring-mini { position: absolute; width: 100%; height: 100%; pointer-events: none; }
 
+        .container { max-width: 450px; margin: auto; }
+        .content { display: none; }
+        .content.active { display: block; }
         .strava-logo-img { height: 16px; filter: invert(38%) sepia(98%) saturate(3015%) hue-rotate(1deg) brightness(102%) contrast(105%); }
     </style>
 </head>
@@ -177,10 +165,10 @@
 <button class="theme-switcher" onclick="toggleTheme()">Trocar Tema</button>
 
 <div class="tabs">
-    <button id="tab-t" class="tab-btn active" onclick="switchTab('treinar')">💪 Treinar</button>
-    <button id="tab-f" class="tab-btn" onclick="switchTab('fichas')">📋 Fichas</button>
-    <button id="tab-c" class="tab-btn" onclick="switchTab('calendario')">📅 Calen.</button>
-    <button id="tab-e" class="tab-btn" onclick="switchTab('evolucao')">📈 Evol.</button>
+    <button id="tab-treinar" class="tab-btn active" onclick="switchTab('treinar')">💪 Treinar</button>
+    <button id="tab-fichas" class="tab-btn" onclick="switchTab('fichas')">📋 Fichas</button>
+    <button id="tab-calendario" class="tab-btn" onclick="switchTab('calendario')">📅 Calen.</button>
+    <button id="tab-evolucao" class="tab-btn" onclick="switchTab('evolucao')">📈 Evol.</button>
 </div>
 
 <div class="container">
@@ -273,7 +261,6 @@
     let token = localStorage.getItem('strava_access_token');
     const CLIENT_ID = '201889';
 
-    // --- TEMAS ---
     function toggleTheme() {
         const body = document.body;
         const theme = body.getAttribute('data-theme') === 'performance' ? 'apple' : 'performance';
@@ -282,19 +269,17 @@
         localStorage.setItem('theme_nikho', theme);
     }
 
-    // --- NAVEGAÇÃO ---
     function switchTab(aba) {
         document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(aba).classList.add('active');
-        document.getElementById('tab-' + aba.charAt(0)).classList.add('active');
+        document.getElementById('tab-' + aba).classList.add('active');
         if(aba === 'treinar') { updateRingChart(); renderAtalhos(); renderHist(); }
         if(aba === 'calendario') renderCalendario();
         if(aba === 'evolucao') { popularSelect(); renderizarGraficoEvolucao(); }
         if(aba === 'fichas') renderFichas();
     }
 
-    // --- ANÉIS E CALORIAS ---
     function updateRingChart() {
         const meta = parseFloat(document.getElementById('metaDiaria').value) || 2000;
         const musc = parseFloat(document.getElementById('cM').value) || 0;
@@ -306,23 +291,21 @@
         document.getElementById('txtCaloriasRing').innerText = total + " / " + meta + " kcal";
 
         const container = document.getElementById('mainRingContainer');
-        perc >= 100 ? container.classList.add('meta-atingida') : container.classList.remove('meta-atingida');
+        if(perc >= 100) container.classList.add('meta-atingida');
+        else container.classList.remove('meta-atingida');
 
         document.getElementById('ring-cardio-main').style.strokeDashoffset = 376.99 * (1 - Math.min(cardio/meta, 1));
         document.getElementById('ring-musc-main').style.strokeDashoffset = 263.89 * (1 - Math.min(musc/meta, 1));
         document.getElementById('ring-outras-main').style.strokeDashoffset = 150.80 * (1 - Math.min(total/meta, 1));
     }
 
-    // --- REFERÊNCIA DE TREINO ---
     function getSerieReferencia(nomeEx, indexSerie) {
         const termo = nomeEx.toLowerCase().trim();
-        const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo)));
+        const ultimo = hist.slice().reverse().find(t => (t.exercicios || []).some(e => e.nome.toLowerCase().trim().includes(termo)));
         if (ultimo) {
             const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
-            const totalSeries = exData.series.length;
             const serieData = exData.series[indexSerie];
-            if (serieData) return `Último: ${serieData.r} reps / ${serieData.p}kg (${totalSeries} séries)`;
-            return `Último: [Fim do histórico] (${totalSeries} séries totais)`;
+            if (serieData) return `Último: ${serieData.r} reps / ${serieData.p}kg (${exData.series.length} séries)`;
         }
         return "Sem histórico";
     }
@@ -330,14 +313,13 @@
     function buscarReferencia(nome) {
         if (!nome || nome.length < 2) { document.getElementById('referenciaPeso').innerText = ""; return; }
         const termo = nome.toLowerCase().trim();
-        const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo)));
+        const ultimo = hist.slice().reverse().find(t => (t.exercicios || []).some(e => e.nome.toLowerCase().trim().includes(termo)));
         if (ultimo) {
             const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
             document.getElementById('referenciaPeso').innerText = `💡 Último: ${exData.series[0].r} reps / ${exData.series[0].p}kg (${exData.series.length} séries)`;
         } else { document.getElementById('referenciaPeso').innerText = ""; }
     }
 
-    // --- TREINO ATIVO ---
     function addEx() {
         const n = document.getElementById('exNome').value;
         if(n) {
@@ -370,9 +352,8 @@
     function addSerie(id) { sessao.find(e => e.id === id).series.push({r:'',p:''}); renderSessao(); }
     function removerEx(id) { sessao = sessao.filter(e => e.id !== id); renderSessao(); }
 
-    // --- HISTÓRICO E EDIÇÃO ---
     async function enviarParaPlanilha() {
-        const p = {
+        hist.push({
             id: Date.now(),
             data: new Date().toLocaleDateString('pt-BR'),
             calM: Number(document.getElementById('cM').value),
@@ -380,8 +361,7 @@
             calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value),
             metaSalva: Number(document.getElementById('metaDiaria').value),
             exercicios: [...sessao]
-        };
-        hist.push(p);
+        });
         localStorage.setItem('hist_nikho', JSON.stringify(hist));
         location.reload();
     }
@@ -393,7 +373,7 @@
             const isMeta = perc >= 100 ? 'meta-atingida' : '';
             const outras = Math.max(0, h.calTotal - (h.calM + h.calC));
             return `
-            <div class="historico-item" id="hist-${h.id}" onclick="this.classList.toggle('expanded')">
+            <div class="historico-item" onclick="this.classList.toggle('expanded')">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div class="ring-container ${isMeta}" style="width:45px; height:45px;">
                         <canvas id="ringSmall-${h.id}" width="45" height="45"></canvas>
@@ -411,13 +391,15 @@
                 </div>
                 <div class="hist-details-pane" onclick="event.stopPropagation()">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-                        <div><label style="font-size:10px">Total Dia</label><input type="number" value="${h.calTotal}" onchange="updateHistValue('${h.id}', 'calTotal', this.value)"></div>
+                        <div><label style="font-size:10px">Total</label><input type="number" value="${h.calTotal}" onchange="updateHistValue('${h.id}', 'calTotal', this.value)"></div>
                         <div><label style="font-size:10px">Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)"></div>
+                        <div><label style="font-size:10px; color:var(--cardio)">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
+                        <div><label style="font-size:10px; color:var(--primary)">💪 Musc.</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
                     </div>
-                    <strong>Exercícios (Edição):</strong>
+                    <strong>Exercícios:</strong>
                     ${(h.exercicios || []).map((ex, exIdx) => `
                         <div style="background:var(--bg); padding:8px; border-radius:10px; margin-top:5px;">
-                            <input type="text" value="${ex.nome}" style="font-weight:bold" onchange="updateHistEx('${h.id}', ${exIdx}, this.value)">
+                            <input type="text" value="${ex.nome}" onchange="updateHistEx('${h.id}', ${exIdx}, this.value)">
                             ${ex.series.map((s, sIdx) => `
                                 <div style="display:flex; gap:5px;">
                                     <input type="number" value="${s.r}" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'r', this.value)">
@@ -426,7 +408,7 @@
                             `).join('')}
                         </div>
                     `).join('')}
-                    <button class="btn-outline" style="width:100%; margin-top:10px; border-color:#FF453A; color:#FF453A" onclick="apagarTreino('${h.id}')">🗑️ Excluir</button>
+                    <button class="btn-outline" style="width:100%; margin-top:10px; border-color:#FF453A; color:#FF453A" onclick="apagarTreino('${h.id}')">Excluir</button>
                 </div>
             </div>`;
         }).join('');
@@ -445,7 +427,6 @@
     function saveAll() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); }
     function apagarTreino(id) { if(confirm("Apagar Registro?")) { hist = hist.filter(h => h.id != id); saveAll(); renderHist(); } }
 
-    // --- CALENDÁRIO ---
     function renderCalendario() {
         const body = document.getElementById('calBody'); const now = new Date();
         document.getElementById('mesAnoAtual').innerText = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
@@ -467,16 +448,15 @@
         const dash = document.getElementById('dashCalendario');
         if(t) {
             document.getElementById('vTotal').innerText = t.calTotal + " kcal";
-            document.getElementById('dashExercicios').innerHTML = (t.exercicios || []).map(ex => `• ${ex.nome} (${ex.series.length} séries)`).join('<br>');
+            document.getElementById('dashExercicios').innerHTML = (t.exercicios || []).map(ex => `• ${ex.nome}`).join('<br>');
             dash.style.display = 'block';
         }
     }
 
-    // --- APOIO ---
     function renderAtalhos() { document.getElementById('atalhosFicha').innerHTML = fichas.map(f => `<button class="btn-outline" onclick="carregarFicha('${f.txt.replace(/\n/g, '|')}')">${f.t}</button>`).join(''); }
     function carregarFicha(txt) { txt.split('|').forEach(n => { if(n.trim()) sessao.push({ id: Date.now()+Math.random(), nome: n.trim(), series: [{r:'',p:''}] }); }); renderSessao(); }
-    function renderFichas() { document.getElementById('listaFichas').innerHTML = fichas.map((f, i) => `<div class="card"><input type="text" value="${f.t}" onchange="fichas[${i}].t=this.value; localStorage.setItem('fichas_nikho', JSON.stringify(fichas));"><textarea onchange="fichas[${i}].txt=this.value; localStorage.setItem('fichas_nikho', JSON.stringify(fichas));">${f.txt}</textarea><button onclick="fichas.splice(${i},1);localStorage.setItem('fichas_nikho', JSON.stringify(fichas));renderFichas();">🗑️</button></div>`).join(''); }
-    function salvarFicha() { fichas.push({ t: document.getElementById('titFicha').value, txt: document.getElementById('txtFicha').value }); localStorage.setItem('fichas_nikho', JSON.stringify(fichas)); switchTab('treinar'); }
+    function renderFichas() { document.getElementById('listaFichas').innerHTML = fichas.map((f, i) => `<div class="card"><input type="text" value="${f.t}" onchange="fichas[${i}].t=this.value; saveAll();"><textarea onchange="fichas[${i}].txt=this.value; saveAll();">${f.txt}</textarea><button onclick="fichas.splice(${i},1);saveAll();renderFichas();">🗑️</button></div>`).join(''); }
+    function salvarFicha() { fichas.push({ t: document.getElementById('titFicha').value, txt: document.getElementById('txtFicha').value }); saveAll(); switchTab('treinar'); }
     function popularSelect() { const n = [...new Set(hist.flatMap(t => (t.exercicios || []).map(e => e.nome)))]; document.getElementById('selectExGrafico').innerHTML = n.map(x => `<option value="${x}">${x}</option>`).join(''); }
     function renderizarGraficoEvolucao() {
         const ex = document.getElementById('selectExGrafico').value; if(!ex) return;
@@ -495,3 +475,4 @@
 </script>
 </body>
 </html>
+
