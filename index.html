@@ -126,7 +126,7 @@
             <input type="number" id="cC" placeholder="Calorias Cardio Manual" oninput="updateRingChart()">
             <button id="btnConnectStrava" class="btn btn-strava-outline" onclick="autorizarStrava()">
                 <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                Conectar Strava
+                Conectar <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
             </button>
             <div id="stravaAcoes" style="display:none; margin-top:10px;">
                 <button class="btn btn-strava-outline" onclick="puxarAtividadesStrava()">Conectar Strava</button>
@@ -225,21 +225,56 @@
         const cardio = parseFloat(document.getElementById('cC').value) || 0;
         const total = musc + cardio;
         const porcentagemTotal = Math.round((total / meta) * 100);
-
         document.getElementById('txtPorcentagem').innerText = porcentagemTotal + "%";
         document.getElementById('txtCaloriasRing').innerText = total + " / " + meta + " kcal";
-
         const container = document.getElementById('mainRingContainer');
         if (porcentagemTotal >= 100) container.classList.add('meta-atingida');
         else container.classList.remove('meta-atingida');
-
         const pCardio = Math.min(cardio / meta, 1);
         const pMusc = Math.min(musc / meta, 1);
         const pTotal = Math.min(total / meta, 1);
-
         document.getElementById('ring-cardio-main').style.strokeDashoffset = 376.99 * (1 - pCardio);
         document.getElementById('ring-musc-main').style.strokeDashoffset = 263.89 * (1 - pMusc);
         document.getElementById('ring-outras-main').style.strokeDashoffset = 150.80 * (1 - pTotal);
+    }
+
+    function getSerieReferencia(nomeEx, indexSerie) {
+        const termo = nomeEx.toLowerCase().trim();
+        const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo)));
+        if (ultimo) {
+            const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
+            const totalSeries = exData.series.length;
+            const serieData = exData.series[indexSerie];
+            if (serieData) return `Último: ${serieData.r} reps / ${serieData.p}kg (${totalSeries} séries)`;
+            return `Último: [Fim do histórico] (${totalSeries} séries totais)`;
+        }
+        return "Sem histórico";
+    }
+
+    function buscarReferencia(nome) {
+        if (!nome || nome.length < 2) { document.getElementById('referenciaPeso').innerText = ""; return; }
+        const termo = nome.toLowerCase().trim();
+        const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo)));
+        if (ultimo) {
+            const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo));
+            document.getElementById('referenciaPeso').innerText = `💡 Último: ${exData.series[0].r} reps / ${exData.series[0].p}kg (${exData.series.length} séries)`;
+        } else { document.getElementById('referenciaPeso').innerText = ""; }
+    }
+
+    function renderSessao() {
+        document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `
+            <div class="ex-item-card">
+                <div class="ex-header"><strong>${ex.nome}</strong><span onclick="sessao=sessao.filter(e=>e.id!=${ex.id});renderSessao();">✕</span></div>
+                ${ex.series.map((s, i) => {
+                    const ref = getSerieReferencia(ex.nome, i);
+                    return `<span class="ref-text">💡 ${ref}</span>
+                    <div class="serie-row"><span>${i+1}º</span>
+                    <input type="number" placeholder="R" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].r=this.value">
+                    <input type="number" placeholder="Kg" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].p=this.value">
+                    <span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(${i},1);renderSessao();">✕</span></div>`;
+                }).join('')}
+                <button class="btn" style="background:#3A3A3C; color:white; padding:5px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:'',p:''});renderSessao();">+ Série</button>
+            </div>`).join('');
     }
 
     function renderHistInferior() {
@@ -248,7 +283,6 @@
             const m = h.metaSalva || 2000;
             const perc = Math.round((h.calTotal/m)*100);
             const isMeta = perc >= 100 ? 'meta-atingida' : '';
-            const outras = Math.max(0, h.calTotal - (h.calM + h.calC));
             return `
             <div class="historico-item" id="hist-${h.id}" onclick="toggleExpand('${h.id}')">
                 <div class="hist-header">
@@ -261,7 +295,6 @@
                         <div class="cal-summary">
                             <div class="tag-row"><span class="tag-cardio">🏃 ${h.calC || 0}</span></div>
                             <div class="tag-row"><span class="tag-musc">💪 ${h.calM || 0}</span></div>
-                            <div class="tag-row"><span class="tag-diff" style="color:var(--outras)">🌿 ${outras}</span></div>
                         </div>
                     </div>
                     <div style="text-align:right"><strong>${h.calTotal}</strong><br><small>▼</small></div>
@@ -273,22 +306,18 @@
                         <div><label style="font-size:10px;">💪 Musc.</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
                         <div><label style="font-size:10px;">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
                     </div>
-                    <label style="font-size:10px;">🎯 Meta</label>
-                    <input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
-                    
+                    <label style="font-size:10px;">🎯 Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
                     <div style="margin-top:10px;">
-                        <strong>Exercícios:</strong>
+                        <strong>Exercícios (Clique para editar):</strong>
                         ${(h.exercicios || []).map((ex, exIdx) => `
                             <div style="background:#2C2C2E; padding:8px; border-radius:10px; margin-top:5px;">
-                                <input type="text" value="${ex.nome}" style="margin-bottom:5px; font-weight:bold; font-size:12px;" onchange="updateHistEx('${h.id}', ${exIdx}, this.value)">
+                                <input type="text" value="${ex.nome}" style="margin-bottom:5px; font-weight:bold; font-size:12px; background:transparent; border:none; color:white;" onchange="updateHistEx('${h.id}', ${exIdx}, this.value)">
                                 ${ex.series.map((s, sIdx) => `
                                     <div style="display:flex; gap:5px;">
-                                        <input type="number" placeholder="R" value="${s.r}" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'r', this.value)">
-                                        <input type="number" placeholder="Kg" value="${s.p}" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'p', this.value)">
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `).join('')}
+                                        <input type="number" value="${s.r}" style="font-size:12px; padding:5px;" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'r', this.value)">
+                                        <input type="number" value="${s.p}" style="font-size:12px; padding:5px;" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'p', this.value)">
+                                    </div>`).join('')}
+                            </div>`).join('')}
                     </div>
                     <button class="btn-outline" style="color:#FF453A; width:100%; margin-top:10px; border-color:#FF453A;" onclick="apagarTreino('${h.id}')">🗑️ Excluir Registro</button>
                 </div>
@@ -297,20 +326,8 @@
         hist.slice().reverse().slice(0, 10).forEach(h => {
             const ctx = document.getElementById(`ringSmall-${h.id}`).getContext('2d');
             const meta = h.metaSalva || 2000;
-            const preenchimento = Math.min(h.calTotal, meta);
-            const vazio = Math.max(0, meta - h.calTotal);
-            new Chart(ctx, { 
-                type: 'doughnut', 
-                data: { 
-                    datasets: [{ 
-                        data: [h.calC, h.calM, Math.max(0, preenchimento - (h.calC + h.calM)), vazio], 
-                        backgroundColor: ['#FC4C02', '#0A84FF', '#30D158', '#3A3A3C'], 
-                        borderWidth: 0, 
-                        cutout: '80%' 
-                    }] 
-                }, 
-                options: { plugins: { legend: false }, maintainAspectRatio: false } 
-            });
+            const p = Math.min(h.calTotal, meta);
+            new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [h.calC, h.calM, Math.max(0, p-(h.calC+h.calM)), Math.max(0, meta-h.calTotal)], backgroundColor: ['#FC4C02', '#0A84FF', '#30D158', '#3A3A3C'], borderWidth: 0, cutout: '80%' }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } });
         });
     }
 
@@ -319,46 +336,24 @@
     function updateHistValue(id, field, val) { const idx = hist.findIndex(x => x.id == id); hist[idx][field] = Number(val); saveRef(); renderHistInferior(); }
 
     function renderCalendario() { 
-        const body = document.getElementById('calBody'); 
-        const now = new Date(); 
+        const body = document.getElementById('calBody'); const now = new Date(); 
         document.getElementById('mesAnoAtual').innerText = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase(); 
-        body.innerHTML = ''; 
-        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); 
+        body.innerHTML = ''; const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay(); const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); 
         for (let i = 0; i < firstDay; i++) { body.innerHTML += `<div class="cal-day empty"></div>`; }
         for (let d = 1; d <= daysInMonth; d++) { 
-            const ds = `${d.toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`; 
-            const t = hist.find(h => h.data === ds); 
+            const ds = `${d.toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`; const t = hist.find(h => h.data === ds); 
             const isMeta = t && (t.calTotal / (t.metaSalva || 2000) >= 1) ? 'meta-atingida' : '';
             body.innerHTML += `<div class="cal-day" onclick="mostrarDashCalendario('${ds}')">${d}${t ? `<canvas class="cal-ring-mini ${isMeta}" id="cR-${d}"></canvas>` : ''}</div>`; 
             if(t) setTimeout(() => { 
-                const ctx = document.getElementById(`cR-${d}`).getContext('2d'); 
-                const meta = t.metaSalva || 2000;
-                const preenchimento = Math.min(t.calTotal, meta);
-                const vazio = Math.max(0, meta - t.calTotal);
-                new Chart(ctx, { 
-                    type: 'doughnut', 
-                    data: { 
-                        datasets: [{ 
-                            data: [t.calC, t.calM, Math.max(0, preenchimento - (t.calC + t.calM)), vazio], 
-                            backgroundColor: ['#FC4C02', '#0A84FF', '#30D158', '#3A3A3C'], 
-                            borderWidth: 0 
-                        }] 
-                    }, 
-                    options: { plugins: { legend: false }, maintainAspectRatio: false } 
-                }); 
+                const ctx = document.getElementById(`cR-${d}`).getContext('2d'); const meta = t.metaSalva || 2000; const p = Math.min(t.calTotal, meta);
+                new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [t.calC, t.calM, Math.max(0, p-(t.calC+t.calM)), Math.max(0, meta-t.calTotal)], backgroundColor: ['#FC4C02', '#0A84FF', '#30D158', '#3A3A3C'], borderWidth: 0 }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } }); 
             }, 10); 
         } 
     }
 
-    // Funções de Referência
-    function getSerieReferencia(nomeEx, indexSerie) { const termo = nomeEx.toLowerCase().trim(); const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo))); if (ultimo) { const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo)); const serieData = exData.series[indexSerie]; if (serieData) return `Último: ${serieData.r} reps / ${serieData.p}kg (${exData.series.length} séries)`; } return "Sem histórico"; }
-    function buscarReferencia(nome) { if (!nome || nome.length < 2) { document.getElementById('referenciaPeso').innerText = ""; return; } const termo = nome.toLowerCase().trim(); const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo))); if (ultimo) { const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo)); const primeira = exData.series[0]; document.getElementById('referenciaPeso').innerText = `💡 Último: ${primeira.r} reps / ${primeira.p}kg (${exData.series.length} séries)`; } else { document.getElementById('referenciaPeso').innerText = ""; } }
-    
-    // Funcionalidades preservadas
-    function renderAtalhosFichas() { const container = document.getElementById('atalhosFicha'); container.innerHTML = fichas.map(f => `<button class="btn-outline" onclick="carregarExerciciosDaFicha('${f.txt.replace(/'/g, "\\'").replace(/\n/g, "\\n")}')">${f.t}</button>`).join(''); }
+    // Funções de apoio preservadas
+    function renderAtalhosFichas() { document.getElementById('atalhosFicha').innerHTML = fichas.map(f => `<button class="btn-outline" onclick="carregarExerciciosDaFicha('${f.txt.replace(/'/g, "\\'").replace(/\n/g, "\\n")}')">${f.t}</button>`).join(''); }
     function carregarExerciciosDaFicha(txt) { txt.split(/\\n|\n/).forEach(ex => { if (ex.trim()) sessao.push({ id: Date.now() + Math.random(), nome: ex.trim(), series: [{ r: '', p: '' }] }); }); renderSessao(); }
-    function renderSessao() { document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `<div class="ex-item-card"><div class="ex-header"><strong>${ex.nome}</strong><span onclick="sessao=sessao.filter(e=>e.id!=${ex.id});renderSessao();">✕</span></div>${ex.series.map((s, i) => `<div class="serie-row"><span>${i+1}º</span><input type="number" placeholder="R" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].r=this.value"><input type="number" placeholder="Kg" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].p=this.value"><span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(${i},1);renderSessao();">✕</span></div>`).join('')}<button class="btn" style="background:#3A3A3C; color:white; padding:5px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:'',p:''});renderSessao();">+ Série</button></div>`).join(''); }
     function toggleExpand(id) { document.getElementById(`hist-${id}`).classList.toggle('expanded'); }
     function saveRef() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); }
     function apagarTreino(id) { if(confirm("Apagar?")) { hist = hist.filter(h => h.id != id); saveRef(); renderHistInferior(); } }
