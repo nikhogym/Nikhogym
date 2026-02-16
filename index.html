@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nikho Gym Connect</title>
     
-    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/dumbbell.svg">
-    <link rel="icon" href="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/dumbbell.svg">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/neon/150/dumbbell.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://img.icons8.com/neon/152/dumbbell.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://img.icons8.com/neon/180/dumbbell.png">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/neon/150/dumbbell.png">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="NikhoGym">
@@ -336,7 +339,8 @@
                                         <input type="number" value="${s.r}" style="font-size:12px; padding:5px;" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'r', this.value)">
                                         <input type="number" value="${s.p}" style="font-size:12px; padding:5px;" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'p', this.value)">
                                     </div>`).join('')}
-                            </div>`).join('')}
+                            </div>
+                        `).join('')}
                     </div>
                     <button class="btn-outline" style="color:#FF453A; width:100%; margin-top:10px; border-color:#FF453A;" onclick="apagarTreino('${h.id}')">🗑️ Excluir Registro</button>
                 </div>
@@ -370,6 +374,7 @@
         } 
     }
 
+    // APOIO PRESERVADO
     function addEx() { const n = document.getElementById('exNome').value; if(n) { sessao.push({ id: Date.now() + Math.random(), nome: n, series: [{ r: '', p: '' }] }); renderSessao(); document.getElementById('exNome').value = ""; } }
     function saveRef() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); }
     async function enviarParaPlanilha() { const p = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calM: Number(document.getElementById('cM').value), calC: Number(document.getElementById('cC').value), calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value), metaSalva: Number(document.getElementById('metaDiaria').value), exercicios: [...sessao] }; hist.push(p); saveRef(); location.reload(); }
@@ -396,3 +401,4 @@
 </script>
 </body>
 </html>
+
