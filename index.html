@@ -248,8 +248,10 @@
             <div style="height: 180px;"><canvas id="chartCarga"></canvas></div>
         </div>
         <div class="card">
-            <div class="section-title">💾 Backup</div>
-            <button class="btn-outline" style="width:100%" onclick="exportarDados()">📤 Exportar JSON</button>
+            <div class="section-title">💾 Soberania de Dados</div>
+            <button class="btn-outline" style="width:100%; margin-bottom: 10px;" onclick="exportarDados()">📤 Exportar Backup JSON</button>
+            <button class="btn-outline" style="width:100%" onclick="document.getElementById('importFile').click()">📥 Importar Backup JSON</button>
+            <input type="file" id="importFile" style="display:none" onchange="importarDados(this)">
         </div>
     </div>
 </div>
@@ -286,14 +288,11 @@
         const cardio = parseFloat(document.getElementById('cC').value) || 0;
         const total = musc + cardio;
         const perc = Math.round((total / meta) * 100);
-
         document.getElementById('txtPorcentagem').innerText = perc + "%";
         document.getElementById('txtCaloriasRing').innerText = total + " / " + meta + " kcal";
-
         const container = document.getElementById('mainRingContainer');
         if(perc >= 100) container.classList.add('meta-atingida');
         else container.classList.remove('meta-atingida');
-
         document.getElementById('ring-cardio-main').style.strokeDashoffset = 376.99 * (1 - Math.min(cardio/meta, 1));
         document.getElementById('ring-musc-main').style.strokeDashoffset = 263.89 * (1 - Math.min(musc/meta, 1));
         document.getElementById('ring-outras-main').style.strokeDashoffset = 150.80 * (1 - Math.min(total/meta, 1));
@@ -335,8 +334,7 @@
                 <div style="display:flex; justify-content:space-between"><strong>${ex.nome}</strong> <span onclick="removerEx(${ex.id})">✕</span></div>
                 ${ex.series.map((s, i) => {
                     const ref = getSerieReferencia(ex.nome, i);
-                    return `
-                    <span class="ref-text">💡 ${ref}</span>
+                    return `<span class="ref-text">💡 ${ref}</span>
                     <div class="serie-row">
                         <span>${i+1}º</span>
                         <input type="number" placeholder="R" value="${s.r}" onchange="editSerie(${ex.id}, ${i}, 'r', this.value)">
@@ -362,7 +360,7 @@
             metaSalva: Number(document.getElementById('metaDiaria').value),
             exercicios: [...sessao]
         });
-        localStorage.setItem('hist_nikho', JSON.stringify(hist));
+        saveAll();
         location.reload();
     }
 
@@ -390,13 +388,12 @@
                     <strong>${h.calTotal} kcal</strong>
                 </div>
                 <div class="hist-details-pane" onclick="event.stopPropagation()">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         <div><label style="font-size:10px">Total</label><input type="number" value="${h.calTotal}" onchange="updateHistValue('${h.id}', 'calTotal', this.value)"></div>
                         <div><label style="font-size:10px">Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)"></div>
                         <div><label style="font-size:10px; color:var(--cardio)">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
                         <div><label style="font-size:10px; color:var(--primary)">💪 Musc.</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
                     </div>
-                    <strong>Exercícios:</strong>
                     ${(h.exercicios || []).map((ex, exIdx) => `
                         <div style="background:var(--bg); padding:8px; border-radius:10px; margin-top:5px;">
                             <input type="text" value="${ex.nome}" onchange="updateHistEx('${h.id}', ${exIdx}, this.value)">
@@ -412,7 +409,6 @@
                 </div>
             </div>`;
         }).join('');
-
         hist.slice().reverse().slice(0, 10).forEach(h => {
             const ctx = document.getElementById(`ringSmall-${h.id}`).getContext('2d');
             const meta = h.metaSalva || 2000;
@@ -465,6 +461,7 @@
         chartCargaInstance = new Chart(document.getElementById('chartCarga'), { type: 'line', data: { labels: d.map(x => x.label), datasets: [{ label: 'kg', data: d.map(x => x.val), borderColor: '#0A84FF', tension: 0.3 }] }, options: { plugins: { legend: { labels: { color: '#FFF' } } } } });
     }
     function exportarDados() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({hist, fichas})], {type: 'application/json'})); a.download = 'nikho_backup.json'; a.click(); }
+    function importarDados(i) { const r = new FileReader(); r.onload = () => { const d = JSON.parse(r.result); localStorage.setItem('hist_nikho', JSON.stringify(d.hist)); localStorage.setItem('fichas_nikho', JSON.stringify(d.fichas)); location.reload(); }; r.readAsText(i.files[0]); }
     function autorizarStrava() { window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(window.location.href.split('?')[0])}&approval_prompt=force&scope=activity:read_all`; }
 
     window.onload = () => {
@@ -475,4 +472,3 @@
 </script>
 </body>
 </html>
-
