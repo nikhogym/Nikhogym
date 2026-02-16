@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nikho Gym Connect</title>
     
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22black%22/><path d=%22M20 50h15m30 0h15M35 30v40m30-40v40M42 45h16v10H42z%22 stroke=%22%230A84FF%22 stroke-width=%226%22 stroke-linecap=%22round%22 fill=%22none%22/><circle cx=%2250%22 cy=%2250%22 r=%2240%22 stroke=%22%230A84FF%22 stroke-width=%222%22 fill=%22none%22 opacity=%220.3%22/></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22black%22/><path d=%22M20 50h15m30 0h15M35 30v40m30-40v40M42 45h16v10H42z%22 stroke=%22%230A84FF%22 stroke-width=%226%22 stroke-linecap=%22round%22 fill=%22none%22/></svg>">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/dumbbell.svg">
+    <link rel="icon" href="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/dumbbell.svg">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NikhoGym">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -138,8 +139,8 @@
 
             <div id="stravaAcoes" style="display:none; margin-top:10px;">
                 <button class="btn btn-strava-outline" onclick="puxarAtividadesStrava()">
-                    <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                    Puxar Atividades <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
+                   <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
+                   Puxar Dados <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
                 </button>
                 <div id="listaAtividadesStrava" style="max-height: 150px; overflow-y: auto;"></div>
             </div>
@@ -334,10 +335,8 @@
                                     <div style="display:flex; gap:5px;">
                                         <input type="number" value="${s.r}" style="font-size:12px; padding:5px;" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'r', this.value)">
                                         <input type="number" value="${s.p}" style="font-size:12px; padding:5px;" onchange="updateHistSerie('${h.id}', ${exIdx}, ${sIdx}, 'p', this.value)">
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `).join('')}
+                                    </div>`).join('')}
+                            </div>`).join('')}
                     </div>
                     <button class="btn-outline" style="color:#FF453A; width:100%; margin-top:10px; border-color:#FF453A;" onclick="apagarTreino('${h.id}')">🗑️ Excluir Registro</button>
                 </div>
@@ -371,17 +370,16 @@
         } 
     }
 
-    // --- APOIO E PERSISTÊNCIA ---
-    function saveRef() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); }
-    function apagarTreino(id) { if(confirm("Apagar registro permanentemente?")) { hist = hist.filter(h => h.id != id); saveRef(); renderHistInferior(); } }
-    async function enviarParaPlanilha() { const p = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calM: Number(document.getElementById('cM').value), calC: Number(document.getElementById('cC').value), calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value), metaSalva: Number(document.getElementById('metaDiaria').value), exercicios: [...sessao] }; hist.push(p); saveRef(); location.reload(); }
     function addEx() { const n = document.getElementById('exNome').value; if(n) { sessao.push({ id: Date.now() + Math.random(), nome: n, series: [{ r: '', p: '' }] }); renderSessao(); document.getElementById('exNome').value = ""; } }
+    function saveRef() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); }
+    async function enviarParaPlanilha() { const p = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calM: Number(document.getElementById('cM').value), calC: Number(document.getElementById('cC').value), calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value), metaSalva: Number(document.getElementById('metaDiaria').value), exercicios: [...sessao] }; hist.push(p); saveRef(); location.reload(); }
     function renderAtalhosFichas() { document.getElementById('atalhosFicha').innerHTML = fichas.map(f => `<button class="btn-outline" onclick="carregarExerciciosDaFicha('${f.txt.replace(/'/g, "\\'").replace(/\n/g, "\\n")}')">${f.t}</button>`).join(''); }
     function carregarExerciciosDaFicha(txt) { txt.split(/\\n|\n/).forEach(ex => { if (ex.trim()) sessao.push({ id: Date.now() + Math.random(), nome: ex.trim(), series: [{ r: '', p: '' }] }); }); renderSessao(); }
     function toggleExpand(id) { document.getElementById(`hist-${id}`).classList.toggle('expanded'); }
+    function apagarTreino(id) { if(confirm("Apagar Registro?")) { hist = hist.filter(h => h.id != id); saveRef(); renderHistInferior(); } }
     function autorizarStrava() { const REDIRECT = encodeURIComponent(window.location.href.split('?')[0]); window.location.href = `https://www.strava.com/oauth/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT}&approval_prompt=force&scope=activity:read_all`; }
-    async function puxarAtividadesStrava() { if (!token) return alert("Conecte ao Strava!"); try { const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', { headers: { 'Authorization': `Bearer ${token}` } }); const acts = await r.json(); document.getElementById('listaAtividadesStrava').innerHTML = acts.map(act => `<div style="background:#2C2C2E; padding:10px; border-radius:10px; margin-top:5px; font-size:12px; cursor:pointer;" onclick="buscarDetalhesAtividade(${act.id})">🏃 ${act.name} (${new Date(act.start_date).toLocaleDateString()})</div>`).join(''); } catch (e) { alert("Erro Strava"); } }
-    async function buscarDetalhesAtividade(id) { try { const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, { headers: { 'Authorization': `Bearer ${token}` } }); const data = await r.json(); document.getElementById('cC').value = Math.round(data.calories || 0); updateRingChart(); } catch (e) { alert("Erro detalhes"); } }
+    async function puxarAtividadesStrava() { if (!token) return alert("Conecte!"); try { const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', { headers: { 'Authorization': `Bearer ${token}` } }); const acts = await r.json(); document.getElementById('listaAtividadesStrava').innerHTML = acts.map(act => `<div style="background:#2C2C2E; padding:10px; border-radius:10px; margin-top:5px; font-size:12px; cursor:pointer;" onclick="buscarDetalhesAtividade(${act.id})">🏃 ${act.name} (${new Date(act.start_date).toLocaleDateString()})</div>`).join(''); } catch (e) { alert("Erro"); } }
+    async function buscarDetalhesAtividade(id) { try { const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, { headers: { 'Authorization': `Bearer ${token}` } }); const d = await r.json(); document.getElementById('cC').value = Math.round(d.calories || 0); updateRingChart(); } catch (e) { alert("Erro"); } }
     function mostrarDashCalendario(ds) { const t = hist.find(h => h.data === ds); const dash = document.getElementById('dashCalendario'); document.getElementById('dashDataTitulo').innerText = `📅 MÉTRICAS DE ${ds}`; if (t) { const o = Math.max(0, t.calTotal - (t.calM + t.calC)); document.getElementById('vTotal').innerText = `${t.calTotal} kcal`; document.getElementById('vMusc').innerText = `${t.calM} kcal`; document.getElementById('vCardio').innerText = `${t.calC} kcal`; document.getElementById('vOutras').innerText = `${o} kcal`; document.getElementById('dashExercicios').innerHTML = (t.exercicios || []).map(ex => `• ${ex.nome} (${ex.series.length} séries)`).join('<br>') || "Sem exercícios registrados."; } else { document.getElementById('vTotal').innerText = "Sem dados"; ["vMusc","vCardio","vOutras"].forEach(id => document.getElementById(id).innerText = "-"); } dash.style.display = 'block'; dash.scrollIntoView({ behavior: 'smooth' }); }
     function renderizarGraficoCaloriasEvolucao() { if (chartCalEvInstance) chartCalEvInstance.destroy(); const ctx = document.getElementById('chartCalEvolucao').getContext('2d'); const d = hist.slice(-15); chartCalEvInstance = new Chart(ctx, { type: 'line', data: { labels: d.map(x => x.data.split('/')[0]), datasets: [{ label: 'Cal Total', data: d.map(x => x.calTotal), borderColor: '#30D158', tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } }); }
     function popularSelectExercicios() { const n = [...new Set(hist.flatMap(t => (t.exercicios || []).map(e => e.nome)))]; document.getElementById('selectExGrafico').innerHTML = n.map(x => `<option value="${x}">${x}</option>`).join(''); renderizarGraficoEvolucao(); }
