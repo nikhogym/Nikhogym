@@ -9,6 +9,7 @@
         :root { 
             --primary: #0A84FF; /* Musculação: Azul */
             --cardio: #FC4C02;  /* Cardio: Laranja Strava */
+            --outras: #30D158;  /* Outras: Verde */
             --strava: #FC4C02; 
             --success: #30D158; 
             --bg: #000000; 
@@ -38,6 +39,21 @@
         .btn-strava-outline { background: transparent; border: 2px solid var(--strava); color: var(--strava); }
         .strava-logo-img { height: 16px; filter: invert(38%) sepia(98%) saturate(3015%) hue-rotate(1deg) brightness(102%) contrast(105%); }
         
+        /* --- ESTILO DOS ANÉIS SVG --- */
+        .rings-container { position: relative; width: 180px; height: 180px; margin: auto; display: flex; align-items: center; justify-content: center; }
+        .rings-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+        .ring-bg { fill: none; stroke-width: 14; opacity: 0.1; }
+        .ring-progress { fill: none; stroke-width: 14; stroke-linecap: round; transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        .meta-atingida { animation: pulseGlow 2s infinite alternate; }
+        @keyframes pulseGlow {
+            from { filter: drop-shadow(0 0 2px var(--success)); }
+            to { filter: drop-shadow(0 0 12px var(--success)); }
+        }
+
+        .ring-label-center { position: absolute; text-align: center; }
+        .ring-label-center span { display: block; }
+
         .ref-badge { font-size: 11px; color: var(--success); font-weight: bold; margin-bottom: 10px; display: block; }
         .ref-text { font-size: 10px; color: #8E8E93; margin-bottom: 4px; display: block; font-style: italic; }
         
@@ -56,7 +72,7 @@
         .tag-row { display: flex; align-items: center; gap: 6px; }
         .tag-musc { color: var(--primary); font-weight: bold; }
         .tag-cardio { color: var(--cardio); font-weight: bold; }
-        .tag-diff { color: #8E8E93; font-size: 10px; margin-top: 2px; }
+        .tag-diff { color: var(--outras); font-size: 10px; margin-top: 2px; }
 
         /* --- VISUAL CALENDÁRIO MELHORADO --- */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
@@ -88,13 +104,24 @@
     <div id="treinar" class="content active">
         <div class="card" style="text-align: center;">
             <div class="section-title" style="justify-content: center;">🎯 Meta Diária</div>
-            <div style="position: relative; height: 150px; width: 150px; margin: auto;">
-                <canvas id="ringChart"></canvas>
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%;">
-                    <span id="txtPorcentagem" style="font-size: 20px; font-weight: bold; display: block;">0%</span>
+            
+            <div class="rings-container" id="mainRingContainer">
+                <svg class="rings-svg" viewBox="0 0 150 150">
+                    <circle class="ring-bg" cx="75" cy="75" r="60" stroke="var(--cardio)"></circle>
+                    <circle id="ring-cardio-main" class="ring-progress" cx="75" cy="75" r="60" stroke="var(--cardio)" stroke-dasharray="376.99" stroke-dashoffset="376.99"></circle>
+                    
+                    <circle class="ring-bg" cx="75" cy="75" r="42" stroke="var(--primary)"></circle>
+                    <circle id="ring-musc-main" class="ring-progress" cx="75" cy="75" r="42" stroke="var(--primary)" stroke-dasharray="263.89" stroke-dashoffset="263.89"></circle>
+                    
+                    <circle class="ring-bg" cx="75" cy="75" r="24" stroke="var(--outras)"></circle>
+                    <circle id="ring-outras-main" class="ring-progress" cx="75" cy="75" r="24" stroke="var(--outras)" stroke-dasharray="150.80" stroke-dashoffset="150.80"></circle>
+                </svg>
+                <div class="ring-label-center">
+                    <span id="txtPorcentagem" style="font-size: 22px; font-weight: bold;">0%</span>
                     <span id="txtCaloriasRing" style="font-size: 9px; color: #8E8E93;">0 / 2000 kcal</span>
                 </div>
             </div>
+
             <input type="number" id="metaDiaria" value="2000" oninput="updateRingChart()" style="margin-top: 15px; text-align: center;">
         </div>
 
@@ -108,10 +135,7 @@
             </button>
 
             <div id="stravaAcoes" style="display:none; margin-top:10px;">
-                <button class="btn btn-strava-outline" onclick="puxarAtividadesStrava()">
-                    <svg class="strava-icon" viewBox="0 0 24 24"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM5.03 13.028l5.156 10.172 5.155-10.172h-3.065l-2.09 4.116-2.09-4.116H5.03z"/></svg>
-                    Conectar <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Strava_Logo.svg" class="strava-logo-img" alt="Strava">
-                </button>
+                <button class="btn btn-strava-outline" onclick="puxarAtividadesStrava()">Conectar Strava</button>
                 <div id="listaAtividadesStrava" style="max-height: 150px; overflow-y: auto;"></div>
             </div>
         </div>
@@ -161,7 +185,7 @@
                 <div class="dash-item"><span class="dash-label">Total Dia</span><div id="vTotal" class="dash-value">-</div></div>
                 <div class="dash-item"><span class="dash-label">Musculação</span><div id="vMusc" class="dash-value" style="color:var(--primary)">-</div></div>
                 <div class="dash-item"><span class="dash-label">Cardio</span><div id="vCardio" class="dash-value" style="color:var(--cardio)">-</div></div>
-                <div class="dash-item"><span class="dash-label">Gasto Passivo</span><div id="vOutras" class="dash-value" style="color:#8E8E93">-</div></div>
+                <div class="dash-item"><span class="dash-label">Gasto Passivo</span><div id="vOutras" class="dash-value" style="color:var(--outras)">-</div></div>
             </div>
             <div id="dashExercicios" style="margin-top: 15px; font-size: 12px; color: #8E8E93; border-top: 1px solid #3A3A3C; padding-top: 10px;"></div>
         </div>
@@ -184,7 +208,7 @@
 </div>
 
 <script>
-    let sessao = [], myRingChart, chartCargaInstance, chartCalEvInstance;
+    let sessao = [], chartCargaInstance, chartCalEvInstance;
     let hist = JSON.parse(localStorage.getItem('hist_nikho')) || [];
     let fichas = JSON.parse(localStorage.getItem('fichas_nikho')) || [];
     let token = localStorage.getItem('strava_access_token');
@@ -199,6 +223,30 @@
         if(aba === 'calendario') { renderCalendario(); document.getElementById('dashCalendario').style.display = 'none'; }
         if(aba === 'evolucao') { popularSelectExercicios(); renderizarGraficoCaloriasEvolucao(); }
         if(aba === 'fichas') renderFichas();
+    }
+
+    // --- LOGICA DE ANÉIS PROPORCIONAIS CORRIGIDA ---
+    function updateRingChart() {
+        const meta = parseFloat(document.getElementById('metaDiaria').value) || 2000;
+        const musc = parseFloat(document.getElementById('cM').value) || 0;
+        const cardio = parseFloat(document.getElementById('cC').value) || 0;
+        const total = musc + cardio;
+        const porcentagemTotal = Math.round((total / meta) * 100);
+
+        document.getElementById('txtPorcentagem').innerText = porcentagemTotal + "%";
+        document.getElementById('txtCaloriasRing').innerText = total + " / " + meta + " kcal";
+
+        const container = document.getElementById('mainRingContainer');
+        if (porcentagemTotal >= 100) container.classList.add('meta-atingida');
+        else container.classList.remove('meta-atingida');
+
+        const pCardio = Math.min(cardio / meta, 1);
+        const pMusc = Math.min(musc / meta, 1);
+        const pTotal = Math.min(total / meta, 1);
+
+        document.getElementById('ring-cardio-main').style.strokeDashoffset = 376.99 * (1 - pCardio);
+        document.getElementById('ring-musc-main').style.strokeDashoffset = 263.89 * (1 - pMusc);
+        document.getElementById('ring-outras-main').style.strokeDashoffset = 150.80 * (1 - pTotal);
     }
 
     function getSerieReferencia(nomeEx, indexSerie) {
@@ -232,7 +280,6 @@
         const container = document.getElementById('historicoInferior');
         container.innerHTML = hist.slice().reverse().slice(0, 10).map(h => {
             const m = h.metaSalva || 2000;
-            const diff = Math.max(0, h.calTotal - ((h.calM || 0) + (h.calC || 0)));
             return `
             <div class="historico-item" id="hist-${h.id}" onclick="toggleExpand('${h.id}')">
                 <div class="hist-header">
@@ -243,32 +290,18 @@
                     <div style="flex:1;">
                         <div class="hist-meta">📅 ${h.data}</div>
                         <div class="cal-summary">
-                            <div class="tag-row"><span class="tag-musc">💪 ${h.calM || 0}</span></div>
                             <div class="tag-row"><span class="tag-cardio">🏃 ${h.calC || 0}</span></div>
-                            <div class="tag-diff">Outras: ${diff} kcal</div>
+                            <div class="tag-row"><span class="tag-musc">💪 ${h.calM || 0}</span></div>
                         </div>
                     </div>
                     <div style="text-align:right"><strong>${h.calTotal}</strong><br><small>▼</small></div>
                 </div>
                 <div class="hist-details-pane" onclick="event.stopPropagation()">
-                    <label style="font-size:10px; color:var(--success)">🔥 Total Dia (Smartwatch)</label>
+                    <label style="font-size:10px;">🔥 Total Dia</label>
                     <input type="number" value="${h.calTotal}" onchange="updateHistValue('${h.id}', 'calTotal', this.value)">
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         <div><label style="font-size:10px;">💪 Treino</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
                         <div><label style="font-size:10px;">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
-                    </div>
-                    <label style="font-size:10px;">🎯 Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)">
-                    <div style="margin-top:10px;">
-                        <strong>Exercícios:</strong>
-                        ${h.exercicios ? h.exercicios.map((e, ei) => `
-                            <div style="background:#2C2C2E; padding:8px; border-radius:10px; margin-top:5px;">
-                                <input type="text" value="${e.nome}" onchange="updateExName('${h.id}', ${ei}, this.value)">
-                                ${e.series.map((s, si) => `
-                                    <div style="display:flex; gap:5px;">
-                                        <input type="number" value="${s.r}" onchange="updateSerie('${h.id}', ${ei}, ${si}, 'r', this.value)">
-                                        <input type="number" value="${s.p}" onchange="updateSerie('${h.id}', ${ei}, ${si}, 'p', this.value)">
-                                    </div>`).join('')}
-                            </div>`).join('') : ''}
                     </div>
                     <button class="btn-outline" style="color:var(--danger); width:100%; margin-top:10px;" onclick="apagarTreino('${h.id}')">🗑️ Excluir</button>
                 </div>
@@ -276,14 +309,13 @@
         }).join('');
         hist.slice().reverse().slice(0, 10).forEach(h => {
             const ctx = document.getElementById(`ringSmall-${h.id}`).getContext('2d');
-            new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [h.calM, h.calC, Math.max(0, (h.metaSalva||2000)-h.calTotal)], backgroundColor: ['#0A84FF', '#FC4C02', '#3A3A3C'], borderWidth: 0, cutout: '80%' }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } });
+            // Cardio Laranja, Musc Azul, Outras Verde
+            new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [h.calC, h.calM, Math.max(0, h.calTotal - (h.calM + h.calC))], backgroundColor: ['#FC4C02', '#0A84FF', '#30D158'], borderWidth: 0, cutout: '80%' }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } });
         });
     }
 
     function toggleExpand(id) { document.getElementById(`hist-${id}`).classList.toggle('expanded'); }
-    function updateHistValue(id, field, val) { const idx = hist.findIndex(x => x.id == id); hist[idx][field] = Number(val); saveRef(); renderHistInferior(); }
-    function updateExName(hId, exIdx, val) { const idx = hist.findIndex(x => x.id == hId); hist[idx].exercicios[exIdx].nome = val; saveRef(); }
-    function updateSerie(hId, exIdx, sIdx, f, v) { const idx = hist.findIndex(x => x.id == hId); hist[idx].exercicios[exIdx].series[sIdx][f] = v; saveRef(); }
+    function updateHistValue(id, field, val) { const idx = hist.findIndex(x => x.id == id); hist[idx][field] = Number(val); localStorage.setItem('hist_nikho', JSON.stringify(hist)); renderHistInferior(); }
     function saveRef() { localStorage.setItem('hist_nikho', JSON.stringify(hist)); }
     function apagarTreino(id) { if(confirm("Apagar?")) { hist = hist.filter(h => h.id != id); saveRef(); renderHistInferior(); } }
 
@@ -291,31 +323,26 @@
     async function puxarAtividadesStrava() { if (!token) return alert("Conecte ao Strava primeiro!"); try { const r = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=5', { headers: { 'Authorization': `Bearer ${token}` } }); const activities = await r.json(); const container = document.getElementById('listaAtividadesStrava'); container.innerHTML = activities.map(act => `<div style="background:#2C2C2E; padding:10px; border-radius:10px; margin-top:5px; font-size:12px; cursor:pointer;" onclick="buscarDetalhesAtividade(${act.id})">🏃 ${act.name} (${new Date(act.start_date).toLocaleDateString()})</div>`).join(''); } catch (e) { alert("Erro ao buscar dados."); } }
     async function buscarDetalhesAtividade(id) { try { const r = await fetch(`https://www.strava.com/api/v3/activities/${id}`, { headers: { 'Authorization': `Bearer ${token}` } }); const data = await r.json(); document.getElementById('cC').value = Math.round(data.calories || 0); updateRingChart(); } catch (e) { alert("Erro ao buscar detalhes."); } }
     function buscarReferencia(nome) { if (!nome || nome.length < 2) { document.getElementById('referenciaPeso').innerText = ""; return; } const termo = nome.toLowerCase().trim(); const ultimo = hist.slice().reverse().find(t => t.exercicios && t.exercicios.some(e => e.nome.toLowerCase().trim().includes(termo))); if (ultimo) { const exData = ultimo.exercicios.find(e => e.nome.toLowerCase().trim().includes(termo)); const primeira = exData.series[0]; document.getElementById('referenciaPeso').innerText = `💡 Último: ${primeira.r} reps / ${primeira.p}kg (${exData.series.length} séries)`; } else { document.getElementById('referenciaPeso').innerText = ""; } }
-    function updateRingChart() { const meta = parseFloat(document.getElementById('metaDiaria').value) || 1; const musc = parseFloat(document.getElementById('cM').value) || 0; const cardio = parseFloat(document.getElementById('cC').value) || 0; const total = musc + cardio; document.getElementById('txtPorcentagem').innerText = Math.min(Math.round((total / meta) * 100), 100) + "%"; document.getElementById('txtCaloriasRing').innerText = total + " / " + meta + " kcal"; const data = { datasets: [{ data: [musc, cardio, Math.max(0, meta - total)], backgroundColor: ['#0A84FF', '#FC4C02', '#2C2C2E'], borderWidth: 0, cutout: '85%', borderRadius: 15 }] }; if (myRingChart) { myRingChart.data = data; myRingChart.update(); } else { myRingChart = new Chart(document.getElementById('ringChart').getContext('2d'), { type: 'doughnut', data: data, options: { plugins: { legend: false }, maintainAspectRatio: false } }); } }
+    
     function addEx() { const n = document.getElementById('exNome').value; if(n) { sessao.push({ id: Date.now() + Math.random(), nome: n, series: [{ r: '', p: '' }] }); renderSessao(); document.getElementById('exNome').value = ""; } }
     function renderSessao() { document.getElementById('listaTreinoAtivo').innerHTML = sessao.map(ex => `<div class="ex-item-card"><div class="ex-header"><strong>${ex.nome}</strong><span onclick="sessao=sessao.filter(e=>e.id!=${ex.id});renderSessao();">✕</span></div>${ex.series.map((s, i) => { const ref = getSerieReferencia(ex.nome, i); return `<span class="ref-text">💡 ${ref}</span><div class="serie-row"><span>${i+1}º</span><input type="number" placeholder="R" value="${s.r}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].r=this.value"><input type="number" placeholder="Kg" value="${s.p}" onchange="sessao.find(e=>e.id==${ex.id}).series[${i}].p=this.value"><span onclick="sessao.find(e=>e.id==${ex.id}).series.splice(${i},1);renderSessao();">✕</span></div>`; }).join('')}<button class="btn" style="background:#3A3A3C; color:white; padding:5px; font-size:12px;" onclick="sessao.find(e=>e.id==${ex.id}).series.push({r:'',p:''});renderSessao();">+ Série</button></div>`).join(''); }
     async function enviarParaPlanilha() { const p = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), calM: Number(document.getElementById('cM').value), calC: Number(document.getElementById('cC').value), calTotal: Number(document.getElementById('cM').value) + Number(document.getElementById('cC').value), metaSalva: Number(document.getElementById('metaDiaria').value), exercicios: [...sessao] }; hist.push(p); saveRef(); location.reload(); }
 
-    // --- LÓGICA CALENDÁRIO ATUALIZADA ---
     function renderCalendario() { 
         const body = document.getElementById('calBody'); 
         const now = new Date(); 
         document.getElementById('mesAnoAtual').innerText = now.toLocaleString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase(); 
         body.innerHTML = ''; 
-
         const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
         const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(); 
-
-        // Preenchimento dias vazios início do mês
         for (let i = 0; i < firstDay; i++) { body.innerHTML += `<div class="cal-day empty"></div>`; }
-
         for (let d = 1; d <= daysInMonth; d++) { 
             const ds = `${d.toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`; 
             const t = hist.find(h => h.data === ds); 
             body.innerHTML += `<div class="cal-day" onclick="mostrarDashCalendario('${ds}')">${d}${t ? `<canvas class="cal-ring-mini" id="cR-${d}"></canvas>` : ''}</div>`; 
             if(t) setTimeout(() => { 
                 const ctx = document.getElementById(`cR-${d}`).getContext('2d'); 
-                new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [t.calM, t.calC, Math.max(0, (t.metaSalva||2000)-t.calTotal)], backgroundColor: ['#0A84FF', '#FC4C02', '#3A3A3C'], borderWidth: 0 }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } }); 
+                new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [t.calC, t.calM, Math.max(0, t.calTotal - (t.calM + t.calC))], backgroundColor: ['#FC4C02', '#0A84FF', '#30D158'], borderWidth: 0 }] }, options: { plugins: { legend: false }, maintainAspectRatio: false } }); 
             }, 10); 
         } 
     }
