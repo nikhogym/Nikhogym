@@ -14,6 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* --- ARQUITETURA DE TEMAS --- */
+        /* CONFIGURAÇÃO GERAL: Todas as abas no topo agora */
         :root {
             /* Tema 1: Apple Neon */
             --bg: #000000;
@@ -27,9 +28,11 @@
             --outras: #30D158;
             --radius-card: 22px;
             --radius-btn: 16px;
-            --tab-pos-top: 0;
+            
+            /* Posicionamento Padrão (Topo) */
+            --tab-pos-top: 15px; 
             --tab-pos-bottom: auto;
-            --tab-transform: none;
+            --tab-transform: translateX(-50%);
             
             /* Emojis Apple */
             --emoji-treinar: "💪";
@@ -51,9 +54,6 @@
             --outras: #9DFF2B;
             --radius-card: 12px;
             --radius-btn: 8px;
-            --tab-pos-top: auto;
-            --tab-pos-bottom: 20px;
-            --tab-transform: translateX(-50%);
             
             /* Emojis Performance */
             --emoji-treinar: "🔥";
@@ -63,7 +63,7 @@
         }
 
         [data-theme="ecosystem"] {
-            /* Tema 3: Ecosystem Premium Tech */
+            /* Tema 3: Ecosystem */
             --bg: #08090a; 
             --card: rgba(18, 20, 24, 0.8); 
             --input-bg: #1a1d23; 
@@ -75,11 +75,8 @@
             --outras: #00ffa3;
             --radius-card: 24px;
             --radius-btn: 14px;
-            --tab-pos-top: auto;
-            --tab-pos-bottom: 25px;
-            --tab-transform: translateX(-50%);
             
-            /* Emojis Ecosystem Tech */
+            /* Emojis Ecosystem */
             --emoji-treinar: "🤖";
             --emoji-fichas: "📡";
             --emoji-calendario: "🗓️";
@@ -99,9 +96,6 @@
             --outras: #06b6d4;
             --radius-card: 20px;
             --radius-btn: 50px;
-            --tab-pos-top: auto;
-            --tab-pos-bottom: 25px;
-            --tab-transform: translateX(-50%);
             
             /* Emojis Nebula */
             --emoji-treinar: "🪐";
@@ -111,7 +105,7 @@
         }
 
         [data-theme="titanium"] {
-            /* Tema 5: Titanium Pro */
+            /* Tema 5: Titanium */
             --bg: #1c1c1e;
             --card: #2c2c2e;
             --input-bg: #3a3a3c;
@@ -123,9 +117,6 @@
             --outras: #32d74b;
             --radius-card: 16px;
             --radius-btn: 12px;
-            --tab-pos-top: auto;
-            --tab-pos-bottom: 25px;
-            --tab-transform: translateX(-50%);
             
             /* Emojis Titanium */
             --emoji-treinar: "🏋️";
@@ -147,9 +138,6 @@
             --outras: #34d399;  
             --radius-card: 26px;
             --radius-btn: 18px;
-            --tab-pos-top: auto;
-            --tab-pos-bottom: 25px;
-            --tab-transform: translateX(-50%);
             
             /* Emojis Vitality */
             --emoji-treinar: "🦁";
@@ -171,9 +159,6 @@
             --outras: #2dd4bf;  
             --radius-card: 20px;
             --radius-btn: 50px;
-            --tab-pos-top: auto;
-            --tab-pos-bottom: 25px;
-            --tab-transform: translateX(-50%);
             
             /* Emojis Aurora */
             --emoji-treinar: "🏔️";
@@ -195,9 +180,6 @@
             --outras: #00e5ff;  
             --radius-card: 4px; 
             --radius-btn: 4px;
-            --tab-pos-top: auto;
-            --tab-pos-bottom: 25px;
-            --tab-transform: translateX(-50%);
             
             /* Emojis Volt */
             --emoji-treinar: "⚡";
@@ -219,9 +201,6 @@
             --outras: #FF0000;
             --radius-card: 10px;
             --radius-btn: 20px;
-            --tab-pos-top: auto;
-            --tab-pos-bottom: 25px;
-            --tab-transform: translateX(-50%);
             
             /* Emojis Apex */
             --emoji-treinar: "🥊";
@@ -231,21 +210,18 @@
         }
 
         [data-theme="liquid"] {
-            /* Tema 10: Liquid Glass (Novo - Vidro Líquido) */
+            /* Tema 10: Liquid */
             --bg: #001f3f;
             --card: rgba(255, 255, 255, 0.1);
             --input-bg: rgba(0, 0, 0, 0.25);
             --text: #e0f7fa;
             --muted: #81d4fa;
             --border: rgba(0, 255, 255, 0.25);
-            --primary: #00ffff; /* Ciano Neon */
-            --cardio: #ff0055;  /* Rosa Neon para contraste */
-            --outras: #00e676;  /* Verde Água */
+            --primary: #00ffff; 
+            --cardio: #ff0055;  
+            --outras: #00e676;  
             --radius-card: 24px;
             --radius-btn: 20px;
-            --tab-pos-top: auto;
-            --tab-pos-bottom: 25px;
-            --tab-transform: translateX(-50%);
             
             /* Emojis Liquid */
             --emoji-treinar: "💧";
@@ -256,13 +232,15 @@
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
+        /* CORREÇÃO DE PADDING PARA ABAS NO TOPO */
         body { 
             font-family: -apple-system, system-ui, sans-serif; 
             background: var(--bg); 
             color: var(--text); 
             margin: 0; 
             padding: 10px; 
-            padding-top: 100px;
+            padding-top: 100px; /* Espaço para as abas no topo */
+            padding-bottom: 40px; /* Espaço normal embaixo */
             transition: all 0.3s ease;
         }
 
@@ -275,59 +253,21 @@
             background-attachment: fixed;
         }
 
-        [data-theme="nebula"] body {
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            background-attachment: fixed;
-        }
+        [data-theme="nebula"] body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); background-attachment: fixed; }
+        [data-theme="titanium"] body { background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%); background-attachment: fixed; }
+        [data-theme="vitality"] body { background: radial-gradient(circle at top, #2a1f16, #12100e 70%); background-attachment: fixed; }
+        [data-theme="aurora"] body { background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364); background-attachment: fixed; }
+        [data-theme="volt"] body { background-image: repeating-linear-gradient(45deg, #111 0, #111 2px, transparent 0, transparent 50%); background-size: 10px 10px; background-attachment: fixed; }
+        [data-theme="apex"] body { background-image: radial-gradient(#333 1px, transparent 1px); background-size: 20px 20px; background-color: #1a1a1a; background-attachment: fixed; }
+        [data-theme="liquid"] body { background: radial-gradient(circle at center, #004e92, #000428); background-attachment: fixed; }
 
-        [data-theme="titanium"] body {
-            background: linear-gradient(180deg, #1c1c1e 0%, #000000 100%);
-            background-attachment: fixed;
-        }
-
-        [data-theme="vitality"] body {
-            background: radial-gradient(circle at top, #2a1f16, #12100e 70%);
-            background-attachment: fixed;
-        }
-
-        [data-theme="aurora"] body {
-            background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
-            background-attachment: fixed;
-        }
-
-        [data-theme="volt"] body {
-            background-image: repeating-linear-gradient(45deg, #111 0, #111 2px, transparent 0, transparent 50%);
-            background-size: 10px 10px;
-            background-attachment: fixed;
-        }
-
-        [data-theme="apex"] body {
-            background-image: radial-gradient(#333 1px, transparent 1px);
-            background-size: 20px 20px;
-            background-color: #1a1a1a;
-            background-attachment: fixed;
-        }
-
-        [data-theme="liquid"] body {
-            background: radial-gradient(circle at center, #004e92, #000428);
-            background-attachment: fixed;
-        }
-
-        [data-theme="performance"] body, 
-        [data-theme="ecosystem"] body,
-        [data-theme="nebula"] body,
-        [data-theme="titanium"] body,
-        [data-theme="vitality"] body,
-        [data-theme="aurora"] body,
-        [data-theme="volt"] body,
-        [data-theme="apex"] body,
-        [data-theme="liquid"] body { 
-            padding-top: 80px; 
-            padding-bottom: 120px; 
-        }
-
+        /* CORREÇÃO DO BOTÃO TROCAR TEMA PARA A PARTE INFERIOR */
         .theme-switcher {
-            position: fixed; top: 20px; right: 15px; z-index: 4000;
+            position: fixed; 
+            bottom: 20px; /* Movido para baixo */
+            right: 15px; 
+            top: auto; /* Anula o top */
+            z-index: 4000;
             background: var(--primary); color: #000; border: none;
             padding: 8px 12px; border-radius: 20px; font-size: 10px;
             font-weight: 900; text-transform: uppercase;
@@ -342,37 +282,26 @@
         [data-theme="apex"] .theme-switcher { background: #FF0000; color: white; box-shadow: 0 0 15px rgba(255, 0, 0, 0.6); }
         [data-theme="liquid"] .theme-switcher { background: rgba(0, 255, 255, 0.2); color: #00ffff; border: 1px solid #00ffff; backdrop-filter: blur(8px); box-shadow: 0 0 20px rgba(0, 255, 255, 0.4); }
 
+        /* ABAS FIXAS NO TOPO (Padrão para todos) */
         .tabs { 
             display: flex; gap: 12px; 
             position: fixed; 
-            top: var(--tab-pos-top); bottom: var(--tab-pos-bottom); 
-            left: 0; right: 0; 
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 15px 10px; 
+            top: var(--tab-pos-top); 
+            bottom: auto; /* Força top */
+            left: 50%; width: 92%; max-width: 420px; 
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); padding: 10px; 
             z-index: 2000; border-bottom: 1px solid var(--border);
             transform: var(--tab-transform);
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
+        /* Estilização específica das abas por tema (apenas cores e bordas) */
         [data-theme="performance"] .tabs,
-        [data-theme="ecosystem"] .tabs,
-        [data-theme="nebula"] .tabs,
-        [data-theme="titanium"] .tabs,
-        [data-theme="vitality"] .tabs,
-        [data-theme="aurora"] .tabs,
-        [data-theme="volt"] .tabs,
-        [data-theme="apex"] .tabs,
-        [data-theme="liquid"] .tabs {
-            left: 50%; width: 92%; max-width: 420px; 
-            border-radius: 25px; border: 1px solid var(--border);
-            background: rgba(22, 27, 34, 0.85);
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-            padding: 10px;
-        }
-
+        [data-theme="ecosystem"] .tabs { background: rgba(22, 27, 34, 0.95); }
         [data-theme="nebula"] .tabs, 
         [data-theme="aurora"] .tabs { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); }
-        
         [data-theme="liquid"] .tabs { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(15px); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); }
-
         [data-theme="titanium"] .tabs { background: rgba(44, 44, 46, 0.9); border: 1px solid #48484a; }
         [data-theme="vitality"] .tabs { background: rgba(31, 27, 24, 0.9); border: 1px solid #3d342b; }
         [data-theme="volt"] .tabs { border-radius: 4px; border: 1px solid var(--primary); background: #000; box-shadow: 0 0 15px rgba(204, 255, 0, 0.15); }
@@ -667,7 +596,10 @@
     }
 
     function updateRingChart() {
-        const meta = parseFloat(document.getElementById('metaDiaria').value) || 2000;
+        const metaInput = document.getElementById('metaDiaria');
+        const meta = parseFloat(metaInput.value) || 2000;
+        localStorage.setItem('meta_nikho', meta);
+
         const musc = parseFloat(document.getElementById('cM').value) || 0;
         const cardio = parseFloat(document.getElementById('cC').value) || 0;
         const total = musc + cardio;
@@ -776,12 +708,13 @@
                     <strong>${h.calTotal} kcal</strong>
                 </div>
                 <div class="hist-details-pane" onclick="event.stopPropagation()">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
                         <div><label style="font-size:10px">Total</label><input type="number" value="${h.calTotal}" onchange="updateHistValue('${h.id}', 'calTotal', this.value)"></div>
                         <div><label style="font-size:10px">Meta</label><input type="number" value="${m}" onchange="updateHistValue('${h.id}', 'metaSalva', this.value)"></div>
                         <div><label style="font-size:10px; color:var(--cardio)">🏃 Cardio</label><input type="number" value="${h.calC}" onchange="updateHistValue('${h.id}', 'calC', this.value)"></div>
                         <div><label style="font-size:10px; color:var(--primary)">💪 Musc.</label><input type="number" value="${h.calM}" onchange="updateHistValue('${h.id}', 'calM', this.value)"></div>
                     </div>
+                    <strong>Exercícios:</strong>
                     ${(h.exercicios || []).map((ex, exIdx) => `
                         <div style="background:var(--bg); padding:8px; border-radius:10px; margin-top:5px;">
                             <input type="text" value="${ex.nome}" onchange="updateHistEx('${h.id}', ${exIdx}, this.value)">
@@ -886,37 +819,31 @@
     window.onload = async () => {
         const savedTheme = localStorage.getItem('theme_nikho');
         const switcherBtn = document.querySelector('.theme-switcher');
-        if(savedTheme === 'performance') {
-            document.body.setAttribute('data-theme', 'performance');
-            switcherBtn.innerHTML = "⚡ Performance";
-        } else if(savedTheme === 'ecosystem') {
-            document.body.setAttribute('data-theme', 'ecosystem');
-            switcherBtn.innerHTML = "🧬 Ecosystem";
-        } else if(savedTheme === 'nebula') {
-            document.body.setAttribute('data-theme', 'nebula');
-            switcherBtn.innerHTML = "🌌 Nebula";
-        } else if(savedTheme === 'titanium') {
-            document.body.setAttribute('data-theme', 'titanium');
-            switcherBtn.innerHTML = "🔩 Titanium";
-        } else if(savedTheme === 'vitality') {
-            document.body.setAttribute('data-theme', 'vitality');
-            switcherBtn.innerHTML = "🦁 Vitality";
-        } else if(savedTheme === 'aurora') {
-            document.body.setAttribute('data-theme', 'aurora');
-            switcherBtn.innerHTML = "🏔️ Aurora";
-        } else if(savedTheme === 'volt') {
-            document.body.setAttribute('data-theme', 'volt');
-            switcherBtn.innerHTML = "⚡ Volt";
-        } else if(savedTheme === 'apex') {
-            document.body.setAttribute('data-theme', 'apex');
-            switcherBtn.innerHTML = "🏁 Apex";
-        } else if(savedTheme === 'liquid') {
-            document.body.setAttribute('data-theme', 'liquid');
-            switcherBtn.innerHTML = "💧 Liquid";
+        
+        const themes = {
+            'performance': "⚡ Performance",
+            'ecosystem': "🧬 Ecosystem",
+            'nebula': "🌌 Nebula",
+            'titanium': "🔩 Titanium",
+            'vitality': "🦁 Vitality",
+            'aurora': "🏔️ Aurora",
+            'volt': "⚡ Volt",
+            'apex': "🏁 Apex",
+            'liquid': "💧 Liquid"
+        };
+
+        if (themes[savedTheme]) {
+            document.body.setAttribute('data-theme', savedTheme);
+            switcherBtn.innerHTML = themes[savedTheme];
         } else {
+            document.body.removeAttribute('data-theme');
             switcherBtn.innerHTML = " Apple Neon";
         }
         
+        // PERSISTÊNCIA DA META
+        const savedMeta = localStorage.getItem('meta_nikho');
+        if(savedMeta) document.getElementById('metaDiaria').value = savedMeta;
+
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         if (code) {
